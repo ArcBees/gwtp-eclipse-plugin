@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="com.imagem.gwtpplugin.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="RCP Perspective"
+            class="com.imagem.gwtpplugin.Perspective"
+            id="com.imagem.gwtpplugin.perspective">
+      </perspective>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="com.imagem.gwtpplugin.application"
+            name="gwtpplugin">
+         <property
+               name="appName"
+               value="gwtpplugin">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.imagem.gwtpplugin.actionSet"
+            label="GWTP Action"
+            visible="true">
+         <action
+               class="com.imagem.gwtpplugin.MenuAction"
+               icon="icons/gwtp-plugin.png"
+               id="com.imagem.gwtpplugin.action"
+               label="GWTP Menu"
+               state="true"
+               style="pulldown"
+               toolbarPath="GWTP"
+               tooltip="GWTP Plugin">
+         </action>
+      </actionSet>
+   </extension>
+
+</plugin>

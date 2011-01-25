@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.imagem.gwtpplugin.feature_1.0.1.201101241633.jar" id="com.imagem.gwtpplugin.feature" version="1.0.1.201101241633">
+      <category name="imagem"/>
+   </feature>
+   <category-def name="imagem" label="Imagem Plugin">
+      <description>
+         Imagem Plugin 1.0.1
+      </description>
+   </category-def>
+</site>

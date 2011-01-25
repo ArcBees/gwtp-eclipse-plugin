@@ -1,0 +1,92 @@
+package com.imagem.gwtpplugin.projectfile.war;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import com.imagem.gwtpplugin.projectfile.IProjectFile;
+
+public class ProjectHTML implements IProjectFile {
+
+	private final String EXTENSION = ".html";
+	private String projectName;
+	private String path;
+	
+	public ProjectHTML(String projectName, String path) {
+		this.projectName = projectName;
+		this.path = path;
+	}
+	
+	@Override
+	public String getName() {
+		return projectName;
+	}
+
+	@Override
+	public String getPackage() {
+		return "";
+	}
+
+	@Override
+	public String getPath() {
+		return path;
+	}
+
+	@Override
+	public String getExtension() {
+		return EXTENSION;
+	}
+
+	@Override
+	public InputStream openContentStream() {
+		String contents = "<!doctype html>\n";
+		contents += "<!-- The DOCTYPE declaration above will set the    -->\n";
+		contents += "<!-- browser's rendering engine into               -->\n";
+		contents += "<!-- \"Standards Mode\". Replacing this declaration  -->\n";
+		contents += "<!-- with a \"Quirks Mode\" doctype may lead to some -->\n";
+		contents += "<!-- differences in layout.                        -->\n\n";
+		
+		contents += "<html>\n";
+		contents += "	<head>\n";
+		contents += "		<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n\n";
+		
+		contents += "		<!--                                                               -->\n";
+		contents += "		<!-- Consider inlining CSS to reduce the number of requested files -->\n";
+		contents += "		<!--                                                               -->\n";
+		contents += "		<link type=\"text/css\" rel=\"stylesheet\" href=\"" + projectName + ".css\">\n\n";
+		
+		contents += "		<!--                                           -->\n";
+		contents += "		<!-- Any title is fine                         -->\n";
+		contents += "		<!--                                           -->\n";
+		contents += "		<title>" + projectName + "</title>\n\n";
+		
+		contents += "		<!--                                           -->\n";
+		contents += "		<!-- This script loads your compiled module.   -->\n";
+		contents += "		<!-- If you add any GWT meta tags, they must   -->\n";
+		contents += "		<!-- be added before this line.                -->\n";
+		contents += "		<!--                                           -->\n";
+		contents += "		<script type=\"text/javascript\" language=\"javascript\" src=\"" + projectName.toLowerCase() + "/" + projectName.toLowerCase() + ".nocache.js\"></script>\n";
+		contents += "	</head>\n\n";
+		
+		contents += "	<!--                                           -->\n";
+		contents += "	<!-- The body can have arbitrary html, or      -->\n";
+		contents += "	<!-- you can leave the body empty if you want  -->\n";
+		contents += "	<!-- to create a completely dynamic UI.        -->\n";
+		contents += "	<!--                                           -->\n";
+		contents += "	<body>\n\n";
+		
+		contents += "		<!-- OPTIONAL: include this if you want history support -->\n";
+		contents += "		<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position: absolute; width: 0;height: 0; border: 0;\"></iframe>\n\n";
+		
+		contents += "		<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->\n";
+		contents += "		<noscript>\n";
+		contents += "			<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif;\">\n";
+		contents += "				Your web browser must have JavaScript enabled\n";
+		contents += "				in order for this application to display correctly.\n";
+		contents += "			</div>\n";
+		contents += "		</noscript>\n";
+		contents += "	</body>\n";
+		contents += "</html>";
+
+		return new ByteArrayInputStream(contents.getBytes());
+	}
+}
