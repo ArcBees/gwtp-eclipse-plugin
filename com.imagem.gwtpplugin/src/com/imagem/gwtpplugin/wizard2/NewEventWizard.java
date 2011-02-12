@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard;
+package com.imagem.gwtpplugin.wizard2;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -31,15 +28,12 @@ import com.imagem.gwtpplugin.projectfile.src.client.event.Event;
 import com.imagem.gwtpplugin.projectfile.src.client.event.Handler;
 import com.imagem.gwtpplugin.projectfile.src.client.event.HasHandlers;
 
-@Deprecated
-public class EventWizard extends Wizard implements INewWizard {
+public class NewEventWizard extends Wizard implements INewWizard {
 
-	private EventWizardPage eventPage;
+	private NewEventWizardPage newEventPage;
 	private IStructuredSelection selection;
-	private IProject project;
-	private IPath basePath;
-	
-	public EventWizard() {
+
+	public NewEventWizard() {
 		super();
 		setNeedsProgressMonitor(true);
 		setWindowTitle("New Event");
@@ -47,27 +41,31 @@ public class EventWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		eventPage = new EventWizardPage(selection);
-		addPage(eventPage);
+		newEventPage = new NewEventWizardPage(selection);
+		addPage(newEventPage);
 	}
 	
 	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		this.selection = selection;
+	}
+
+	@Override
 	public boolean performFinish() {
-		String name = eventPage.getEventName();
-		String eventPackage = eventPage.getEventPackage();
-		String[] parameters = eventPage.getParameters();
-		boolean hasHandlers = eventPage.hasHandlers();
+		String name = newEventPage.getTypeName().replace("Event", "");
+		IProject project = newEventPage.getPackageFragmentRoot().getJavaProject().getProject();
 		
-		final Event event = new Event(name, eventPackage);
-		final Handler handler = new Handler(name, eventPackage);
-		final HasHandlers hasHandler = new HasHandlers(name, eventPackage);
+		final Event event = new Event(name, newEventPage.getPackageText());
+		final Handler handler = new Handler(name, newEventPage.getPackageText());
+		final HasHandlers hasHandler = new HasHandlers(name, newEventPage.getPackageText());
 		
-		event.setFields(SourceEditor.getVariables(project, basePath, parameters));
+		event.setFields(newEventPage.getFields());
+		event.setHandlers(newEventPage.hasHandlers());
 		
 		try {
 			SourceEditor.createProjectFile(project, event, true);
 			SourceEditor.createProjectFile(project, handler, true);
-			if(hasHandlers)
+			if(newEventPage.hasHandlers())
 				SourceEditor.createProjectFile(project, hasHandler, true);
 		} 
 		catch (CoreException e) {
@@ -76,28 +74,6 @@ public class EventWizard extends Wizard implements INewWizard {
 		}
 		
 		return true;
-	}
-
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		this.selection = selection;
-		if(selection != null && !selection.isEmpty()) {
-			if (selection.size() > 1)
-				return;
-			Object firstElement = selection.getFirstElement();
-			IResource resource = null;
-			if (firstElement instanceof IResource) {
-				// Is it a IResource ?
-				resource = (IResource) firstElement;
-			}
-			else if (firstElement instanceof IAdaptable) {
-				// Is it a IResource adaptable ?
-				IAdaptable adaptable = (IAdaptable) firstElement;
-				resource = (IResource) adaptable.getAdapter(IResource.class);
-			}
-			project = resource.getProject();
-			basePath = SourceEditor.getBasePath(resource.getFullPath());
-		}
 	}
 
 }

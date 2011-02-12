@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbench;
 import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.project.ProjectCreator;
 
+@Deprecated
 public class ProjectWizard extends Wizard implements INewWizard {
 
 	private ProjectWizardPage page;
@@ -38,7 +39,7 @@ public class ProjectWizard extends Wizard implements INewWizard {
 		setWindowTitle("New GWTP Project");
 
 		try {
-			URL url = new URL(Activator.getDefault().getBundle().getEntry("/"), "icons/logo.png");
+			URL url = new URL(Activator.getDefault().getBundle().getEntry("/"), "icons/gwtp-logo.png");
 			setDefaultPageImageDescriptor(ImageDescriptor.createFromURL(url));
 		}
 		catch (MalformedURLException e) {
@@ -55,7 +56,7 @@ public class ProjectWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		ProjectCreator.createProject(page.getProjectName(), page.getProjectPackage(), page.getProjectLocation());
+		ProjectCreator.createProject(page.getProjectName(), page.getProjectPackage(), page.getProjectLocation(), page.useGAE());
 		return true;
 	}
 

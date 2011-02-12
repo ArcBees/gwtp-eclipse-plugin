@@ -22,13 +22,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import com.imagem.gwtpplugin.project.SourceEditor;
 import com.imagem.gwtpplugin.projectfile.IUpdatableFile;
 import com.imagem.gwtpplugin.projectfile.src.client.core.Presenter;
 import com.imagem.gwtpplugin.projectfile.src.client.core.View;
 import com.imagem.gwtpplugin.tool.Formatter;
 
-public class ClientModule implements IUpdatableFile {
+public class PresenterModule implements IUpdatableFile {
 
 	private final String EXTENSION = ".java";
 	private String projectName;
@@ -39,7 +47,8 @@ public class ClientModule implements IUpdatableFile {
 	private Presenter presenter;
 	private View view;
 
-	public ClientModule(String projectName, String ginPackage, String placePackage, String resourcePackage, String clientPackage) {
+	@Deprecated
+	public PresenterModule(String projectName, String ginPackage, String placePackage, String resourcePackage, String clientPackage) {
 		this.projectName = projectName;
 		this.ginPackage = ginPackage;
 		this.placePackage = placePackage;
@@ -79,10 +88,10 @@ public class ClientModule implements IUpdatableFile {
 	public InputStream openContentStream() {
 		String contents = "package " + getPackage() + ";\n\n";
 
+		contents += "import com.google.gwt.event.shared.EventBus;\n";
+		contents += "import com.google.gwt.event.shared.SimpleEventBus;\n";
 		contents += "import com.google.inject.Singleton;\n";
-		contents += "import com.gwtplatform.mvp.client.DefaultEventBus;\n";
 		contents += "import com.gwtplatform.mvp.client.DefaultProxyFailureHandler;\n";
-		contents += "import com.gwtplatform.mvp.client.EventBus;\n";
 		contents += "import com.gwtplatform.mvp.client.RootPresenter;\n";
 		contents += "import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.ParameterTokenFormatter;\n";
@@ -103,7 +112,7 @@ public class ClientModule implements IUpdatableFile {
 		contents += "	@Override\n";
 		contents += "	protected void configure() {\n";
 		contents += "		// Singletons\n";
-		contents += "		bind(EventBus.class).to(DefaultEventBus.class).in(Singleton.class);\n";
+		contents += "		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);\n";
 		contents += "		bind(PlaceManager.class).to(" + projectName + "PlaceManager.class).in(Singleton.class);\n";
 		contents += "		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);\n";
 		contents += "		bind(ProxyFailureHandler.class).to(DefaultProxyFailureHandler.class).in(Singleton.class);\n";
@@ -157,4 +166,58 @@ public class ClientModule implements IUpdatableFile {
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
 	}
 
+	// New Version
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public PresenterModule(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
+		// TODO Create if doesn't exist
+		type = project.findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public void createBinder(IType presenter, IType view) throws JavaModelException {
+		cu.createImport(presenter.getFullyQualifiedName(), null, null);
+		cu.createImport(view.getFullyQualifiedName(), null, null);
+		
+		boolean isWidget = presenter.getSuperclassName().startsWith("PresenterWidget");
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configure", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+		if(isWidget) {
+			contents += "bindPresenterWidget(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class);";
+		}
+		else {
+			contents += "bindPresenter(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class, " + presenter.getElementName() + ".MyProxy.class);";
+		}
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
 }

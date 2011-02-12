@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+@Deprecated
 public class ProjectWizardPage extends WizardPage {
 
 	private Text projectName;
@@ -46,6 +47,7 @@ public class ProjectWizardPage extends WizardPage {
 	private Text location;
 	private Button browse;
 	private Label locationLabel;
+	private Button useGAE;
 
 	protected ProjectWizardPage() {
 		super("ProjectWizardPage");
@@ -57,6 +59,8 @@ public class ProjectWizardPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		
 		Composite container = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
@@ -146,6 +150,10 @@ public class ProjectWizardPage extends WizardPage {
 			}
 		});
 		
+		// GAE
+		useGAE = new Button(container, SWT.CHECK);
+		useGAE.setText("Use App Engine");
+		
 		// TODO Google SDKs
 
 		setDefaultValues();
@@ -205,6 +213,10 @@ public class ProjectWizardPage extends WizardPage {
 			return new Path(location.getText()).toFile().toURI();
 		}
 		return null;
+	}
+
+	public boolean useGAE() {
+		return useGAE.getSelection();
 	}
 
 }

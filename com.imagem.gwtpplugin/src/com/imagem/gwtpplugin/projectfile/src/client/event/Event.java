@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 import com.imagem.gwtpplugin.project.SourceEditor;
 import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.projectfile.Variable;
+import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.tool.Formatter;
 
 public class Event implements IProjectFile {
@@ -29,7 +29,7 @@ public class Event implements IProjectFile {
 	private final String EXTENSION = ".java";
 	private String name;
 	private String eventPackage;
-	private Variable[] parameters;
+	private Field[] fields;
 	private boolean hasHandlers = false;
 
 	public Event(String name, String eventPackage) {
@@ -37,11 +37,11 @@ public class Event implements IProjectFile {
 		this.eventPackage = eventPackage;
 	}
 	
-	public void setParameters(Variable... parameters) {
-		this.parameters = parameters;
+	public void setFields(Field... fields) {
+		this.fields = fields;
 	}
 	
-	public void hasHandlers(boolean hasHandlers) {
+	public void setHandlers(boolean hasHandlers) {
 		this.hasHandlers  = hasHandlers;
 	}
 
@@ -67,43 +67,43 @@ public class Event implements IProjectFile {
 
 	@Override
 	public InputStream openContentStream() {
-		if(parameters == null)
-			parameters = new Variable[0];
+		/*if(fields == null)
+			fields = new Field[0];
 		
 		String contents = "package " + getPackage() + ";\n\n";
 
 		contents += "import com.google.gwt.event.shared.GwtEvent;\n";
 		if(!hasHandlers)
-			contents += "import com.gwtplatform.mvp.client.HasEventBus;\n";
+			contents += "import com.google.gwt.event.shared.HasHandlers;\n";
 		contents += "\n";
 		
 		contents += "public class " + getName() + " extends GwtEvent<" + name + "Handler> {\n";
 		contents += "	public static Type<" + name + "Handler> TYPE = new Type<" + name + "Handler>();\n\n";
 		
 
-		for(Variable param : parameters) {
-			contents += "	private final " + param.toString() + ";\n";
+		for(Field field : fields) {
+			contents += "	private final " + field.getField() + ";\n";
 		}
 		contents += "\n";
 		
 		contents += "	public " + getName() + "(";
 		String separator = "";
-		for(Variable param : parameters) {
-			contents += separator + "final " + param.toString();
+		for(Field param : fields) {
+			contents += separator + "final " + param.getField();
 			separator = ", ";
 		}
 		contents += ") {\n";
-		for(Variable param : parameters) {
+		for(Field param : fields) {
 			contents += "		this." + param.getName() + " = " + param.getName() + ";\n";
 		}
 		contents += "	}\n\n";
 		
-		for(Variable param : parameters) {
-			if((param.getType().equals("boolean") || param.getType().equals("Boolean")) && (param.getName().startsWith("is") || param.getName().startsWith("has")))
-				contents += "	public " + param.toString() + "() {\n";
+		for(Field field : fields) {
+			if((field.getType().equals("boolean") || field.getType().equals("Boolean")) && (field.getName().startsWith("is") || field.getName().startsWith("has")))
+				contents += "	public " + field.getField() + "() {\n";
 			else
-				contents += "	public " + param.getType() + " get" + param.getCapName() + "() {\n";
-			contents += "		return " + param.getName() + ";\n";
+				contents += "	public " + field.getType() + " get" + field.getCapName() + "() {\n";
+			contents += "		return " + field.getName() + ";\n";
 			contents += "	}\n\n";
 		}
 		
@@ -124,15 +124,15 @@ public class Event implements IProjectFile {
 		if(hasHandlers)
 			contents += "	public static void fire(Has" + name + "Handlers source";
 		else
-			contents += "	public static void fire(HasEventBus source";
-		for(Variable param : parameters) {
-			contents += ", " + param.toString();
+			contents += "	public static void fire(HasHandlers source";
+		for(Field field : fields) {
+			contents += ", " + field.getField();
 		}
 		contents += ") {\n";
 		contents += "		source.fireEvent(new " + getName() + "(";
 		separator = "";
-		for(Variable param : parameters) {
-			contents += separator + param.getName();
+		for(Field field : fields) {
+			contents += separator + field.getName();
 			separator = ", ";
 		}
 		contents += "));\n";
@@ -140,12 +140,13 @@ public class Event implements IProjectFile {
 		
 		contents += "}";
 		
-		for(Variable param : parameters) {
-			if(!param.getImport().isEmpty())
-				contents = SourceEditor.insertImport(contents, param.getImport());
+		for(Field field : fields) {
+			if(!field.getQualifiedType().isEmpty())
+				contents = SourceEditor.insertImport(contents, field.getQualifiedType());
 		}
 
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());*/
+		return null;
 	}
 
 }

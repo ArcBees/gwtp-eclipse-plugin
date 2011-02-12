@@ -27,8 +27,9 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
 import com.imagem.gwtpplugin.project.SourceEditor;
-import com.imagem.gwtpplugin.projectfile.src.shared.model.Model;
+import com.imagem.gwtpplugin.projectfile.src.shared.Model;
 
+@Deprecated
 public class ModelWizard extends Wizard implements INewWizard {
 
 	private ModelWizardPage modelPage;
@@ -55,7 +56,7 @@ public class ModelWizard extends Wizard implements INewWizard {
 		String variables[] = modelPage.getVariables();
 		
 		final Model model = new Model(name, modelPackage);
-		model.setVariables(SourceEditor.getVariables(project, basePath, variables));
+		model.setFields(SourceEditor.getVariables(project, basePath, variables));
 		
 		try {
 			SourceEditor.createProjectFile(project, model, true);

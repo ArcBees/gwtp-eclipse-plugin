@@ -25,7 +25,7 @@ import com.imagem.gwtpplugin.projectfile.src.client.ActionCallback;
 import com.imagem.gwtpplugin.projectfile.src.client.EntryPoint;
 import com.imagem.gwtpplugin.projectfile.src.client.core.TestPresenter;
 import com.imagem.gwtpplugin.projectfile.src.client.core.TestView;
-import com.imagem.gwtpplugin.projectfile.src.client.gin.ClientModule;
+import com.imagem.gwtpplugin.projectfile.src.client.gin.PresenterModule;
 import com.imagem.gwtpplugin.projectfile.src.client.gin.Ginjector;
 import com.imagem.gwtpplugin.projectfile.src.client.place.PlaceAnnotation;
 import com.imagem.gwtpplugin.projectfile.src.client.place.PlaceManager;
@@ -87,7 +87,7 @@ public class ClientSectionCreator extends Creator {
 		Ginjector ginjector = new Ginjector(project.getName(), toPackage(ginPath), toPackage(clientPath.append("resource")), toPackage(clientPath));
 		createProjectFile(project, ginjector);
 		
-		ClientModule clientModule = new ClientModule(project.getName(), toPackage(ginPath), toPackage(clientPath.append("place")), toPackage(clientPath.append("resource")), toPackage(clientPath));
+		PresenterModule clientModule = new PresenterModule(project.getName(), toPackage(ginPath), toPackage(clientPath.append("place")), toPackage(clientPath.append("resource")), toPackage(clientPath));
 		createProjectFile(project, clientModule);
 	}
 	

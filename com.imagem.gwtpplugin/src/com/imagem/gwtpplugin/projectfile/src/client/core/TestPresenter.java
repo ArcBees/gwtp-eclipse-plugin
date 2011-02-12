@@ -95,8 +95,8 @@ public class TestPresenter implements IProjectFile {
 	public InputStream openContentStream() {
 		String contents = "package " + getPackage() + ";\n\n";
 
+		contents += "import com.google.gwt.event.shared.EventBus;\n";
 		contents += "import com.google.inject.Inject;\n";
-		contents += "import com.gwtplatform.mvp.client.EventBus;\n";
 		contents += "import com.gwtplatform.mvp.client.View;\n\n";
 		if(!isWidget) {
 			contents += "import com.gwtplatform.mvp.client.Presenter;\n";

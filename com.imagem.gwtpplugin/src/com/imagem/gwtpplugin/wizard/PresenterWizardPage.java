@@ -22,8 +22,11 @@ import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -33,8 +36,18 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.ui.JavaElementComparator;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -49,7 +62,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
+@Deprecated
 @SuppressWarnings("restriction")
 public class PresenterWizardPage extends WizardPage {
 
@@ -61,14 +76,15 @@ public class PresenterWizardPage extends WizardPage {
 	private Button isCodeSplit;
 	private Button isWidget;
 	private Button useUiBinder;
-	private Text gateKeeper;
-	private Button btnBrowseGateKeeper;
+	private Text gatekeeper;
+	private Button btnBrowseGatekeeper;
 	private IJavaProject project;
 	private Button onBind;
 	private Button onHide;
 	private Button onReset;
 	private Button onReveal;
 	private Button onUnbind;
+	private Button btnPresenterPackage;
 
 	public PresenterWizardPage(IStructuredSelection selection) {
 		super("PresenterWizardPage");
@@ -79,11 +95,18 @@ public class PresenterWizardPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		int nColumns = 3;
+		
 		Composite container = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
-		layout.numColumns = 3;
+		layout.numColumns = nColumns;
 		layout.verticalSpacing = 5;
+		
+		// Test
+		/*PackageField test = new PackageField(container, nColumns);
+		test.setLabelText("Test:");
+		test.setPackageFragmentRoot(project.getPackageFragmentRoot("src/"));*/
 
 		// Presenter Package
 		Label label = new Label(container, SWT.NULL);
@@ -98,7 +121,25 @@ public class PresenterWizardPage extends WizardPage {
 			}
 		});
 
-		label = new Label(container, SWT.NULL);
+		btnPresenterPackage = new Button(container, SWT.PUSH);
+		btnPresenterPackage.setText("Browse...");
+		btnPresenterPackage.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IPackageFragmentRoot root = chooseContainer();
+				if(root != null)
+					presenterPackage.setText(root.getPath().makeRelative().toString());
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				IPackageFragmentRoot root = chooseContainer();
+				if(root != null)
+					presenterPackage.setText(root.getPath().makeRelative().toString());
+			}
+		});
+		
+		//root.getPath().makeRelative().toString();
 
 		// Presenter Name
 		label = new Label(container, SWT.NULL);
@@ -128,13 +169,13 @@ public class PresenterWizardPage extends WizardPage {
 				isCodeSplit.setEnabled(!isWidget.getSelection());
 				if(isWidget.getSelection()) {
 					tokenName.setEnabled(!isWidget.getSelection());
-					gateKeeper.setEnabled(!isWidget.getSelection());
-					btnBrowseGateKeeper.setEnabled(!isWidget.getSelection());
+					gatekeeper.setEnabled(!isWidget.getSelection());
+					btnBrowseGatekeeper.setEnabled(!isWidget.getSelection());
 				}
 				else {
 					tokenName.setEnabled(isPlace.getSelection());
-					gateKeeper.setEnabled(isPlace.getSelection());
-					btnBrowseGateKeeper.setEnabled(isPlace.getSelection());
+					gatekeeper.setEnabled(isPlace.getSelection());
+					btnBrowseGatekeeper.setEnabled(isPlace.getSelection());
 				}
 				dialogChanged();
 			}
@@ -152,8 +193,8 @@ public class PresenterWizardPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tokenName.setEnabled(isPlace.getSelection());
-				gateKeeper.setEnabled(isPlace.getSelection());
-				btnBrowseGateKeeper.setEnabled(isPlace.getSelection());
+				gatekeeper.setEnabled(isPlace.getSelection());
+				btnBrowseGatekeeper.setEnabled(isPlace.getSelection());
 				dialogChanged();
 			}
 		});
@@ -177,28 +218,28 @@ public class PresenterWizardPage extends WizardPage {
 
 		// GateKeeper
 		label = new Label(container, SWT.NULL);
-		label.setText("GateKeeper:");
+		label.setText("Gatekeeper:");
 
-		gateKeeper = new Text(container, SWT.BORDER | SWT.SINGLE);
+		gatekeeper = new Text(container, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gateKeeper.setLayoutData(gd);
-		gateKeeper.addModifyListener(new ModifyListener() {
+		gatekeeper.setLayoutData(gd);
+		gatekeeper.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				dialogChanged();
 			}
 		});
 
-		btnBrowseGateKeeper = new Button(container, SWT.PUSH);
-		btnBrowseGateKeeper.setText("Browse...");
-		btnBrowseGateKeeper.addSelectionListener(new SelectionListener() {
+		btnBrowseGatekeeper = new Button(container, SWT.PUSH);
+		btnBrowseGatekeeper.setText("Browse...");
+		btnBrowseGatekeeper.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				gateKeeper.setText(getNameWithTypeParameters(chooseGateKeeper()));
+				gatekeeper.setText(getNameWithTypeParameters(chooseGateKeeper()));
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				gateKeeper.setText(getNameWithTypeParameters(chooseGateKeeper()));
+				gatekeeper.setText(getNameWithTypeParameters(chooseGateKeeper()));
 			}
 		});
 
@@ -255,9 +296,105 @@ public class PresenterWizardPage extends WizardPage {
 
 		label = new Label(container, SWT.NULL);
 		
+		// TODO Choose RevealEvent
+		
 		initialize();
 		setControl(container);
 	}
+	
+	protected IPackageFragmentRoot chooseContainer() {
+		IJavaElement initElement= project.getPrimaryElement();
+		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
+			public boolean isSelectedValid(Object element) {
+				try {
+					if (element instanceof IJavaProject) {
+						IJavaProject jproject= (IJavaProject)element;
+						IPath path= jproject.getProject().getFullPath();
+						return (jproject.findPackageFragmentRoot(path) != null);
+					} else if (element instanceof IPackageFragmentRoot) {
+						return (((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE);
+					}
+					return true;
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus()); // just log, no UI in validation
+				}
+				return false;
+			}
+		};
+
+		acceptedClasses= new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
+			public boolean select(Viewer viewer, Object parent, Object element) {
+				if (element instanceof IPackageFragmentRoot) {
+					try {
+						return (((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE);
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus()); // just log, no UI in validation
+						return false;
+					}
+				}
+				return super.select(viewer, parent, element);
+			}
+		};
+
+		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
+		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
+		dialog.setValidator(validator);
+		dialog.setComparator(new JavaElementComparator());
+		dialog.setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title);
+		dialog.setMessage(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_description);
+		dialog.addFilter(filter);
+		dialog.setInput(project);
+		dialog.setInitialSelection(initElement);
+		dialog.setHelpAvailable(false);
+
+		if (dialog.open() == Window.OK) {
+			Object element= dialog.getFirstResult();
+			if (element instanceof IJavaProject) {
+				IJavaProject jproject= (IJavaProject)element;
+				return jproject.getPackageFragmentRoot(jproject.getProject());
+			} else if (element instanceof IPackageFragmentRoot) {
+				return (IPackageFragmentRoot)element;
+			}
+			return null;
+		}
+		return null;
+	}
+	
+	/*protected IPackageFragment choosePackage() {
+		IPackageFragmentRoot froot= getPackageFragmentRoot();
+		IJavaElement[] packages= null;
+		try {
+			if (froot != null && froot.exists()) {
+				packages= froot.getChildren();
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		if (packages == null) {
+			packages= new IJavaElement[0];
+		}
+
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+		dialog.setIgnoreCase(false);
+		dialog.setTitle(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_title);
+		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_description);
+		dialog.setEmptyListMessage(NewWizardMessages.NewTypeWizardPage_ChoosePackageDialog_empty);
+		dialog.setElements(packages);
+		dialog.setHelpAvailable(false);
+
+		IPackageFragment pack= getPackageFragment();
+		if (pack != null) {
+			dialog.setInitialSelections(new Object[] { pack });
+		}
+
+		if (dialog.open() == Window.OK) {
+			return (IPackageFragment) dialog.getFirstResult();
+		}
+		return null;
+	}*/
 
 	private IType chooseGateKeeper() {
 		if (project == null) {
@@ -269,9 +406,9 @@ public class PresenterWizardPage extends WizardPage {
 
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
 				getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
-		dialog.setTitle("TITLE");
-		dialog.setMessage("MESSAGE");
-		dialog.setInitialPattern("*GateKeeper");
+		dialog.setTitle("Gatekeeper Selection");
+		dialog.setMessage("Select a gatekeeper for your presenter");
+		dialog.setInitialPattern("*Gatekseeper");
 
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();
@@ -302,7 +439,6 @@ public class PresenterWizardPage extends WizardPage {
 			// ignore
 		}
 		return superName;
-
 	}
 
 	private void dialogChanged() {
@@ -310,7 +446,13 @@ public class PresenterWizardPage extends WizardPage {
 			setMessage("Enter the presenter package path");
 			return;
 		}
-		// TODO package validity
+		else {
+			IResource container = project.getProject().findMember("src/" + presenterPackage.getText().replaceAll("\\.", "/"));
+			if(!(container instanceof IContainer && container.exists())) {
+				setErrorMessage("Presenter package must be valid");
+				return;
+			}
+		}
 
 		if(presenterName.getText().isEmpty()) {
 			setMessage("Enter a name for the Presenter");
@@ -327,6 +469,7 @@ public class PresenterWizardPage extends WizardPage {
 					setMessage("Enter a name for the Token");
 					return;
 				}
+				// TODO More token validation
 				for(char c : tokenName.getText().toCharArray()) {
 					// [a-z][0-9]!
 					if(!((c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c == 33)) {
@@ -334,11 +477,11 @@ public class PresenterWizardPage extends WizardPage {
 						return;
 					}
 				}
-				if(!gateKeeper.getText().isEmpty()) {
+				if(!gatekeeper.getText().isEmpty()) {
 					try {
-						IType type = project.findType(gateKeeper.getText());
+						IType type = project.findType(gatekeeper.getText());
 						if(type == null || !type.exists()) {
-							setErrorMessage(gateKeeper.getText() + " doesn't exists.");
+							setErrorMessage(gatekeeper.getText() + " doesn't exist");
 							return;
 						}
 						ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
@@ -352,7 +495,7 @@ public class PresenterWizardPage extends WizardPage {
 							}
 						}
 						if(!isGateKeeper) {
-							setErrorMessage(gateKeeper.getText() + " doesn't implements GateKeeper");
+							setErrorMessage(gatekeeper.getText() + " doesn't implement GateKeeper");
 							return;
 						}
 					} 
@@ -435,7 +578,7 @@ public class PresenterWizardPage extends WizardPage {
 	}
 
 	public String getGateKeeper() {
-		return gateKeeper.getText();
+		return gatekeeper.getText();
 	}
 
 	public boolean isCodeSplit() {

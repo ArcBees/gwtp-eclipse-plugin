@@ -27,11 +27,12 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
 import com.imagem.gwtpplugin.project.SourceEditor;
-import com.imagem.gwtpplugin.projectfile.src.server.guice.ServerModule;
-import com.imagem.gwtpplugin.projectfile.src.server.handler.ActionHandler;
-import com.imagem.gwtpplugin.projectfile.src.shared.action.Action;
-import com.imagem.gwtpplugin.projectfile.src.shared.action.Result;
+import com.imagem.gwtpplugin.projectfile.src.server.ActionHandler;
+import com.imagem.gwtpplugin.projectfile.src.server.guice.HandlerModule;
+import com.imagem.gwtpplugin.projectfile.src.shared.Action;
+import com.imagem.gwtpplugin.projectfile.src.shared.Result;
 
+@Deprecated
 public class ActionWizard extends Wizard implements INewWizard {
 
 	private ActionWizardPage page;
@@ -61,12 +62,12 @@ public class ActionWizard extends Wizard implements INewWizard {
 		final Action action = new Action(name, actionPackage);
 		final Result result = new Result(name, actionPackage);
 		final ActionHandler actionHandler = new ActionHandler(project.getName(), name, handlerPaclage, actionPackage);
-		final ServerModule serverModule = new ServerModule(guicePackage);
+		final HandlerModule serverModule = new HandlerModule(guicePackage);
 
-		action.setSecure(page.isSecureAction());
-		action.setParameters(SourceEditor.getVariables(project, basePath, page.getActionParameters()));
+		action.setSuperclass(page.getSuperclass());
+		action.setFields(SourceEditor.getVariables(project, basePath, page.getActionParameters()));
 
-		result.setParameters(SourceEditor.getVariables(project, basePath, page.getResultParameters()));
+		result.setFields(SourceEditor.getVariables(project, basePath, page.getResultParameters()));
 		
 		//actionHandler.setSecureAction(!page.useDefaultActionHandler());
 		

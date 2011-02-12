@@ -22,20 +22,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import com.imagem.gwtpplugin.project.SourceEditor;
 import com.imagem.gwtpplugin.projectfile.IUpdatableFile;
-import com.imagem.gwtpplugin.projectfile.src.server.handler.ActionHandler;
-import com.imagem.gwtpplugin.projectfile.src.shared.action.Action;
+import com.imagem.gwtpplugin.projectfile.src.server.ActionHandler;
+import com.imagem.gwtpplugin.projectfile.src.shared.Action;
 import com.imagem.gwtpplugin.tool.Formatter;
 
-public class ServerModule implements IUpdatableFile {
+public class HandlerModule implements IUpdatableFile {
 
 	private final String EXTENSION = ".java";
 	private String guicePackage;
 	private Action action;
 	private ActionHandler actionHandler;
+	private String name = "ServerModule";
 
-	public ServerModule(String guicePackage) {
+	public HandlerModule(String guicePackage) {
 		this.guicePackage = guicePackage;
 	}
 	
@@ -46,10 +55,14 @@ public class ServerModule implements IUpdatableFile {
 	public void setActionHandler(ActionHandler actionHandler) {
 		this.actionHandler = actionHandler;
 	}
+	
+	public void setName(String name) {
+		this.name  = name;
+	}
 
 	@Override
 	public String getName() {
-		return "ServerModule";
+		return name;
 	}
 
 	@Override
@@ -110,5 +123,56 @@ public class ServerModule implements IUpdatableFile {
 		}
 		
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+	}
+	
+	// New Version
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public HandlerModule(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		type = root.getJavaProject().findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public IType getType() {
+		return type;
+	}
+	
+	public void createBinder(IType action, IType actionHandler) throws JavaModelException {
+		cu.createImport(action.getFullyQualifiedName(), null, null);
+		cu.createImport(actionHandler.getFullyQualifiedName(), null, null);
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configureHandlers", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+		contents += "bindHandler(" + action.getElementName() + ".class, " + actionHandler.getElementName() + ".class);";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
 	}
 }

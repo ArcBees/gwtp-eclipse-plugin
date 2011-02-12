@@ -19,13 +19,27 @@ package com.imagem.gwtpplugin.wizard;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -34,6 +48,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
+@Deprecated
+@SuppressWarnings("restriction")
 public class ActionWizardPage extends WizardPage {
 
 	private IStructuredSelection selection;
@@ -43,9 +59,11 @@ public class ActionWizardPage extends WizardPage {
 	private Text addResultParameter;
 	private List actionParameterList;
 	private List resultParameterList;
-	private Button isSecureCheckBox;
 	private Button addActionButton;
 	private Button addResultButton;
+	private Text actionType;
+	private Button btnBrowseActionType;
+	private IJavaProject project;
 
 	public ActionWizardPage(IStructuredSelection selection) {
 		super("ActionWizardPage");
@@ -93,14 +111,32 @@ public class ActionWizardPage extends WizardPage {
 
 		label = new Label(container, SWT.NULL);
 
-		// Use Secure Action
+		// Action Type
 		label = new Label(container, SWT.NULL);
+		label.setText("Action Superclass:");
 
-		isSecureCheckBox = new Button(container, SWT.CHECK);
-		isSecureCheckBox.setText("Secure Action");
-		isSecureCheckBox.setSelection(false);
+		actionType = new Text(container, SWT.BORDER | SWT.SINGLE);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		actionType.setLayoutData(gd);
+		actionType.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				dialogChanged();
+			}
+		});
 
-		label = new Label(container, SWT.NULL);
+		btnBrowseActionType = new Button(container, SWT.PUSH);
+		btnBrowseActionType.setText("Browse...");
+		btnBrowseActionType.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				actionType.setText(getNameWithTypeParameters(chooseActionType()));
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				actionType.setText(getNameWithTypeParameters(chooseActionType()));
+			}
+		});
 
 		// Add Parameter
 		label = new Label(container, SWT.NULL);
@@ -211,6 +247,51 @@ public class ActionWizardPage extends WizardPage {
 		setControl(container);
 	}
 
+	private IType chooseActionType() {
+		if (project == null) {
+			return null;
+		}
+
+		IJavaElement[] elements= new IJavaElement[] { project };
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false,
+				getWizard().getContainer(), scope, IJavaSearchConstants.CLASS);
+		dialog.setTitle("Action Superclass Selection");
+		dialog.setMessage("Choose a superclass for your action");
+		dialog.setInitialPattern("*Action");
+
+		if (dialog.open() == Window.OK) {
+			return (IType) dialog.getFirstResult();
+		}
+		return null;
+	}
+
+	private String getNameWithTypeParameters(IType type) {
+		String superName= type.getFullyQualifiedName('.');
+		if (!JavaModelUtil.is50OrHigher(type.getJavaProject())) {
+			return superName;
+		}
+		try {
+			ITypeParameter[] typeParameters= type.getTypeParameters();
+			if (typeParameters.length > 0) {
+				StringBuffer buf= new StringBuffer(superName);
+				buf.append('<');
+				for (int k= 0; k < typeParameters.length; k++) {
+					if (k != 0) {
+						buf.append(',').append(' ');
+					}
+					buf.append(typeParameters[k].getElementName());
+				}
+				buf.append('>');
+				return buf.toString();
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+		return superName;
+	}
+
 	private void initialize() {
 		if(selection != null && !selection.isEmpty()) {
 			if (selection.size() > 1)
@@ -234,6 +315,7 @@ public class ActionWizardPage extends WizardPage {
 				else
 					container = resource.getParent();
 			}
+			project = JavaCore.create(container.getProject());
 
 			String pack = "";
 			for(int i = 1; i < container.getProjectRelativePath().segmentCount(); i++) {
@@ -242,6 +324,7 @@ public class ActionWizardPage extends WizardPage {
 				pack += container.getProjectRelativePath().segment(i);
 			}
 			actionPackage.setText(pack);
+			actionType.setText("com.gwtplatform.dispatch.shared.ActionImpl");
 		}
 	}
 
@@ -254,11 +337,7 @@ public class ActionWizardPage extends WizardPage {
 			return;
 		}
 		if(actionText.getText().isEmpty()) {
-			setMessage("Enter a name for the Action");
-			return;
-		}
-		if(!actionText.getText().endsWith("Action")) {
-			setErrorMessage("Action File must ends by \"Action\"");
+			setMessage("Enter the action's name");
 			return;
 		}
 
@@ -288,6 +367,38 @@ public class ActionWizardPage extends WizardPage {
 		else
 			addResultButton.setEnabled(false);
 		
+		if(actionType.getText().isEmpty()) {
+			setMessage("Enter the action's superclass");
+			return;
+		}
+		else {
+			try {
+				IType type = project.findType(actionType.getText());
+				if(type == null || !type.exists()) {
+					setErrorMessage(actionType.getText() + " doesn't exist");
+					return;
+				}
+				ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+				IType[] interfaces = hierarchy.getAllInterfaces();
+				boolean isAction = false;
+				for(IType inter : interfaces) {
+					String test = getNameWithTypeParameters(inter);
+					if(test.equals("com.gwtplatform.dispatch.shared.Action<R>")) {
+						isAction = true;
+						break;
+					}
+				}
+				if(!isAction) {
+					setErrorMessage(actionType.getText() + " doesn't implement ActionImpl");
+					return;
+				}
+			} 
+			catch (JavaModelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		setPageComplete(true);
 	}
 	
@@ -312,15 +423,15 @@ public class ActionWizardPage extends WizardPage {
 	}
 
 	public String getActionName() {
-		return actionText.getText().replace("Action", "");
+		return actionText.getText();
 	}
 
 	public String getActionPackage() {
 		return actionPackage.getText();
 	}
 
-	public boolean isSecureAction() {
-		return isSecureCheckBox.getSelection();
+	public String getSuperclass() {
+		return actionType.getText();
 	}
 
 	public String[] getActionParameters() {

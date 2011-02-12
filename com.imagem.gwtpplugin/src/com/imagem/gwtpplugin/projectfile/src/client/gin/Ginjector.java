@@ -22,6 +22,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import com.imagem.gwtpplugin.project.SourceEditor;
 import com.imagem.gwtpplugin.projectfile.IUpdatableFile;
 import com.imagem.gwtpplugin.projectfile.src.client.core.Presenter;
@@ -35,7 +43,8 @@ public class Ginjector implements IUpdatableFile {
 	private String resourcePackage;
 	private String clientPackage;
 	private Presenter presenter;
-	
+
+	@Deprecated
 	public Ginjector(String projectName, String ginPackage, String resourcePackage, String clientPackage) {
 		this.projectName = projectName;
 		this.ginPackage = ginPackage;
@@ -71,12 +80,12 @@ public class Ginjector implements IUpdatableFile {
 	public InputStream openContentStream() {
 		String contents = "package " + getPackage() + ";\n\n";
 
+		contents += "import com.google.gwt.event.shared.EventBus;\n";
 		contents += "import com.google.gwt.inject.client.AsyncProvider;\n";
 		contents += "import com.google.gwt.inject.client.GinModules;\n";
 		contents += "import com.google.gwt.inject.client.Ginjector;\n";
 		contents += "import com.gwtplatform.dispatch.client.DispatchAsync;\n";
 		contents += "import com.gwtplatform.dispatch.client.gin.DispatchAsyncModule;\n";
-		contents += "import com.gwtplatform.mvp.client.EventBus;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.PlaceManager;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.ProxyFailureHandler;\n";
 		contents += "import " + clientPackage + ".core.presenter.TestPresenter;\n"; // TODO Test
@@ -131,6 +140,36 @@ public class Ginjector implements IUpdatableFile {
 		}
 		
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+	}
+	
+	// New Version
+	private final String PROVIDER = "com.google.inject.Provider";
+	private final String ASYNC_PROVIDER = "com.google.gwt.inject.client.AsyncProvider";
+	
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public Ginjector(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
+		// TODO Create if doesn't exist
+		type = project.findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public IMethod createProvider(IType presenter) throws JavaModelException {
+		IAnnotation annotation = null;
+		IJavaElement[] children = presenter.getChildren();
+		for(IJavaElement child : children) {
+			if(child instanceof IType && ((IType) child).getElementName().equals("MyProxy")) {
+				annotation = ((IType) child).getAnnotation("ProxyStandard");
+				break;
+			}
+		}
+		
+		cu.createImport(annotation.exists() ? PROVIDER : ASYNC_PROVIDER, null, null);
+		cu.createImport(presenter.getFullyQualifiedName(), null, null);
+		
+		String contents = (annotation.exists() ? "Provider<" : "AsyncProvider<") + presenter.getElementName() + "> get" + presenter.getElementName() + "();";
+		return type.createMethod(contents, null, false, null);
 	}
 
 }

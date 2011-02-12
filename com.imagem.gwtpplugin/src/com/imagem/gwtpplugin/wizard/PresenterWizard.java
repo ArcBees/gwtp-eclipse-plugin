@@ -30,10 +30,11 @@ import com.imagem.gwtpplugin.project.SourceEditor;
 import com.imagem.gwtpplugin.projectfile.src.client.core.Presenter;
 import com.imagem.gwtpplugin.projectfile.src.client.core.Ui;
 import com.imagem.gwtpplugin.projectfile.src.client.core.View;
-import com.imagem.gwtpplugin.projectfile.src.client.gin.ClientModule;
+import com.imagem.gwtpplugin.projectfile.src.client.gin.PresenterModule;
 import com.imagem.gwtpplugin.projectfile.src.client.gin.Ginjector;
 import com.imagem.gwtpplugin.projectfile.src.client.place.Tokens;
 
+@Deprecated
 public class PresenterWizard extends Wizard implements INewWizard {
 
 	private PresenterWizardPage presenterPage;
@@ -63,19 +64,19 @@ public class PresenterWizard extends Wizard implements INewWizard {
 		String placePackage = SourceEditor.toPackage(basePath.append("client").append("place"));
 		String resourcePackage = SourceEditor.toPackage(basePath.append("client").append("resource"));
 		
-		final Presenter presenter = new Presenter(project.getName(), name, presenterPackage, placePackage);
-		final View view = new View(name, viewPackage, presenterPackage, resourcePackage);
+		final Presenter presenter = new Presenter(project.getName(), name, presenterPackage);
+		final View view = new View(name, viewPackage, presenterPackage);
 		final Ui ui = new Ui(name, viewPackage);
 		final Tokens tokens = new Tokens(project.getName(), placePackage);
-		final ClientModule clientModule = new ClientModule(project.getName(), ginPackage, placePackage, resourcePackage, clientPackage);
+		final PresenterModule clientModule = new PresenterModule(project.getName(), ginPackage, placePackage, resourcePackage, clientPackage);
 		final Ginjector ginjector = new Ginjector(project.getName(), ginPackage, resourcePackage, clientPackage);
 		
-		presenter.setCodeSplit(presenterPage.isCodeSplit());
+		presenter.setProxyStandard(!presenterPage.isCodeSplit());
 		presenter.setPlace(presenterPage.isPlace());
-		presenter.setToken(presenterPage.getToken());
+		presenter.setToken(placePackage + "." + project.getName() + "Tokens", presenterPage.getToken());
 		presenter.setWidget(presenterPage.isWidget());
 		presenter.setGatekeeper(presenterPage.getGateKeeper());
-		presenter.setOnMethods(presenterPage.onMethods());
+		presenter.setMethodStubs(presenterPage.onMethods());
 		
 		view.setUiBinder(presenterPage.useUiBinder());
 		

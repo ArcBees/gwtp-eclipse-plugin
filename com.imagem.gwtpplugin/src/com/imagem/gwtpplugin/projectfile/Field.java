@@ -16,23 +16,30 @@
 
 package com.imagem.gwtpplugin.projectfile;
 
-public class Variable {
+import org.eclipse.jdt.core.IType;
 
-	private final String type;
-	private final String name;
-	private String imports;
+public class Field {
+
+	private IType type;
+	private String name;
 	
-	public Variable(String type, String name) {
-		this(type, name, "");
+	public Field() {
 	}
 	
-	public Variable(String type, String name, String imports) {
+	public Field(IType type, String name) {
 		this.type = type;
 		this.name = name;
-		this.imports = imports;
 	}
 	
-	public String getType() {
+	public void setType(IType type) {
+		this.type = type;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public IType getType() {
 		return type;
 	}
 	
@@ -40,19 +47,10 @@ public class Variable {
 		return name;
 	}
 	
-	public String getImport() {
-		return imports;
-	}
-	
-	public String toString() {
-		return type + " " + name;
-	}
-	
-	public String getCapName() {
-		return name.substring(0, 1).toUpperCase() + name.substring(1);
-	}
-	
-	public void setImport(String imports) {
-		this.imports = imports;
-	}
+	/*public boolean isPrimaryType() {
+		if(qualifiedType.equals("boolean") || qualifiedType.equals("byte") || qualifiedType.equals("short") || qualifiedType.equals("int") || 
+				qualifiedType.equals("long") || qualifiedType.equals("float") || qualifiedType.equals("double") || qualifiedType.equals("char"))
+			return true;
+		return false;
+	}*/
 }

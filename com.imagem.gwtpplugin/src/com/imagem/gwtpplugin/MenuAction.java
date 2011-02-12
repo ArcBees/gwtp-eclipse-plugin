@@ -31,21 +31,21 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
-import com.imagem.gwtpplugin.wizard.ActionWizard;
-import com.imagem.gwtpplugin.wizard.EventWizard;
-import com.imagem.gwtpplugin.wizard.ModelWizard;
-import com.imagem.gwtpplugin.wizard.PresenterWizard;
 import com.imagem.gwtpplugin.wizard.ProjectWizard;
+import com.imagem.gwtpplugin.wizard2.NewActionWizard;
+import com.imagem.gwtpplugin.wizard2.NewEventWizard;
+import com.imagem.gwtpplugin.wizard2.NewModelWizard;
+import com.imagem.gwtpplugin.wizard2.NewPresenterWizard;
 
 public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
 	private IWorkbenchWindow window;
 	private ISelection selection;
-	
+
 	@Override
 	public Menu getMenu(Control parent) {
 		Menu menu = new Menu(parent);
-		
+
 		MenuItem item = new MenuItem(menu, SWT.PUSH);
 		item.setText("GWTP Project");
 		item.addSelectionListener(new SelectionListener() {
@@ -57,7 +57,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else
 					wizard.init(window.getWorkbench(), new StructuredSelection());
-					
+
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 				dialog.create();
 				dialog.open();
@@ -66,21 +66,21 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		
+
 		item = new MenuItem(menu, SWT.SEPARATOR);
-		
+
 		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Action");
 		item.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new ActionWizard();
+				INewWizard wizard = new NewActionWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else
 					wizard.init(window.getWorkbench(), new StructuredSelection());
-					
+
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 				dialog.create();
 				dialog.open();
@@ -89,19 +89,19 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		
+
 		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Event");
 		item.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new EventWizard();
+				INewWizard wizard = new NewEventWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else
 					wizard.init(window.getWorkbench(), new StructuredSelection());
-					
+
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 				dialog.create();
 				dialog.open();
@@ -110,19 +110,19 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		
+
 		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Model");
 		item.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new ModelWizard();
+				INewWizard wizard = new NewModelWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else
 					wizard.init(window.getWorkbench(), new StructuredSelection());
-					
+
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 				dialog.create();
 				dialog.open();
@@ -131,19 +131,19 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		
+
 		item = new MenuItem(menu, SWT.PUSH);
 		item.setText("Presenter");
 		item.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new PresenterWizard();
+				INewWizard wizard = new NewPresenterWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else
 					wizard.init(window.getWorkbench(), new StructuredSelection());
-					
+
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
 				dialog.create();
 				dialog.open();
@@ -152,7 +152,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		
+
 		return menu;
 	}
 

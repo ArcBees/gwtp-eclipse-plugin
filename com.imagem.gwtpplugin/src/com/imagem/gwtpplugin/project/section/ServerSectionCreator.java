@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import com.imagem.gwtpplugin.project.Creator;
 import com.imagem.gwtpplugin.projectfile.src.server.guice.DispatchServletModule;
 import com.imagem.gwtpplugin.projectfile.src.server.guice.GuiceServletConfig;
-import com.imagem.gwtpplugin.projectfile.src.server.guice.ServerModule;
+import com.imagem.gwtpplugin.projectfile.src.server.guice.HandlerModule;
 
 public class ServerSectionCreator extends Creator {
 
@@ -57,7 +57,7 @@ public class ServerSectionCreator extends Creator {
 		GuiceServletConfig guiceServletConfig = new GuiceServletConfig(project.getName(), toPackage(guicePath));
 		createProjectFile(project, guiceServletConfig);
 		
-		ServerModule serverModule = new ServerModule(toPackage(guicePath));
+		HandlerModule serverModule = new HandlerModule(toPackage(guicePath));
 		createProjectFile(project, serverModule);
 	}
 	

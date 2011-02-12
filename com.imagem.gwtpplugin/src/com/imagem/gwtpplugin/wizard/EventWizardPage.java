@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
+@Deprecated
 public class EventWizardPage extends WizardPage {
 
 	private IStructuredSelection selection;

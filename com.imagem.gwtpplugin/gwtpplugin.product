@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="gwtpplugin" uid="gwtpplugin" id="com.imagem.gwtpplugin.product" application="com.imagem.gwtpplugin.application" version="1.0.1.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="gwtpplugin" uid="gwtpplugin" id="com.imagem.gwtpplugin.product" application="com.imagem.gwtpplugin.application" version="1.0.2.qualifier" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>

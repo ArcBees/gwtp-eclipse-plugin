@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
+@Deprecated
 public class ModelWizardPage extends WizardPage {
 
 	private IStructuredSelection selection;
@@ -154,16 +155,21 @@ public class ModelWizardPage extends WizardPage {
 		}
 
 		if(modelName.getText().isEmpty()) {
-			setMessage("Enter a name for the Model");
+			setMessage("Enter the model's name");
 			return;
 		}
 		
 		if(!addVariable.getText().isEmpty()) {
+			if(addVariable.getText().contains("<") || addVariable.getText().contains(">")) {
+				addButton.setEnabled(false);
+				setErrorMessage("Generic classes aren't supported yet, you have to add them manually");
+				return;
+			}
+			
 			String[] parameter = addVariable.getText().split(" ");
-
 			if(parameter.length != 2) {
 				addButton.setEnabled(false);
-				setErrorMessage("Variable must be valid");
+				setErrorMessage("Variables must contain a type and a name");
 				return;
 			}
 			addButton.setEnabled(true);

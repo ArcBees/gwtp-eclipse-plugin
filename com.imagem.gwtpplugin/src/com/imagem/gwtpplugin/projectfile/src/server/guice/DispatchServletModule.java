@@ -62,7 +62,7 @@ public class DispatchServletModule implements IProjectFile {
 		String contents = "package " + getPackage() + ";\n\n";
 
 		contents += "import com.google.inject.servlet.ServletModule;\n";
-		contents += "import com.gwtplatform.dispatch.server.DispatchServiceImpl;\n";
+		contents += "import com.gwtplatform.dispatch.server.guice.DispatchServiceImpl;\n";
 		contents += "import com.gwtplatform.dispatch.shared.ActionImpl;\n";
 		if(useSessionCookie)
 			contents += "import com.gwtplatform.dispatch.shared.SecurityCookie;\n";
@@ -70,7 +70,7 @@ public class DispatchServletModule implements IProjectFile {
 		contents += "public class " + getName() + " extends ServletModule {\n\n";
 
 		contents += "	@Override\n";
-		contents += "	protected void configureServlets() {\n";
+		contents += "	public void configureServlets() {\n";
 		// TODO < GWT 2.1
 		//contents += "		serve(\"/" + projectName.toLowerCase() + "/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);\n\n";
 		

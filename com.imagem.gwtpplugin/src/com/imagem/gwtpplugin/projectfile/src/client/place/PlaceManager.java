@@ -57,9 +57,9 @@ public class PlaceManager implements IProjectFile {
 	public InputStream openContentStream() {
 		String contents = "package " + getPackage() + ";\n\n";
 
+		contents += "import com.google.gwt.event.shared.EventBus;\n";
 		contents += "import com.google.inject.Inject;\n";
 		contents += "import " + placePackage + ".annotation.DefaultPlace;\n";
-		contents += "import com.gwtplatform.mvp.client.EventBus;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.PlaceManagerImpl;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.PlaceRequest;\n";
 		contents += "import com.gwtplatform.mvp.client.proxy.TokenFormatter;\n";

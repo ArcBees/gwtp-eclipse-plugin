@@ -16,6 +16,23 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.place;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+@Deprecated
 public class Gatekeeper {
-	// TODO Gatekeeper
+	
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public Gatekeeper(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		type = root.getJavaProject().findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public IType getType() {
+		return type;
+	}
 }

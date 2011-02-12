@@ -33,13 +33,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import com.google.appengine.eclipse.core.nature.GaeNature;
+import com.google.appengine.eclipse.core.sdk.GaeSdkContainer;
 import com.google.gwt.eclipse.core.nature.GWTNature;
 import com.google.gwt.eclipse.core.runtime.GWTRuntimeContainer;
 import com.imagem.gwtpplugin.project.section.ClientSectionCreator;
 import com.imagem.gwtpplugin.project.section.ServerSectionCreator;
 import com.imagem.gwtpplugin.project.section.SharedSectionCreator;
+import com.imagem.gwtpplugin.projectfile.Settings;
 import com.imagem.gwtpplugin.projectfile.src.GwtXmlModule;
+import com.imagem.gwtpplugin.projectfile.src.Jdoconfig;
+import com.imagem.gwtpplugin.projectfile.src.Log4j;
+import com.imagem.gwtpplugin.projectfile.war.AppengineWebXml;
 import com.imagem.gwtpplugin.projectfile.war.Jar;
+import com.imagem.gwtpplugin.projectfile.war.Logging;
 import com.imagem.gwtpplugin.projectfile.war.ProjectCSS;
 import com.imagem.gwtpplugin.projectfile.war.ProjectHTML;
 import com.imagem.gwtpplugin.projectfile.war.WebXml;
@@ -51,7 +58,8 @@ public class ProjectCreator extends Creator {
 	private static final String GIN = "gin-r137";
 	private static final String GUICE = "guice-2.0";
 	private static final String GUICE_SERVLET = "guice-servlet-2.0";
-	private static final String GWTP = "gwtp-0.4";
+	//private static final String GWTP = "gwtp-0.4";
+	private static final String GWTP = "gwtp-all-0.5";
 
 	/**
 	 * For this marvelous project we need to:
@@ -67,20 +75,19 @@ public class ProjectCreator extends Creator {
 	 * @param options
 	 * @return
 	 */
-	public static IProject createProject(String projectName, String projectPackage, URI projectLocation) {
+	public static IProject createProject(String projectName, String projectPackage, URI projectLocation, boolean useGAE) {
 		IProject project = null;
 
 		try {
 			project = createBaseProject(projectName, projectLocation);
-			addNature(project);
+			addNature(project, useGAE);
 
-			createWarFolder(project, projectPackage);
-			createSrcFolder(project, projectPackage);
+			createWarFolder(project, projectPackage, useGAE);
+			createSrcFolder(project, projectPackage, useGAE);
+			createSettings(project);
 
 			IJavaProject javaProject = JavaCore.create(project);
-			createEntries(javaProject);
-
-			// TODO Text file encoding
+			createEntries(javaProject, useGAE);
 		}
 		catch(CoreException e) {
 			e.printStackTrace();
@@ -124,10 +131,13 @@ public class ProjectCreator extends Creator {
 	 * @param project
 	 * @throws CoreException
 	 */
-	private static void addNature(IProject project) throws CoreException {
+	private static void addNature(IProject project, boolean useGAE) throws CoreException {
 		if (!project.hasNature(JavaCore.NATURE_ID)) {
 			IProjectDescription description = project.getDescription();
-			description.setNatureIds(new String[]{JavaCore.NATURE_ID, GWTNature.NATURE_ID});
+			if(useGAE)
+				description.setNatureIds(new String[]{JavaCore.NATURE_ID, GWTNature.NATURE_ID, GaeNature.NATURE_ID});
+			else
+				description.setNatureIds(new String[]{JavaCore.NATURE_ID, GWTNature.NATURE_ID});
 			project.setDescription(description, null);
 		}
 	}
@@ -140,7 +150,7 @@ public class ProjectCreator extends Creator {
 	 * @param options 
 	 * @throws CoreException
 	 */
-	private static void createWarFolder(IProject project, String projectPackage) throws CoreException {
+	private static void createWarFolder(IProject project, String projectPackage, boolean useGAE) throws CoreException {
 		IPath warPath = new Path("war");
 		createFolder(project.getFolder(warPath));
 
@@ -155,6 +165,14 @@ public class ProjectCreator extends Creator {
 
 		WebXml webXml = new WebXml(project.getName(), projectPackage, webInfPath.toString());
 		createProjectFile(project, webXml);
+
+		if(useGAE) {
+			AppengineWebXml appengineWebXml = new AppengineWebXml(webInfPath.toString());
+			createProjectFile(project, appengineWebXml);
+
+			Logging logging = new Logging(webInfPath.toString());
+			createProjectFile(project, logging);
+		}
 
 		createLibFolder(project, webInfPath);
 	}
@@ -194,9 +212,20 @@ public class ProjectCreator extends Creator {
 	 * @param options 
 	 * @throws CoreException
 	 */
-	private static void createSrcFolder(IProject project, String projectPackage) throws CoreException {
+	private static void createSrcFolder(IProject project, String projectPackage, boolean useGAE) throws CoreException {
 		IPath srcPath = new Path("src");
 		createFolder(project.getFolder(srcPath));
+
+		if(useGAE) {
+			Log4j log4j = new Log4j(srcPath.toString());
+			createProjectFile(project, log4j);
+
+			IPath metaInfPath = srcPath.append("META-INF");
+			createFolder(project.getFolder(metaInfPath));
+
+			Jdoconfig jdoconfig = new Jdoconfig(metaInfPath.toString());
+			createProjectFile(project, jdoconfig);
+		}
 
 		IPath basePath = srcPath.append(projectPackage.replace('.', '/'));
 		createFolder(project.getFolder(basePath));
@@ -213,9 +242,10 @@ public class ProjectCreator extends Creator {
 	 * Create entries in the classpath
 	 * 
 	 * @param javaProject
+	 * @param useGAE 
 	 * @throws CoreException
 	 */
-	private static void createEntries(IJavaProject javaProject) throws CoreException {
+	private static void createEntries(IJavaProject javaProject, boolean useGAE) throws CoreException {
 		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 
 		// Default output location
@@ -231,9 +261,17 @@ public class ProjectCreator extends Creator {
 		gwtInitializer.initialize(gwtContainer, javaProject);
 		entries.add(JavaCore.newContainerEntry(gwtContainer));
 
+		// GAE SDK container
+		if(useGAE) {
+			IPath gaeContainer = GaeSdkContainer.CONTAINER_PATH;
+			ClasspathContainerInitializer gaeInitializer = JavaCore.getClasspathContainerInitializer(gaeContainer.segment(0));
+			gaeInitializer.initialize(gaeContainer, javaProject);
+			entries.add(JavaCore.newContainerEntry(gaeContainer));
+		}
+
 		// JRE container
 		entries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
-		
+
 		// GWTP libs
 		entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + AOPALLIANCE + ".jar"), null, null));
 		entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GIN + ".jar"), null, null));
@@ -242,5 +280,12 @@ public class ProjectCreator extends Creator {
 		entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GWTP + ".jar"), null, null));
 
 		javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
+	}
+
+	private static void createSettings(IProject project) throws CoreException {
+		IPath settingsPath = new Path(".settings");
+		
+		Settings settings = new Settings(settingsPath.toString());
+		createProjectFile(project, settings);
 	}
 }

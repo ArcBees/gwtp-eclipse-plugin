@@ -21,10 +21,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.Variable;
+import com.imagem.gwtpplugin.projectfile.Field;
 
 public class SourceEditor extends Creator {
 	
@@ -38,26 +37,29 @@ public class SourceEditor extends Creator {
 		}
 		return basePath;
 	}
-	
-	public static Variable[] getVariables(IProject project, IPath basePath, String...vars) {
-		Variable[] variables = new Variable[vars.length];
+
+	@Deprecated
+	public static Field[] getVariables(IProject project, IPath basePath, String...vars) {
+		Field[] variables = new Field[vars.length];
 		for(int i = 0; i < vars.length; i++) {
 			variables[i] = getVariable(project, basePath, vars[i]);
 		}
 		return variables;
 	}
 	
-	public static Variable getVariable(IProject project, IPath basePath, String var) {
-		IPath modelPath = basePath.append("shared").append("model");
-		Variable variable = new Variable(var.split(" ")[0], var.split(" ")[1]);
+	@Deprecated
+	public static Field getVariable(IProject project, IPath basePath, String var) {
+		/*IPath modelPath = basePath.append("shared").append("model");
+		Field variable = new Field(var.split(" ")[0], var.split(" ")[1]);
 		
 		IResource res = project.findMember(modelPath.append(variable.getType() + ".java"));
 		if(res != null)
-			variable.setImport(toPackage(modelPath.append(variable.getType())));
+			variable.setQualifiedType(toPackage(modelPath.append(variable.getType())));
 		else if(variable.getType().equals("Date") || variable.getType().equals("List") || variable.getType().equals("Map"))
-			variable.setImport("java.util." + variable.getType());
+			variable.setQualifiedType("java.util." + variable.getType());
 		
-		return variable;
+		return variable;*/
+		return null;
 	}
 
 	/**
