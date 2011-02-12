@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GWTP Plugin
 Bundle-SymbolicName: com.imagem.gwtpplugin; singleton:=true
-Bundle-Version: 1.0.2.qualifier
+Bundle-Version: 1.5.0.qualifier
 Bundle-Activator: com.imagem.gwtpplugin.Activator
 Bundle-Vendor: Imagem
 Require-Bundle: org.eclipse.ui,
