@@ -2,7 +2,7 @@
 <feature
       id="com.imagem.gwtpplugin.feature"
       label="GWTP Plugin"
-      version="1.0.2.qualifier"
+      version="1.5.0.qualifier"
       provider-name="Imagem">
 
    <description url="http://code.google.com/p/gwt-platform/">
