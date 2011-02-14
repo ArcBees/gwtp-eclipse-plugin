@@ -27,6 +27,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.ILaunchGroup;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -35,6 +38,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import com.google.appengine.eclipse.core.nature.GaeNature;
 import com.google.appengine.eclipse.core.sdk.GaeSdkContainer;
+import com.google.gdt.eclipse.suite.launch.WebAppLaunchUtil;
 import com.google.gwt.eclipse.core.nature.GWTNature;
 import com.google.gwt.eclipse.core.runtime.GWTRuntimeContainer;
 import com.imagem.gwtpplugin.project.section.ClientSectionCreator;
@@ -88,6 +92,8 @@ public class ProjectCreator extends Creator {
 
 			IJavaProject javaProject = JavaCore.create(project);
 			createEntries(javaProject, useGAE);
+
+			createLaunchConfig(project);
 		}
 		catch(CoreException e) {
 			e.printStackTrace();
@@ -284,8 +290,24 @@ public class ProjectCreator extends Creator {
 
 	private static void createSettings(IProject project) throws CoreException {
 		IPath settingsPath = new Path(".settings");
-		
+
 		Settings settings = new Settings(settingsPath.toString());
 		createProjectFile(project, settings);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static void createLaunchConfig(IProject project) throws CoreException {
+		ILaunchConfigurationWorkingCopy wc = WebAppLaunchUtil.createLaunchConfigWorkingCopy(project.getName(), project, WebAppLaunchUtil.determineStartupURL(project, false), false);
+		ILaunchGroup[] groups = DebugUITools.getLaunchGroups();
+
+		ArrayList groupsNames = new ArrayList();
+		for(ILaunchGroup group : groups) {
+			if((!("org.eclipse.debug.ui.launchGroup.debug".equals(group.getIdentifier()))) && (!("org.eclipse.debug.ui.launchGroup.run".equals(group.getIdentifier()))))
+				continue;
+			groupsNames.add(group.getIdentifier());
+		}
+
+		wc.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
+		wc.doSave();
 	}
 }
