@@ -40,6 +40,7 @@ public class Result implements IProjectFile {
 	private String actionPackage;
 	private Field[] fields;
 
+	@Deprecated
 	public Result(String name, String actionPackage) {
 		this.name = name;
 		this.actionPackage = actionPackage;

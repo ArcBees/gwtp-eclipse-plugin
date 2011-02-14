@@ -16,14 +16,20 @@
 
 package com.imagem.gwtpplugin.projectfile.src.shared;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Random;
 
-import com.imagem.gwtpplugin.project.SourceEditor;
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
 import com.imagem.gwtpplugin.projectfile.Field;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.IProjectFile;
 
 public class Model implements IProjectFile {
 
@@ -33,6 +39,7 @@ public class Model implements IProjectFile {
 	private Field[] fields;
 	private boolean generateEquals = true;
 
+	@Deprecated
 	public Model(String name, String modelPackage) {
 		this.name = name;
 		this.modelPackage = modelPackage;
@@ -186,5 +193,127 @@ public class Model implements IProjectFile {
 
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());*/
 		return null;
+	}
+	
+	// New Version
+	private static final String I_SERIALIZABLE = "java.io.Serializable";
+	
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public Model(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		type = root.getJavaProject().findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public Model(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		type = root.getJavaProject().findType(packageName + "." + elementName);
+		if(type == null) {
+			String cuName = elementName + ".java";
+			
+			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
+			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
+			cu.createPackageDeclaration(packageName, null);
+
+			cu.createImport(I_SERIALIZABLE, null, null);
+			String contents = "public class " + elementName + " implements Serializable {\n\n}";
+	
+			type = cu.createType(contents, null, false, null);
+		}
+		cu = type.getCompilationUnit();
+	}
+	
+	public IField createSerializationField() throws JavaModelException {
+		Random generator = new Random();
+		
+		String contents = "private static final long serialVersionUID = " + generator.nextLong() + "L;";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
+	public IField createField(IType fieldType, String fieldName) throws JavaModelException {
+		cu.createImport(fieldType.getFullyQualifiedName(), null, null);
+		String contents = "private " + fieldType.getElementName() + " " + fieldName + ";";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
+	public IMethod createSetterMethod(IField field) throws JavaModelException {
+		String contents = "public void set" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1);
+		contents += " (" + Signature.toString(field.getTypeSignature()) + field.getElementName() + ")";
+		contents += "{this." + field.getElementName() + " = " + field.getElementName() + ";}";
+		
+		return type.createMethod(contents, null, false, null);
+	}
+	
+	public IMethod createGetterMethod(IField field) throws JavaModelException {
+		String contents = "public " + Signature.toString(field.getTypeSignature());
+		contents += " get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + " () {return " + field.getElementName() + ";}";
+		
+		return type.createMethod(contents, null, false, null);
+	}
+	
+	public IMethod createEqualsMethod(IField[] fields) throws IllegalArgumentException, JavaModelException {
+		String contents = "";
+		
+		contents += "@Override\n";
+		contents += "public boolean equals(Object anObject) {\n";
+		contents += "	if(this == anObject) return true;\n";
+		contents += "	if(!(anObject instanceof " + type.getElementName() + ")) return false;\n";
+		contents += "	" + type.getElementName() + " that = (" + type.getElementName() + ") anObject;\n\n";
+
+		contents += "	return\n";
+		for(int i = 0; i < fields.length; i++) {
+			IField field = fields[i];
+			String fieldType = Signature.toString(field.getTypeSignature());
+
+			contents += "		";
+			if(fieldType.equals("byte") || fieldType.equals("short") || fieldType.equals("int") || fieldType.equals("long") || 
+					fieldType.equals("char") || fieldType.equals("boolean"))
+				contents += "this.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "() == that.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "()";
+			else if(fieldType.equals("float"))
+				contents += "Float.floatToIntBits(this.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "()) == Float.floatToIntBits(that.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "())";
+			else if(fieldType.equals("double"))
+				contents += "Double.doubleToLongBits(this.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "()) == Double.doubleToLongBits(that.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "())";
+			else
+				contents += "this.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "() == null ? that.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "() == null : this.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "().equals(that.get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "())";
+
+			if(i < fields.length - 1)
+				contents += " &&\n";
+			else
+				contents += ";\n";
+		}
+		contents += "}";
+		
+		return type.createMethod(contents, null, false, null);
+	}
+	
+	public IMethod createHashCodeMethod(IField[] fields) throws IllegalArgumentException, JavaModelException {
+		String contents = "";
+		contents += "@Override\n";
+		contents += "public int hashCode() {\n";
+		contents += "	final int multiplier = 23;\n";
+		contents += "	int hashCode = 17;\n";
+		for(IField field : fields) {
+			String fieldType = Signature.toString(field.getTypeSignature());
+			
+			contents += "	hashCode = multiplier * hashCode + ";
+			if(fieldType.equals("boolean"))
+				contents += "(" + field.getElementName() + " ? 1 : 0);\n";
+			else if(fieldType.equals("byte") || fieldType.equals("short") || fieldType.equals("int") || fieldType.equals("char"))
+				contents += "(int) " + field.getElementName() + ";\n";
+			else if(fieldType.equals("long"))
+				contents += "(int) (" + field.getElementName() + "^(" + field.getElementName() + ">>>32));\n";
+			else if(fieldType.equals("double"))
+				contents += "(int) (Double.doubleToLongBits(" + field.getElementName() + ")^(Double.doubleToLongBits(" + field.getElementName() + ")>>>32));\n";
+			else if(fieldType.equals("float"))
+				contents += "Float.floatToIntBits(" + field.getElementName() + ");\n";
+			else
+				contents += "(" + field.getElementName() + " == null ? 0 : " + field.getElementName() + ".hashCode());\n";
+		}
+		contents += "	return hashCode;\n";
+		contents += "}";
+		
+		return type.createMethod(contents, null, false, null);
 	}
 }

@@ -280,4 +280,20 @@ public class NewEventWizardPage extends NewTypeWizardPage {
 		return generateHasHandlers.getSelection();
 	}
 
+	public String getHandlerPackageText() {
+		return getPackageText();
+	}
+	
+	public String getHandlerTypeName() {
+		return getTypeName().substring(0, getTypeName().length() - 5) + "Handler";
+	}
+
+	public String getHasHandlerPackageText() {
+		return getPackageText();
+	}
+
+	public String getHasHandlerTypeName() {
+		return "Has" + getTypeName().substring(0, getTypeName().length() - 5) + "Handlers";
+	}
+
 }

@@ -44,6 +44,7 @@ public class HandlerModule implements IUpdatableFile {
 	private ActionHandler actionHandler;
 	private String name = "ServerModule";
 
+	@Deprecated
 	public HandlerModule(String guicePackage) {
 		this.guicePackage = guicePackage;
 	}

@@ -37,7 +37,8 @@ public class ActionHandler implements IProjectFile {
 	private String handlerPackage;
 	private String actionPackage;
 	private boolean isSecure = false;
-	
+
+	@Deprecated
 	public ActionHandler(String projectName, String name, String handlerPackage, String actionPackage) {
 		this.projectName = projectName;
 		this.name = name;

@@ -16,14 +16,14 @@
 
 package com.imagem.gwtpplugin.wizard2;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.imagem.gwtpplugin.project.SourceEditor;
+import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.projectfile.src.client.event.Event;
 import com.imagem.gwtpplugin.projectfile.src.client.event.Handler;
 import com.imagem.gwtpplugin.projectfile.src.client.event.HasHandlers;
@@ -52,24 +52,37 @@ public class NewEventWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		String name = newEventPage.getTypeName().replace("Event", "");
-		IProject project = newEventPage.getPackageFragmentRoot().getJavaProject().getProject();
-		
-		final Event event = new Event(name, newEventPage.getPackageText());
-		final Handler handler = new Handler(name, newEventPage.getPackageText());
-		final HasHandlers hasHandler = new HasHandlers(name, newEventPage.getPackageText());
-		
-		event.setFields(newEventPage.getFields());
-		event.setHandlers(newEventPage.hasHandlers());
-		
 		try {
-			SourceEditor.createProjectFile(project, event, true);
-			SourceEditor.createProjectFile(project, handler, true);
-			if(newEventPage.hasHandlers())
-				SourceEditor.createProjectFile(project, hasHandler, true);
-		} 
-		catch (CoreException e) {
-			e.printStackTrace();
+			Handler handler = new Handler(newEventPage.getPackageFragmentRoot(), newEventPage.getHandlerPackageText(), newEventPage.getHandlerTypeName());
+		
+			Event event = new Event(newEventPage.getPackageFragmentRoot(), newEventPage.getPackageText(), newEventPage.getTypeName(), handler.getType());
+			event.createTypeField(handler.getType());
+			
+			Field[] eventFields = newEventPage.getFields();
+			IField[] fields = new IField[eventFields.length];
+			for(int i = 0; i < eventFields.length; i++) {
+				fields[i] = event.createField(eventFields[i].getType(), eventFields[i].getName());
+			}
+			event.createConstructor(fields);
+			for(IField field : fields) {
+				event.createGetterMethod(field);
+			}
+			
+			event.createDispatchMethod(handler.getType());
+			event.createAssociatedTypeGetterMethod(handler.getType());
+			
+			if(newEventPage.hasHandlers()) {
+				HasHandlers hasHandlers = new HasHandlers(newEventPage.getPackageFragmentRoot(), newEventPage.getHasHandlerPackageText(), newEventPage.getHasHandlerTypeName());
+				event.createFireMethod(fields, hasHandlers.getType());
+			}
+			else {
+				event.createFireMethod(fields);
+			}
+			
+			handler.createTriggerMethod(event.getType());
+			
+		}
+		catch (JavaModelException e) {
 			return false;
 		}
 		

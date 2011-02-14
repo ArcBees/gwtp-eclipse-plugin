@@ -16,14 +16,14 @@
 
 package com.imagem.gwtpplugin.wizard2;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.imagem.gwtpplugin.project.SourceEditor;
+import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.projectfile.src.shared.Model;
 
 public class NewModelWizard extends Wizard implements INewWizard {
@@ -50,7 +50,7 @@ public class NewModelWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		IProject project = newModelPage.getPackageFragmentRoot().getJavaProject().getProject();
+		/*IProject project = newModelPage.getPackageFragmentRoot().getJavaProject().getProject();
 
 		final Model model = new Model(newModelPage.getTypeName(), newModelPage.getPackageText());
 		model.setFields(newModelPage.getFields());
@@ -61,6 +61,31 @@ public class NewModelWizard extends Wizard implements INewWizard {
 		} 
 		catch (CoreException e) {
 			e.printStackTrace();
+			return false;
+		}*/
+		
+		try {
+			Model model = new Model(newModelPage.getPackageFragmentRoot(), newModelPage.getPackageText(), newModelPage.getTypeName());
+			model.createSerializationField();
+			
+			Field[] modelFields = newModelPage.getFields();
+			IField[] fields = new IField[modelFields.length];
+			for(int i = 0; i < modelFields.length; i++) {
+				fields[i] = model.createField(modelFields[i].getType(), modelFields[i].getName());
+			}
+			for(IField field : fields) {
+				model.createSetterMethod(field);
+			}
+			for(IField field : fields) {
+				model.createGetterMethod(field);
+			}
+			
+			if(newModelPage.generateEquals()) {
+				model.createEqualsMethod(fields);
+				model.createHashCodeMethod(fields);
+			}
+		}
+		catch (JavaModelException e) {
 			return false;
 		}
 		

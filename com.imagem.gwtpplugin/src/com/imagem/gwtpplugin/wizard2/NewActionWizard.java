@@ -54,30 +54,6 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		/*String name = newActionPage.getTypeName().replace("Event", "");
-		String handlerPaclage = newActionPage.getPackageText().replaceAll("shared", "server").replaceAll("action", "handler");
-		String[] serverModule = newActionPage.getServerModule().split("\\.");
-		IProject project = newActionPage.getPackageFragmentRoot().getJavaProject().getProject();
-		
-		final Action action = new Action(name, newActionPage.getPackageText());
-		final Result result = new Result(name, newActionPage.getPackageText());
-		final ActionHandler actionHandler = new ActionHandler(project.getName(), name, handlerPaclage, newActionPage.getPackageText());
-		final HandlerModule handlerModule = new HandlerModule(getGuicePackage(serverModule));
-
-		action.setSuperclass(newActionPage.getSuperclass());
-		action.setFields(newActionPage.getActionFields());
-
-		result.setFields(newActionPage.getResultFields());
-		
-		handlerModule.setName(getServerModuleName(serverModule));
-		handlerModule.setAction(action);
-		handlerModule.setActionHandler(actionHandler);
-		
-		try {
-			SourceEditor.createProjectFile(project, action, true);
-			SourceEditor.createProjectFile(project, result, true);
-			SourceEditor.createProjectFile(project, actionHandler, true);
-			SourceEditor.updateProjectFile(project, handlerModule);*/
 		try {
 			// Result
 			Result result = new Result(newActionPage.getPackageFragmentRoot(), newActionPage.getResultPackageText(), newActionPage.getResultTypeName());
@@ -118,6 +94,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			actionHandler.createUndoMethod(action.getType(), result.getType());
 			actionHandler.createActionTypeGetterMethod(action.getType());
 			
+			// HandlerModule
 			HandlerModule handlerModule = new HandlerModule(newActionPage.getPackageFragmentRoot(), newActionPage.getHandlerModule());
 			handlerModule.createBinder(action.getType(), actionHandler.getType());
 		} 
@@ -128,19 +105,5 @@ public class NewActionWizard extends Wizard implements INewWizard {
 		
 		return true;
 	}
-
-	/*private String getGuicePackage(String[] serverModule) {
-		String guicePackage = "";
-		for(int i = 0; i < serverModule.length - 1; i++) {
-			if(!guicePackage.isEmpty())
-				guicePackage += ".";
-			guicePackage += serverModule[i];
-		}
-		return guicePackage;
-	}
-	
-	private String getServerModuleName(String[] serverModule) {
-		return serverModule[serverModule.length - 1];
-	}*/
 
 }

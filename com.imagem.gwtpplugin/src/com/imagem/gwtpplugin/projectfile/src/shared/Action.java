@@ -41,6 +41,7 @@ public class Action implements IProjectFile {
 	private String superclass;
 	private Field[] fields;
 
+	@Deprecated
 	public Action(String name, String actionPackage) {
 		this.name = name;
 		this.actionPackage = actionPackage;

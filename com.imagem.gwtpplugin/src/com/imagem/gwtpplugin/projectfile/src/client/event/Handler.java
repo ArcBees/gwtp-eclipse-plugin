@@ -19,6 +19,13 @@ package com.imagem.gwtpplugin.projectfile.src.client.event;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import com.imagem.gwtpplugin.projectfile.IProjectFile;
 import com.imagem.gwtpplugin.tool.Formatter;
 
@@ -28,6 +35,7 @@ public class Handler implements IProjectFile {
 	private String name;
 	private String eventPackage;
 
+	@Deprecated
 	public Handler(String name, String eventPackage) {
 		this.name = name;
 		this.eventPackage = eventPackage;
@@ -65,6 +73,45 @@ public class Handler implements IProjectFile {
 		contents += "}";
 
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+	}
+	
+	// New Version
+	private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";
+	
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public Handler(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		type = root.getJavaProject().findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public Handler(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		type = root.getJavaProject().findType(packageName + "." + elementName);
+		if(type == null) {
+			String cuName = elementName + ".java";
+			
+			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
+			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
+			cu.createPackageDeclaration(packageName, null);
+
+			cu.createImport(I_EVENT_HANDLER, null, null);
+			String contents = "public interface " + elementName + " extends EventHandler {\n\n}";
+	
+			type = cu.createType(contents, null, false, null);
+		}
+		cu = type.getCompilationUnit();
+	}
+	
+	public IType getType() {
+		return type;
+	}
+	
+	public IMethod createTriggerMethod(IType event) throws JavaModelException {
+		cu.createImport(event.getFullyQualifiedName(), null, null);
+		String contents = "public void on" + event.getElementName().substring(0, event.getElementName().length() - 5) + "(" + event.getElementName() + " event);";
+		
+		return type.createMethod(contents, null, false, null);
 	}
 
 }

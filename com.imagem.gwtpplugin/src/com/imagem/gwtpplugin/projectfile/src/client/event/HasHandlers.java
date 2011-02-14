@@ -19,6 +19,13 @@ package com.imagem.gwtpplugin.projectfile.src.client.event;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import com.imagem.gwtpplugin.projectfile.IProjectFile;
 import com.imagem.gwtpplugin.tool.Formatter;
 
@@ -28,6 +35,7 @@ public class HasHandlers implements IProjectFile {
 	private String name;
 	private String eventPackage;
 
+	@Deprecated
 	public HasHandlers(String name, String eventPackage) {
 		this.name = name;
 		this.eventPackage = eventPackage;
@@ -67,5 +75,43 @@ public class HasHandlers implements IProjectFile {
 
 		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
 	}
+	
+	// New Version
+	private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";
+	
+	private IType type;
+	private ICompilationUnit cu;
+	
+	public HasHandlers(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		type = root.getJavaProject().findType(fullyQualifiedName);
+		cu = type.getCompilationUnit();
+	}
+	
+	public HasHandlers(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		type = root.getJavaProject().findType(packageName + "." + elementName);
+		if(type == null) {
+			String cuName = elementName + ".java";
+			
+			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
+			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
+			cu.createPackageDeclaration(packageName, null);
 
+			cu.createImport(I_HAS_HANDLERS, null, null);
+			String contents = "public interface " + elementName + " extends HasHandlers {\n\n}";
+	
+			type = cu.createType(contents, null, false, null);
+		}
+		cu = type.getCompilationUnit();
+	}
+	
+	public IType getType() {
+		return type;
+	}
+	
+	public IMethod createAddHandlerMethod(IType eventHandler) throws JavaModelException {
+		cu.createImport(eventHandler.getFullyQualifiedName(), null, null);
+		String contents = "public HandlerRegistration add" + eventHandler.getElementName() + "(" + eventHandler.getElementName() + " handler);";
+		
+		return type.createMethod(contents, null, false, null);
+	}
 }
