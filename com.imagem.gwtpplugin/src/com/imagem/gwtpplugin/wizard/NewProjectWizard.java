@@ -53,6 +53,7 @@ import com.google.appengine.eclipse.core.validators.GaeProjectValidator;
 import com.google.gdt.eclipse.core.validators.WebAppProjectValidator;
 import com.google.gdt.eclipse.suite.launch.WebAppLaunchUtil;
 import com.google.gwt.eclipse.core.nature.GWTNature;
+import com.google.gwt.eclipse.core.preferences.GWTPreferences;
 import com.google.gwt.eclipse.core.runtime.GWTRuntimeContainer;
 import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.projectfile.src.GwtXmlModule;
@@ -283,8 +284,10 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			// Guice package
 			IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName() + ".guice", false, null); // TODO Progress Monitor
 			
+			String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
+			
 			ServletModule servletModule = new ServletModule(root, guicePackage.getElementName(), "DispatchServletModule");
-			servletModule.createConfigureServletsMethod();
+			servletModule.createConfigureServletsMethod(gwtVersion);
 			
 			HandlerModule handlerModule = new HandlerModule(root, guicePackage.getElementName(), "ServerModule");
 			handlerModule.createConfigureHandlersMethod();

@@ -44,22 +44,57 @@ public class ServletModule extends ProjectClass {
 		}
 	}
 	
-	public IMethod createConfigureServletsMethod() throws JavaModelException {
+	public IMethod createConfigureServletsMethod(String gwtVersion) throws JavaModelException {
 		String contents = "";
 		
 		contents += "@Override\n";
 		contents += "public void configureServlets() {\n";
-		// TODO < GWT 2.1
-		//contents += "	serve(\"/" + projectName.toLowerCase() + "/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);\n\n";
 		
-		// >= GWT 2.1
-		cu.createImport(C_ACTION_IMPL, null, null);
-		cu.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
-		contents += "	serve(\"/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);\n";
+		// GWT < 2.1
+		if(compare(gwtVersion, "2.1") == -1) {
+			String projectName = cu.getJavaProject().getElementName();
+			
+			cu.createImport(C_ACTION_IMPL, null, null);
+			cu.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+			contents += "	serve(\"/" + projectName.toLowerCase() + "/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);\n\n";
+		}
+		// GWT >= 2.1
+		else {
+			cu.createImport(C_ACTION_IMPL, null, null);
+			cu.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+			contents += "	serve(\"/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);\n";
+		}
 		contents += "}";
 		
 		// TODO SessionID
 		
 		return type.createMethod(contents, null, false, null);
+	}
+	
+	private int compare(String v1, String v2) {
+		String[] split1 = v1.split("\\.");
+		String[] split2 = v2.split("\\.");
+		
+		int max = split1.length > split2.length ? split1.length : split2.length;
+		
+		for(int i = 0; i < max; i++) {
+			int t1 = getToken(split1, i);
+			int t2 = getToken(split2, i);
+			
+			if(t1 < t2) {
+				return -1;
+			}
+			else if(t1 > t2) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+	
+	private int getToken(String[] split, int index) {
+		if(index < split.length) {
+			return Integer.parseInt(split[index]);
+		}
+		return 0;
 	}
 }
