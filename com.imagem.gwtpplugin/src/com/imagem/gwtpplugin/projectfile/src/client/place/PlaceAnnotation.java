@@ -16,65 +16,47 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.place;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class PlaceAnnotation implements IProjectFile {
+public class PlaceAnnotation extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String placeName;
-	private String annotationPackage;
-
-	public PlaceAnnotation(String placeName, String annotationPackage) {
-		this.placeName = placeName;
-		this.annotationPackage = annotationPackage;
+	private static final String A_BINDING_ANNOTATION = "com.google.inject.BindingAnnotation";
+	private static final String A_TARGET = "java.lang.annotation.Target";
+	private static final String A_RETENTION = "java.lang.annotation.Retention";
+	private static final String E_FIELD = "java.lang.annotation.ElementType.FIELD";
+	private static final String E_PARAMETER = "java.lang.annotation.ElementType.PARAMETER";
+	private static final String E_METHOD = "java.lang.annotation.ElementType.METHOD";
+	private static final String E_RUNTIME = "java.lang.annotation.RetentionPolicy.RUNTIME";
+	
+	public PlaceAnnotation(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		super(root, fullyQualifiedName);
 	}
 	
-	@Override
-	public String getName() {
-		return placeName;
+	public PlaceAnnotation(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		super(root, packageName, elementName);
+		if(type == null) {
+			cu.createPackageDeclaration(packageName, null);
+			
+			cu.createImport(A_BINDING_ANNOTATION, null, null);
+			String contents = "@BindingAnnotation\n";
+
+			cu.createImport(A_TARGET, null, null);
+			cu.createImport(E_FIELD, null, Flags.AccStatic, null);
+			cu.createImport(E_PARAMETER, null, Flags.AccStatic, null);
+			cu.createImport(E_METHOD, null, Flags.AccStatic, null);
+			contents += "@Target({ FIELD, PARAMETER, METHOD })\n";
+
+			cu.createImport(A_RETENTION, null, null);
+			cu.createImport(E_RUNTIME, null, Flags.AccStatic, null);
+			contents += "@Retention(RUNTIME)\n";
+			
+			contents += "public @interface " + elementName + " {}\n";
+			
+			type = cu.createType(contents, null, false, null);
+		}
 	}
-
-	@Override
-	public String getPackage() {
-		return annotationPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + annotationPackage.replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import static java.lang.annotation.ElementType.FIELD;\n";
-		contents += "import static java.lang.annotation.ElementType.METHOD;\n";
-		contents += "import static java.lang.annotation.ElementType.PARAMETER;\n";
-		contents += "import static java.lang.annotation.RetentionPolicy.RUNTIME;\n\n";
-		
-		contents += "import java.lang.annotation.Retention;\n";
-		contents += "import java.lang.annotation.Target;\n\n";
-		
-		contents += "import com.google.inject.BindingAnnotation;\n\n";
-		
-		contents += "@BindingAnnotation\n";
-		contents += "@Target({ FIELD, PARAMETER, METHOD })\n";
-		contents += "@Retention(RUNTIME)\n";
-		contents += "public @interface " + getName() + " {}\n";
-		
-
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
-
 }

@@ -19,49 +19,26 @@ package com.imagem.gwtpplugin.projectfile.war;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 
 import com.imagem.gwtpplugin.Activator;
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
-public class Jar implements IProjectFile {
-	
-	private final String EXTENSION = ".jar";
-	private String jarName;
-	private String path;
+public class Jar extends ProjectWarFile {
 
-	public Jar(String jarName, String path) {
-		this.jarName = jarName;
-		this.path = path;
+	public Jar(IProject project, IPath path, String name) throws CoreException {
+		super(project, path, name + ".jar");
 	}
 	
-	@Override
-	public String getName() {
-		return jarName;
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		try {
-			return Platform.getBundle(Activator.PLUGIN_ID).getEntry("/file/" + getName() + getExtension()).openStream();
-		}
-		catch (IOException e) {
-			return null;
-		}
+	public IFile createFile() throws IOException, CoreException {
+		InputStream inputStream = Platform.getBundle(Activator.PLUGIN_ID).getEntry("/file/" + file.getName()).openStream();
+		
+		file.create(inputStream, false, null);
+		
+		return file;
 	}
 }

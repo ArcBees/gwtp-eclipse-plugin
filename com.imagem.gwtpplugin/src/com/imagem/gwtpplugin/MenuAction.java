@@ -31,11 +31,11 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
-import com.imagem.gwtpplugin.wizard.ProjectWizard;
-import com.imagem.gwtpplugin.wizard2.NewActionWizard;
-import com.imagem.gwtpplugin.wizard2.NewEventWizard;
-import com.imagem.gwtpplugin.wizard2.NewModelWizard;
-import com.imagem.gwtpplugin.wizard2.NewPresenterWizard;
+import com.imagem.gwtpplugin.wizard.NewActionWizard;
+import com.imagem.gwtpplugin.wizard.NewEventWizard;
+import com.imagem.gwtpplugin.wizard.NewModelWizard;
+import com.imagem.gwtpplugin.wizard.NewPresenterWizard;
+import com.imagem.gwtpplugin.wizard.NewProjectWizard;
 
 public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
@@ -52,7 +52,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new ProjectWizard();
+				INewWizard wizard = new NewProjectWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else

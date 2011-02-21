@@ -17,56 +17,32 @@
 package com.imagem.gwtpplugin.projectfile.war;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IType;
 
-public class WebXml implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
-	private final String EXTENSION = ".xml";
-	private final String NAME = "web";
-	private String projectName;
-	private String projectPackage;
-	private String path;
+public class WebXml extends ProjectWarFile {
 
-	public WebXml(String projectName, String projectPackage, String path) {
-		this.projectName = projectName;
-		this.projectPackage = projectPackage;
-		this.path = path;
+	public WebXml(IProject project, IPath path) throws CoreException {
+		super(project, path, "web.xml");
 	}
 	
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
-	public String getPackage() {
-		return projectPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile(IFile projectHTML, IType guiceServletContextListener) throws CoreException {
 		String contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 		contents += "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 		contents += "	xsi:schemaLocation=\"http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd\"\n";
 		contents += "	version=\"2.5\">\n\n";
 		
-		contents += "	<display-name>" + projectName + "</display-name>\n\n";
+		contents += "	<display-name>" + project.getName() + "</display-name>\n\n";
 		
 		contents += "	<!-- Default page to serve -->\n";
 		contents += "	<welcome-file-list>\n";
-		contents += "		<welcome-file>" + projectName + ".html</welcome-file>\n";
+		contents += "		<welcome-file>" + projectHTML.getName() + "</welcome-file>\n";
 		contents += "	</welcome-file-list>\n\n";
 		
 		contents += "	<!--\n";
@@ -77,7 +53,7 @@ public class WebXml implements IProjectFile {
 		contents += "		filter(String).through(Class<? extends Filter)\n";
 		contents += "	-->\n";
 		contents += "	<listener>\n";
-		contents += "		<listener-class>" + projectPackage + ".server.guice." + projectName + "GuiceServletConfig</listener-class>\n";
+		contents += "		<listener-class>" + guiceServletContextListener.getFullyQualifiedName() + "</listener-class>\n";
 		contents += "	</listener>\n\n";
 		
 		contents += "	<filter>\n";
@@ -91,8 +67,10 @@ public class WebXml implements IProjectFile {
 		contents += "	</filter-mapping>\n\n";
 		
 		contents += "</web-app>";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 
 }

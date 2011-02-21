@@ -16,210 +16,15 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.List;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class Presenter implements IProjectFile {
+public class Presenter extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String projectName;
-	private String name;
-	private String presenterPackage;
-	private String tokenClass;
-	private boolean isProxyStandard = false;
-	private boolean isPlace = false;
-	//private boolean isWidget = false;
-	private String tokenName = "";
-	private String gatekeeper;
-	private List<Boolean> methods;
-
-	@Deprecated
-	public Presenter(String projectName, String name, String presenterPackage) {
-		this.projectName = projectName;
-		this.name = name;
-		this.presenterPackage = presenterPackage;
-	}
-
-	public void setProxyStandard(boolean isProxyStandard) {
-		this.isProxyStandard = isProxyStandard;
-	}
-
-	public void setPlace(boolean isPlace) {
-		this.isPlace = isPlace;
-	}
-
-	public void setWidget(boolean isWidget) {
-		this.isWidget = isWidget;
-	}
-
-	public void setToken(String tokenClass, String tokenName) {
-		this.tokenClass = tokenClass;
-		this.tokenName = tokenName;
-	}
-	
-	public void setGatekeeper(String gatekeeper) {
-		this.gatekeeper = gatekeeper;
-	}
-	
-	public void setMethodStubs(List<Boolean> methods) {
-		this.methods = methods;
-	}
-
-	@Override
-	public String getName() {
-		return name + "Presenter";
-	}
-
-	@Override
-	public String getPackage() {
-		return presenterPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + getPackage().replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	public boolean isCodeSplit() {
-		return !isProxyStandard;
-	}
-
-	public boolean isWidget() {
-		return isWidget;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.google.gwt.event.shared.EventBus;\n";
-		contents += "import com.google.inject.Inject;\n";
-		contents += "import com.gwtplatform.mvp.client.View;\n\n";
-		if(!isWidget) {
-			contents += "import com.gwtplatform.mvp.client.Presenter;\n";
-			if(isProxyStandard)
-				contents += "import com.gwtplatform.mvp.client.annotations.ProxyStandard;\n";
-			else
-				contents += "import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;\n";
-			if(isPlace) {
-				contents += "import com.gwtplatform.mvp.client.annotations.NameToken;\n";
-				contents += "import com.gwtplatform.mvp.client.proxy.ProxyPlace;\n";
-				contents += "import " + tokenClass + ";\n";
-				if(gatekeeper != null && !gatekeeper.isEmpty()) {
-					contents += "import com.gwtplatform.mvp.client.annotations.UseGatekeeper;\n";
-					contents += "import " + gatekeeper + ";\n";
-				}
-			}
-			else
-				contents += "import com.gwtplatform.mvp.client.proxy.Proxy;\n";
-		}
-		else
-			contents += "import com.gwtplatform.mvp.client.PresenterWidget;\n";
-
-		if(!isWidget)
-			contents += "public class " + getName() + " extends Presenter<" + getName() + ".MyView, " + getName() + ".MyProxy> {\n\n";
-		else
-			contents += "public class " + getName() + " extends PresenterWidget<" + getName() + ".MyView> {\n\n";
-
-		contents += "	public interface MyView extends View {\n";
-		contents += "		// TODO Put your view methods here\n";
-		contents += "	}\n\n";
-
-		if(!isWidget) {
-			if(isProxyStandard)
-				contents += "	@ProxyStandard\n";
-			else
-				contents += "	@ProxyCodeSplit\n";
-			if(isPlace) {
-				contents += "	@NameToken(" + projectName + "Tokens." + tokenName + ")\n";
-				if(gatekeeper != null && !gatekeeper.isEmpty()) {
-					String[] gatekeeperSplit = gatekeeper.split("\\.");
-					contents += "	@UseGatekeeper(" + gatekeeperSplit[gatekeeperSplit.length - 1] + ".class)\n";
-				}
-				contents += "	public interface MyProxy extends ProxyPlace<" + getName() + "> {}\n\n";
-			}
-			else
-				contents += "	public interface MyProxy extends Proxy<" + getName() + "> {}\n\n";
-		}
-
-		contents += "	@Inject\n";
-		contents += "	public " + getName() + "(\n";
-		contents += "			final EventBus eventBus, \n";
-		if(!isWidget) {
-			contents += "			final MyView view, \n";
-			contents += "			final MyProxy proxy) {\n";
-			contents += "		super(eventBus, view, proxy);\n";
-		}
-		else {
-			contents += "			final MyView view) {\n";
-			contents += "		super(eventBus, view);\n";
-		}
-		contents += "	}\n\n";
-
-		if(!isWidget) {
-			contents += "	@Override\n";
-			contents += "	protected void revealInParent() {\n";
-			contents += "		// TODO Put the right RevealEvent here\n";
-			contents += "	}\n\n";
-		}
-		
-		if(methods.get(0)) {
-			contents += "	@Override\n";
-			contents += "	protected void onBind() {\n";
-			contents += "		super.onBind();\n";
-			contents += "	}\n\n";
-		}
-		
-		if(methods.get(1)) {
-			contents += "	@Override\n";
-			contents += "	protected void onHide() {\n";
-			contents += "		super.onBind();\n";
-			contents += "	}\n\n";
-		}
-		
-		if(methods.get(2)) {
-			contents += "	@Override\n";
-			contents += "	protected void onReset() {\n";
-			contents += "		super.onBind();\n";
-			contents += "	}\n\n";
-		}
-		
-		if(methods.get(3)) {
-			contents += "	@Override\n";
-			contents += "	protected void onReveal() {\n";
-			contents += "		super.onBind();\n";
-			contents += "	}\n\n";
-		}
-		
-		if(methods.get(4)) {
-			contents += "	@Override\n";
-			contents += "	protected void onUnbind() {\n";
-			contents += "		super.onBind();\n";
-			contents += "	}\n\n";
-		}
-
-		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
-	
-	// New Version
 	private static final String C_PRESENTER = "com.gwtplatform.mvp.client.Presenter";
 	private static final String C_PRESENTER_WIDGET = "com.gwtplatform.mvp.client.PresenterWidget";
 	private static final String C_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
@@ -232,29 +37,22 @@ public class Presenter implements IProjectFile {
 	private static final String A_USE_GATEKEEPER = "com.gwtplatform.mvp.client.annotations.UseGatekeeper";
 	private static final String A_INJECT = "com.google.inject.Inject";
 	
-	private IType type;
-	private ICompilationUnit cu;
 	private boolean isWidget;
 	
 	public Presenter(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
-		type = root.getJavaProject().findType(fullyQualifiedName);
-		cu = type.getCompilationUnit();
+		super(root, fullyQualifiedName);
 		
 		isWidget = type.getSuperclassName().startsWith("PresenterWidget");
 	}
 	
 	public Presenter(IPackageFragmentRoot root, String packageName, String elementName, boolean isWidget) throws JavaModelException {
+		super(root, packageName, elementName);
 		this.isWidget = isWidget;
-		type = root.getJavaProject().findType(packageName + "." + elementName);
+		
 		if(type == null) {
-			String cuName = elementName + ".java";
-			
-			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
-			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
 			cu.createPackageDeclaration(packageName, null);
 			
 			String contents = "";
-			
 			if(isWidget) {
 				cu.createImport(C_PRESENTER_WIDGET, null, null);
 				contents += "public class " + elementName + " extends PresenterWidget<" + elementName + ".MyView> {\n\n}";
@@ -266,11 +64,6 @@ public class Presenter implements IProjectFile {
 				
 			type = cu.createType(contents, null, false, null);
 		}
-		cu = type.getCompilationUnit();
-	}
-	
-	public IType getType() {
-		return type;
 	}
 	
 	public IType createViewInterface() throws JavaModelException {
@@ -281,8 +74,7 @@ public class Presenter implements IProjectFile {
 		
 		cu.createImport(I_VIEW, null, null);
 
-		type.createType(contents, null, false, null);
-		return null;
+		return type.createType(contents, null, false, null);
 	}
 	
 	public IType createProxyInterface(boolean isStandard) throws JavaModelException {

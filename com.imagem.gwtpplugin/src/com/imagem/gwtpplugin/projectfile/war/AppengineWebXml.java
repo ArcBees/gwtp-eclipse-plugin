@@ -17,42 +17,21 @@
 package com.imagem.gwtpplugin.projectfile.war;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
-public class AppengineWebXml implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
-	private final String EXTENSION = ".xml";
-	private final String NAME = "appengine-web";
-	private String path;
+public class AppengineWebXml extends ProjectWarFile {
 
-	public AppengineWebXml(String path) {
-		this.path = path;
+	public AppengineWebXml(IProject project, IPath path) throws CoreException {
+		super(project, path, "appengine-web.xml");
 	}
 	
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile() throws CoreException {
 		String contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 		contents += "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">\n\n";
 		contents += "	<application></application>\n";
@@ -75,8 +54,10 @@ public class AppengineWebXml implements IProjectFile {
 		contents += "	</system-properties>\n\n";
 		
 		contents += "</appengine-web-app>";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 
 }

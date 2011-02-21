@@ -17,45 +17,25 @@
 package com.imagem.gwtpplugin.projectfile.war;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
-public class ProjectCSS implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
-	private final String EXTENSION = ".css";
-	private String projectName;
-	private String path;
-	
-	public ProjectCSS(String projectName, String path) {
-		this.projectName = projectName;
-		this.path = path;
+public class ProjectCSS extends ProjectWarFile {
+
+	public ProjectCSS(IProject project, IPath path, String name) throws CoreException {
+		super(project, path, name + ".css");
 	}
 	
-	@Override
-	public String getName() {
-		return projectName;
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile() throws CoreException {
 		String contents = "/** Add css rules here for your application. **/\n\n";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 }

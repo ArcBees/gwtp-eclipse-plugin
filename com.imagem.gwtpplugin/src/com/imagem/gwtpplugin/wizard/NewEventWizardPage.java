@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard2;
+package com.imagem.gwtpplugin.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,19 +44,19 @@ import com.imagem.gwtpplugin.controls.AddFieldDialog;
 import com.imagem.gwtpplugin.projectfile.Field;
 
 @SuppressWarnings("restriction")
-public class NewModelWizardPage extends NewTypeWizardPage {
+public class NewEventWizardPage extends NewTypeWizardPage {
 
-	private final static String PAGE_NAME = "NewModelWizardPage";
+	private final static String PAGE_NAME = "NewEventWizardPage";
 	private Table table;
+	private Button generateHasHandlers;
 	private List<Field> fields;
 	private Button addField;
-	private Button generateEquals;
 	private IStatus fFieldsStatus = new StatusInfo();
 
-	public NewModelWizardPage(IStructuredSelection selection) {
+	public NewEventWizardPage(IStructuredSelection selection) {
 		super(true, PAGE_NAME);
-		setTitle("Create a Model");
-		setDescription("Create a Model that hold data");
+		setTitle("Create an Event");
+		setDescription("Create an Event and an Handler");
 		
 		init(selection);
 	}
@@ -123,7 +123,9 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 
 		createTypeNameControls(composite, nColumns);
 		createFieldsControls(composite, nColumns);
+
 		createGenerateControls(composite, nColumns);
+
 
 		setControl(composite);
 		setFocus();
@@ -132,7 +134,21 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 	}
 
 	protected String getTypeNameLabel() {
-		return "Model name:";
+		return "Event name:";
+	}
+
+	protected IStatus typeNameChanged() {
+		StatusInfo status = (StatusInfo) super.typeNameChanged();
+
+		if(status.isOK()) {
+			String typeNameWithParameters= getTypeName();
+			if(!typeNameWithParameters.endsWith("Event")) {
+				status.setError("Event class must ends by \"Event\"");
+				return status;
+			}
+		}
+
+		return status;
 	}
 
 	protected IStatus fieldsChanged() {
@@ -160,7 +176,7 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 		fields = new ArrayList<Field>();
 
 		Label label = new Label(composite, SWT.NULL);
-		label.setText("Model fields:");
+		label.setText("Event fields:");
 		label.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 
 		table = new Table(composite, SWT.BORDER);
@@ -218,10 +234,20 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 		});
 	}
 
+	protected void createGenerateControls(Composite composite, int nColumns) {
+		Label label = new Label(composite, SWT.NULL);
+		label.setText("Generate:");
+
+		generateHasHandlers = new Button(composite, SWT.CHECK);
+		generateHasHandlers.setText("HasHandles class");
+
+		label = new Label(composite, SWT.NULL);
+	}
+
 	protected void addField() {
 		AddFieldDialog dialog = new AddFieldDialog(getShell(), getJavaProject(), this);
 		dialog.setWindowTitle("Fields edition");
-		dialog.setTitle("Add a new field to the model");
+		dialog.setTitle("Add a new field to the event");
 		if(dialog.open() == Window.OK) {
 			Field result = dialog.getValue();
 
@@ -246,21 +272,28 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 		}
 	}
 
-	protected void createGenerateControls(Composite composite, int nColumns) {
-		Label label = new Label(composite, SWT.NULL);
-		label.setText("Generate:");
-
-		generateEquals = new Button(composite, SWT.CHECK);
-		generateEquals.setText("equals() and hashCode()");
-		generateEquals.setSelection(true);
-	}
-
 	public Field[] getFields() {
 		return fields.toArray(new Field[fields.size()]);
 	}
+
+	public boolean hasHandlers() {
+		return generateHasHandlers.getSelection();
+	}
+
+	public String getHandlerPackageText() {
+		return getPackageText();
+	}
 	
-	public boolean generateEquals() {
-		return generateEquals.getSelection();
+	public String getHandlerTypeName() {
+		return getTypeName().substring(0, getTypeName().length() - 5) + "Handler";
+	}
+
+	public String getHasHandlerPackageText() {
+		return getPackageText();
+	}
+
+	public String getHasHandlerTypeName() {
+		return "Has" + getTypeName().substring(0, getTypeName().length() - 5) + "Handlers";
 	}
 
 }

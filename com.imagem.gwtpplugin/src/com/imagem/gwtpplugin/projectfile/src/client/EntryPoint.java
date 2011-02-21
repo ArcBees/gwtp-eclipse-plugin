@@ -16,65 +16,56 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class EntryPoint implements IProjectFile {
+public class EntryPoint extends ProjectClass {
 	
-	private final String EXTENSION = ".java";
-	private String projectName;
-	private String clientPackage;
+	private static final String I_ENTRY_POINT = "com.google.gwt.core.client.EntryPoint";
+	private static final String C_GWT = "com.google.gwt.core.client.GWT";
+	private static final String C_DELAYED_BIND_REGISTRY = "com.gwtplatform.mvp.client.DelayedBindRegistry";
 	
-	public EntryPoint(String projectName, String clientPackage) {
-		this.projectName = projectName;
-		this.clientPackage = clientPackage;
+	public EntryPoint(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		super(root, fullyQualifiedName);
 	}
-
-	@Override
-	public String getName() {
-		return projectName;
+	
+	public EntryPoint(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		super(root, packageName, elementName);
+		if(type == null) {
+			cu.createPackageDeclaration(packageName, null);
+			
+			cu.createImport(I_ENTRY_POINT, null, null);
+			String contents = "public class " + elementName + " implements EntryPoint {\n\n}";
+			
+			type = cu.createType(contents, null, false, null);
+		}
 	}
-
-	@Override
-	public String getPackage() {
-		return clientPackage;
+	
+	public IField createGinjectorField(IType ginjector) throws JavaModelException {
+		cu.createImport(ginjector.getFullyQualifiedName(), null, null);
+		cu.createImport(C_GWT, null, null);
+		String contents = "private final " + ginjector.getElementName() + " ginjector = GWT.create(" + ginjector.getElementName() + ".class);";
+		
+		return type.createField(contents, null, false, null);
 	}
-
-	@Override
-	public String getPath() {
-		return "src/" + getPackage().replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
+	
+	public IMethod createOnModuleLoadMethod() throws JavaModelException {
+		String contents = "";
 		
-		contents += "import com.google.gwt.core.client.EntryPoint;\n";
-		contents += "import com.google.gwt.core.client.GWT;\n";
-		contents += "import " + clientPackage + ".gin." + projectName + "Ginjector;\n";
-		contents += "import com.gwtplatform.mvp.client.DelayedBindRegistry;\n\n";
+		contents += "public void onModuleLoad() {\n";
+		contents += "	// This is required for Gwt-Platform proxy's generator\n";
 		
-		contents += "public class " + getName() + " implements EntryPoint {\n";
-		contents += "	private final " + projectName + "Ginjector ginjector = GWT.create(" + projectName + "Ginjector.class);\n\n";
+		cu.createImport(C_DELAYED_BIND_REGISTRY, null, null);
+		contents += "	DelayedBindRegistry.bind(ginjector);\n\n";
 		
-		contents += "	public void onModuleLoad() {\n";
-		contents += "		// This is required for Gwt-Platform proxy's generator\n";
-		contents += "		DelayedBindRegistry.bind(ginjector);\n\n";
-		
-		contents += "		ginjector.getPlaceManager().revealCurrentPlace();\n";
-		contents += "	}\n\n";
-		
+		contents += "	ginjector.getPlaceManager().revealCurrentPlace();\n";
 		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+		
+		return type.createMethod(contents, null, false, null);
 	}
-
 }

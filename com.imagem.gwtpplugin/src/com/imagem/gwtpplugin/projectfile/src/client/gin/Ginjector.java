@@ -16,143 +16,64 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.gin;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.eclipse.jdt.core.IAnnotation;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.project.SourceEditor;
-import com.imagem.gwtpplugin.projectfile.IUpdatableFile;
-import com.imagem.gwtpplugin.projectfile.src.client.core.Presenter;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class Ginjector implements IUpdatableFile {
+public class Ginjector extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String projectName;
-	private String ginPackage;
-	private String resourcePackage;
-	private String clientPackage;
-	private Presenter presenter;
-
-	@Deprecated
-	public Ginjector(String projectName, String ginPackage, String resourcePackage, String clientPackage) {
-		this.projectName = projectName;
-		this.ginPackage = ginPackage;
-		this.resourcePackage = resourcePackage;
-		this.clientPackage = clientPackage;
+	private static final String C_DISPATCH_ASYNC_MODULE = "com.gwtplatform.dispatch.client.gin.DispatchAsyncModule";
+	private static final String C_PROVIDER = "com.google.inject.Provider";
+	private static final String I_ASYNC_PROVIDER = "com.google.gwt.inject.client.AsyncProvider";
+	private static final String I_PLACE_MANAGER = "com.gwtplatform.mvp.client.proxy.PlaceManager";
+	private static final String A_GIN_MODULES = "com.google.gwt.inject.client.GinModules";
+	private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+	private static final String I_DISPATCH_ASYNC = "com.gwtplatform.dispatch.client.DispatchAsync";
+	private static final String I_PROXY_FAILURE_HANDLER = "com.gwtplatform.mvp.client.proxy.ProxyFailureHandler";
+	private static final String I_GINJECTOR = "com.google.gwt.inject.client.Ginjector";
+	
+	public Ginjector(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		super(root, fullyQualifiedName);
 	}
 	
-	public void setPresenter(Presenter presenter) {
-		this.presenter = presenter;
-	}
-
-	@Override
-	public String getName() {
-		return projectName + "Ginjector";
-	}
-
-	@Override
-	public String getPackage() {
-		return ginPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + ginPackage.replace('.', '/');
-	}
-	
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.google.gwt.event.shared.EventBus;\n";
-		contents += "import com.google.gwt.inject.client.AsyncProvider;\n";
-		contents += "import com.google.gwt.inject.client.GinModules;\n";
-		contents += "import com.google.gwt.inject.client.Ginjector;\n";
-		contents += "import com.gwtplatform.dispatch.client.DispatchAsync;\n";
-		contents += "import com.gwtplatform.dispatch.client.gin.DispatchAsyncModule;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.PlaceManager;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.ProxyFailureHandler;\n";
-		contents += "import " + clientPackage + ".core.presenter.TestPresenter;\n"; // TODO Test
-		contents += "import " + resourcePackage + ".Resources;\n";
-		contents += "import " + resourcePackage + ".Translations;\n\n";
-		
-		contents += "@GinModules({ DispatchAsyncModule.class, " + projectName + "ClientModule.class })\n";
-		contents += "public interface " + getName() + " extends Ginjector {\n";
-		contents += "	PlaceManager getPlaceManager();\n";
-		contents += "	EventBus getEventBus();\n";
-		contents += "	DispatchAsync getDispatcher();\n";
-		contents += "	ProxyFailureHandler getProxyFailureHandler();\n";
-		contents += "	Resources getResources();\n";
-		contents += "	Translations getTranslations();\n\n";
-		
-		contents += "	AsyncProvider<TestPresenter> getTestPresenter();\n"; // TODO Test
-		
-		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
-
-	@Override
-	public InputStream updateFile(InputStream is) {
-		String contents = "";
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			String line = "";
-			while((line = br.readLine()) != null) {
-				contents += line + "\n";
-			}
-		}
-		catch (IOException e) {
-			return is;
-		}
-		
-		if(presenter != null && !presenter.isWidget()) {
-			contents = SourceEditor.insertImport(contents, presenter.getPackage() + "." + presenter.getName());
+	public Ginjector(IPackageFragmentRoot root, String packageName, String elementName, IType presenterModule) throws JavaModelException {
+		super(root, packageName, elementName);
+		if(type == null) {
+			cu.createPackageDeclaration(packageName, null);
 			
-			String provider = "";
-			if(presenter.isCodeSplit()) {
-				provider = "AsyncProvider";
-				contents = SourceEditor.insertImport(contents, "com.google.gwt.inject.client.AsyncProvider");
-			}
-			else {
-				provider = "Provider";
-				contents = SourceEditor.insertImport(contents, "com.google.inject.Provider");
-			}
-			String inject = "	" + provider + "<" + presenter.getName() + "> get" + presenter.getName() + "();\n";
-			String method = "public interface " + getName() + " extends Ginjector {\n";
-			contents = SourceEditor.addLine(contents, inject, method);
+			cu.createImport(A_GIN_MODULES, null, null);
+			cu.createImport(C_DISPATCH_ASYNC_MODULE, null, null);
+			cu.createImport(presenterModule.getFullyQualifiedName(), null, null);
+			String contents = "@GinModules({ DispatchAsyncModule.class, " + presenterModule.getElementName() + ".class })\n";
+
+			cu.createImport(I_GINJECTOR, null, null);
+			contents += "public interface " + elementName + " extends Ginjector {\n\n}";
+			
+			type = cu.createType(contents, null, false, null);
 		}
-		
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
 	}
 	
-	// New Version
-	private final String PROVIDER = "com.google.inject.Provider";
-	private final String ASYNC_PROVIDER = "com.google.gwt.inject.client.AsyncProvider";
-	
-	private IType type;
-	private ICompilationUnit cu;
-	
-	public Ginjector(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
-		// TODO Create if doesn't exist
-		type = project.findType(fullyQualifiedName);
-		cu = type.getCompilationUnit();
+	public IMethod[] createDefaultGetterMethods() throws JavaModelException {
+		IMethod[] methods = new IMethod[4];
+
+		cu.createImport(I_DISPATCH_ASYNC, null, null);
+		methods[0] = type.createMethod("DispatchAsync getDispatcher();", null, false, null);
+		
+		cu.createImport(I_EVENT_BUS, null, null);
+		methods[1] = type.createMethod("EventBus getEventBus();", null, false, null);
+		
+		cu.createImport(I_PLACE_MANAGER, null, null);
+		methods[2] = type.createMethod("PlaceManager getPlaceManager();", null, false, null);
+		
+		cu.createImport(I_PROXY_FAILURE_HANDLER, null, null);
+		methods[3] = type.createMethod("ProxyFailureHandler getProxyFailureHandler();", null, false, null);
+		
+		return methods;
 	}
 	
 	public IMethod createProvider(IType presenter) throws JavaModelException {
@@ -165,7 +86,7 @@ public class Ginjector implements IUpdatableFile {
 			}
 		}
 		
-		cu.createImport(annotation.exists() ? PROVIDER : ASYNC_PROVIDER, null, null);
+		cu.createImport(annotation.exists() ? C_PROVIDER : I_ASYNC_PROVIDER, null, null);
 		cu.createImport(presenter.getFullyQualifiedName(), null, null);
 		
 		String contents = (annotation.exists() ? "Provider<" : "AsyncProvider<") + presenter.getElementName() + "> get" + presenter.getElementName() + "();";

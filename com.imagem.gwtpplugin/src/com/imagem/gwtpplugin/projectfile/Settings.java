@@ -17,44 +17,35 @@
 package com.imagem.gwtpplugin.projectfile;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Date;
 
-public class Settings implements IProjectFile {
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-	private final String EXTENSION = ".prefs";
-	private String path;
+public class Settings {
+
+	private IFile file;
 	
-	public Settings(String path) {
-		this.path = path;
+	public Settings(IPackageFragmentRoot root, String packageName, String elementName) throws CoreException {
+		IContainer container = (IContainer) root.createPackageFragment(packageName, false, null).getResource();
+		
+		file = container.getFile(new Path(elementName + ".prefs"));
 	}
 	
-	@Override
-	public String getName() {
-		return "org.eclipse.core.resources";
+	public IFile getFile() {
+		return file;
 	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	
+	public IFile createFile() throws CoreException {
 		String contents = "#" + new Date().toString() + "\n";
 		contents += "eclipse.preferences.version=1\n";
 		contents += "encoding/<project>=ISO-8859-1\n";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 }

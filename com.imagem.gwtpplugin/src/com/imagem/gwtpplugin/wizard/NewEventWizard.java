@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard2;
+package com.imagem.gwtpplugin.wizard;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -30,7 +31,7 @@ import com.imagem.gwtpplugin.projectfile.src.client.event.HasHandlers;
 
 public class NewEventWizard extends Wizard implements INewWizard {
 
-	private NewEventWizardPage newEventPage;
+	private NewEventWizardPage page;
 	private IStructuredSelection selection;
 
 	public NewEventWizard() {
@@ -41,8 +42,8 @@ public class NewEventWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		newEventPage = new NewEventWizardPage(selection);
-		addPage(newEventPage);
+		page = new NewEventWizardPage(selection);
+		addPage(page);
 	}
 	
 	@Override
@@ -52,13 +53,18 @@ public class NewEventWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		Event event = null;
+		Handler handler = null;
+		HasHandlers hasHandlers = null;
 		try {
-			Handler handler = new Handler(newEventPage.getPackageFragmentRoot(), newEventPage.getHandlerPackageText(), newEventPage.getHandlerTypeName());
+			IPackageFragmentRoot root = page.getPackageFragmentRoot();
+			
+			handler = new Handler(root, page.getHandlerPackageText(), page.getHandlerTypeName());
 		
-			Event event = new Event(newEventPage.getPackageFragmentRoot(), newEventPage.getPackageText(), newEventPage.getTypeName(), handler.getType());
+			event = new Event(root, page.getPackageText(), page.getTypeName(), handler.getType());
 			event.createTypeField(handler.getType());
 			
-			Field[] eventFields = newEventPage.getFields();
+			Field[] eventFields = page.getFields();
 			IField[] fields = new IField[eventFields.length];
 			for(int i = 0; i < eventFields.length; i++) {
 				fields[i] = event.createField(eventFields[i].getType(), eventFields[i].getName());
@@ -71,8 +77,10 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			event.createDispatchMethod(handler.getType());
 			event.createAssociatedTypeGetterMethod(handler.getType());
 			
-			if(newEventPage.hasHandlers()) {
-				HasHandlers hasHandlers = new HasHandlers(newEventPage.getPackageFragmentRoot(), newEventPage.getHasHandlerPackageText(), newEventPage.getHasHandlerTypeName());
+			
+			if(page.hasHandlers()) {
+				hasHandlers = new HasHandlers(root, page.getHasHandlerPackageText(), page.getHasHandlerTypeName());
+				hasHandlers.createAddHandlerMethod(handler.getType());
 				event.createFireMethod(fields, hasHandlers.getType());
 			}
 			else {
@@ -80,9 +88,22 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			}
 			
 			handler.createTriggerMethod(event.getType());
-			
+
+			// Committing
+			if(event != null) event.commit();
+			if(handler != null) handler.commit();
+			if(hasHandlers != null) hasHandlers.commit();
 		}
 		catch (JavaModelException e) {
+			e.printStackTrace();
+
+			try {
+				if(event != null) event.discard();
+				if(handler != null) handler.discard();
+				if(hasHandlers != null) hasHandlers.discard();
+			}
+			catch (JavaModelException e1) {	}
+			
 			return false;
 		}
 		

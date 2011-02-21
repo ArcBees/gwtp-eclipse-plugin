@@ -16,144 +16,37 @@
 
 package com.imagem.gwtpplugin.projectfile.src.shared;
 
-import java.io.InputStream;
 import java.util.Random;
 
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import com.imagem.gwtpplugin.projectfile.Field;
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class Result implements IProjectFile {
+public class Result extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String name;
-	private String actionPackage;
-	private Field[] fields;
-
-	@Deprecated
-	public Result(String name, String actionPackage) {
-		this.name = name;
-		this.actionPackage = actionPackage;
-	}
-
-	public void setFields(Field... fields) {
-		this.fields = fields;
-	}
-
-	@Override
-	public String getName() {
-		return name + "Result";
-	}
-
-	@Override
-	public String getPackage() {
-		return actionPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + getPackage().replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		/*// TODO model finder
-		Random generator = new Random();
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.gwtplatform.dispatch.shared.Result;\n";
-		contents += "\n";
-
-		contents += "public class " + getName() + " implements Result {\n\n";
-
-		contents += "	private static final long serialVersionUID = " + generator.nextLong() + "L;\n\n";
-
-		for(Field field : fields) {
-			contents += "	private " + field.getField() + ";\n";
-		}
-		contents += "\n";
-
-		if(fields.length > 0) {
-			contents += "	@SuppressWarnings(\"unused\")\n";
-			contents += "	private " + getName() + "() {\n";
-			contents += "		// For serialization only\n";
-			contents += "	}\n\n";
-		}
-
-		contents += "	public " + getName() + "(";
-		String separator = "";
-		for(Field field : fields) {
-			contents += separator + field.getField();
-			separator = ", ";
-		}
-		contents += ") {\n";
-		for(Field field : fields) {
-			contents += "		this." + field.getName() + " = " + field.getName() + ";\n";
-		}
-		contents += "	}\n\n";
-
-		for(Field field : fields) {
-			contents += "	public " + field.getType() + " get" + field.getCapName() + "() {\n";
-			contents += "		return " + field.getName() + ";\n";
-			contents += "	}\n\n";
-		}
-
-		contents += "}";
-
-		for(Field field : fields) {
-			if(!field.getQualifiedType().isEmpty())
-				contents = SourceEditor.insertImport(contents, field.getQualifiedType());
-		}
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());*/
-		return null;
-	}
-	
-	// New Version
 	private static final String I_RESULT = "com.gwtplatform.dispatch.shared.Result";
 	
-	private IType type;
-	private ICompilationUnit cu;
-	
 	public Result(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
-		type = root.getJavaProject().findType(fullyQualifiedName);
-		cu = type.getCompilationUnit();
+		super(root, fullyQualifiedName);
 	}
 	
 	public Result(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
-		type = root.getJavaProject().findType(packageName + "." + elementName);
+		super(root, packageName, elementName);
 		if(type == null) {
-			String cuName = elementName + ".java";
-			
-			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
-			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
 			cu.createPackageDeclaration(packageName, null);
 
 			cu.createImport(I_RESULT, null, null);
 			String contents = "public class " + elementName + " implements Result {\n\n}";
-	
+			
 			type = cu.createType(contents, null, false, null);
 		}
-		cu = type.getCompilationUnit();
-	}
-	
-	public IType getType() {
-		return type;
 	}
 	
 	public IField createSerializationField() throws JavaModelException {
@@ -206,7 +99,7 @@ public class Result implements IProjectFile {
 		contents += fieldContents;
 		contents += "}";
 		
-		return type.createMethod(contents, fields[fields.length - 1], false, null);
+		return type.createMethod(contents, null, false, null);
 	}
 	
 	public IMethod createGetterMethod(IField field) throws JavaModelException {

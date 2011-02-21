@@ -17,45 +17,33 @@
 package com.imagem.gwtpplugin.projectfile.src;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 
-public class GwtXmlModule implements IProjectFile {
+public class GwtXmlModule {
 
-	private final String extension = ".gwt.xml";
-	private String projectName;
-	private String projectPackage;
-	private String path;
-
-	public GwtXmlModule(String projectName, String projectPackage, String path) {
-		this.projectName = projectName;
-		this.projectPackage = projectPackage;
-		this.path = path;
-	}
-
-	@Override
-	public String getName() {
-		return projectName;
-	}
-
-	@Override
-	public String getPackage() {
-		return projectPackage;
+	private IFile file;
+	private IPackageFragmentRoot root;
+	
+	public GwtXmlModule(IPackageFragmentRoot root, String packageName, String elementName) throws CoreException {
+		this.root = root;
+		IContainer container = (IContainer) root.createPackageFragment(packageName, false, null).getResource();
+		
+		file = container.getFile(new Path(elementName + ".gwt.xml"));
 	}
 	
-	@Override
-	public String getPath() {
-		return path;
+	public IFile getFile() {
+		return file;
 	}
 	
-	@Override
-	public String getExtension() {
-		return extension;
-	}
-	
-	@Override
-	public InputStream openContentStream() {	
+	public IFile createFile(IType entryPoint, IType ginjector) throws CoreException {
+		String projectName = root.getJavaProject().getElementName();
+		
 		String contents = "<?xml version='1.0' encoding='UTF-8'?>\n";
 		contents += "<module rename-to='" + projectName.toLowerCase() + "'>\n";
 		contents += "	<!-- Inherit the core Web Toolkit stuff.                        -->\n";
@@ -75,17 +63,20 @@ public class GwtXmlModule implements IProjectFile {
 		contents += "	<inherits name='com.gwtplatform.dispatch.Dispatch'/>\n\n";
 
 		contents += "	<!-- Specify the app entry point class.                         -->\n";
-		contents += "	<entry-point class='" + projectPackage + ".client." + projectName + "'/>\n\n";
+		contents += "	<entry-point class='" + entryPoint.getFullyQualifiedName() + "'/>\n\n";
 
 		contents += "	<!-- Specify the paths for translatable code                    -->\n";
 		contents += "	<source path='client'/>\n";
 		contents += "	<source path='shared'/>\n\n";
 
 		contents += "	<define-configuration-property name='gin.ginjector' is-multi-valued='false' />\n";
-		contents += "	<set-configuration-property name='gin.ginjector' value='" + projectPackage + ".client.gin." + projectName + "Ginjector' />\n\n";
+		contents += "	<set-configuration-property name='gin.ginjector' value='" + ginjector.getFullyQualifiedName() + "' />\n\n";
 		
 		contents += "</module>";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
+	
 }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard2;
+package com.imagem.gwtpplugin.wizard;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,7 +33,7 @@ import com.imagem.gwtpplugin.projectfile.src.shared.Result;
 
 public class NewActionWizard extends Wizard implements INewWizard {
 
-	private NewActionWizardPage newActionPage;
+	private NewActionWizardPage page;
 	private IStructuredSelection selection;
 
 	public NewActionWizard() {
@@ -43,8 +44,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		newActionPage = new NewActionWizardPage(selection);
-		addPage(newActionPage);
+		page = new NewActionWizardPage(selection);
+		addPage(page);
 	}
 	
 	@Override
@@ -54,13 +55,19 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		Action action = null;
+		Result result = null;
+		ActionHandler actionHandler = null;
+		HandlerModule handlerModule = null;
 		try {
+			IPackageFragmentRoot root = page.getPackageFragmentRoot();
+			
 			// Result
-			Result result = new Result(newActionPage.getPackageFragmentRoot(), newActionPage.getResultPackageText(), newActionPage.getResultTypeName());
+			result = new Result(root, page.getResultPackageText(), page.getResultTypeName());
 			result.createSerializationField();
 			result.createSerializationConstructor();
 			
-			Field[] resultFields = newActionPage.getResultFields();
+			Field[] resultFields = page.getResultFields();
 			IField[] fields = new IField[resultFields.length];
 			for(int i = 0; i < resultFields.length; i++) {
 				fields[i] = result.createField(resultFields[i].getType(), resultFields[i].getName());
@@ -71,13 +78,13 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			}
 			
 			// Action
-			IType actionSuperclass = newActionPage.getJavaProject().findType(newActionPage.getActionSuperclass());
+			IType actionSuperclass = page.getJavaProject().findType(page.getActionSuperclass());
 			
-			Action action = new Action(newActionPage.getPackageFragmentRoot(), newActionPage.getPackageText(), newActionPage.getTypeName(), actionSuperclass, result.getType());
+			action = new Action(root, page.getPackageText(), page.getTypeName(), actionSuperclass, result.getType());
 			action.createSerializationField();
 			action.createSerializationConstructor();
 			
-			Field[] actionFields = newActionPage.getActionFields();
+			Field[] actionFields = page.getActionFields();
 			fields = new IField[actionFields.length];
 			for(int i = 0; i < actionFields.length; i++) {
 				fields[i] = action.createField(actionFields[i].getType(), actionFields[i].getName());
@@ -88,18 +95,33 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			}
 			
 			// ActionHandler
-			ActionHandler actionHandler = new ActionHandler(newActionPage.getPackageFragmentRoot(), newActionPage.getActionHandlerPackageText(), newActionPage.getActionHandlerTypeName(), action.getType(), result.getType());
+			actionHandler = new ActionHandler(root, page.getActionHandlerPackageText(), page.getActionHandlerTypeName(), action.getType(), result.getType());
 			actionHandler.createConstructor();
 			actionHandler.createExecuteMethod(action.getType(), result.getType());
 			actionHandler.createUndoMethod(action.getType(), result.getType());
 			actionHandler.createActionTypeGetterMethod(action.getType());
 			
 			// HandlerModule
-			HandlerModule handlerModule = new HandlerModule(newActionPage.getPackageFragmentRoot(), newActionPage.getHandlerModule());
+			handlerModule = new HandlerModule(root, page.getHandlerModule());
 			handlerModule.createBinder(action.getType(), actionHandler.getType());
+			
+			// Committing
+			if(action != null) action.commit();
+			if(result != null) result.commit();
+			if(actionHandler != null) actionHandler.commit();
+			if(handlerModule != null) handlerModule.commit();
 		} 
 		catch (JavaModelException e) {
 			e.printStackTrace();
+
+			try {
+				if(action != null) action.discard();
+				if(result != null) result.discard();
+				if(actionHandler != null) actionHandler.discard();
+				if(handlerModule != null) handlerModule.discard();
+			}
+			catch (JavaModelException e1) {	}
+			
 			return false;
 		}
 		

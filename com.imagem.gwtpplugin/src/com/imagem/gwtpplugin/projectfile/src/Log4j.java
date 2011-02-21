@@ -17,41 +17,20 @@
 package com.imagem.gwtpplugin.projectfile.src;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-public class Log4j implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
 
-	private final String EXTENSION = ".properties";
-	private String path;
+public class Log4j extends ProjectSrcFile {
 	
-	public Log4j(String path) {
-		this.path = path;
+	public Log4j(IPackageFragmentRoot root) throws CoreException {
+		super(root, "", "log4j.properties");
 	}
 	
-	@Override
-	public String getName() {
-		return "log4j";
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile() throws CoreException {
 		String contents = "# A default log4j configuration for log4j users.\n";
 		contents += "#\n";
 		contents += "# To use this configuration, deploy it into your application's WEB-INF/classes\n";
@@ -76,7 +55,9 @@ public class Log4j implements IProjectFile {
 		contents += "log4j.category.DataNucleus.ValueGeneration=WARN, A1\n";
 		contents += "log4j.category.DataNucleus.Enhancer=WARN, A1\n";
 		contents += "log4j.category.DataNucleus.SchemaTool=WARN, A1\n";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 }

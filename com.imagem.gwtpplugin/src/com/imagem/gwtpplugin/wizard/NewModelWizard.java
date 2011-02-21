@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard2;
+package com.imagem.gwtpplugin.wizard;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -28,7 +29,7 @@ import com.imagem.gwtpplugin.projectfile.src.shared.Model;
 
 public class NewModelWizard extends Wizard implements INewWizard {
 
-	private NewModelWizardPage newModelPage;
+	private NewModelWizardPage page;
 	private IStructuredSelection selection;
 
 	public NewModelWizard() {
@@ -39,8 +40,8 @@ public class NewModelWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		newModelPage = new NewModelWizardPage(selection);
-		addPage(newModelPage);
+		page = new NewModelWizardPage(selection);
+		addPage(page);
 	}
 	
 	@Override
@@ -50,25 +51,15 @@ public class NewModelWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		/*IProject project = newModelPage.getPackageFragmentRoot().getJavaProject().getProject();
-
-		final Model model = new Model(newModelPage.getTypeName(), newModelPage.getPackageText());
-		model.setFields(newModelPage.getFields());
-		model.setGenerateEquals(newModelPage.generateEquals());
-		
+		Model model = null;
 		try {
-			SourceEditor.createProjectFile(project, model, true);
-		} 
-		catch (CoreException e) {
-			e.printStackTrace();
-			return false;
-		}*/
-		
-		try {
-			Model model = new Model(newModelPage.getPackageFragmentRoot(), newModelPage.getPackageText(), newModelPage.getTypeName());
+			IPackageFragmentRoot root = page.getPackageFragmentRoot();
+			
+			model = new Model(root, page.getPackageText(), page.getTypeName());
+			model.createConstructor();
 			model.createSerializationField();
 			
-			Field[] modelFields = newModelPage.getFields();
+			Field[] modelFields = page.getFields();
 			IField[] fields = new IField[modelFields.length];
 			for(int i = 0; i < modelFields.length; i++) {
 				fields[i] = model.createField(modelFields[i].getType(), modelFields[i].getName());
@@ -80,12 +71,21 @@ public class NewModelWizard extends Wizard implements INewWizard {
 				model.createGetterMethod(field);
 			}
 			
-			if(newModelPage.generateEquals()) {
+			if(page.generateEquals()) {
 				model.createEqualsMethod(fields);
 				model.createHashCodeMethod(fields);
 			}
+			
+			if(model != null) model.commit();
 		}
 		catch (JavaModelException e) {
+			e.printStackTrace();
+
+			try {
+				if(model != null) model.discard();
+			}
+			catch (JavaModelException e1) {	}
+			
 			return false;
 		}
 		

@@ -16,92 +16,84 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.place;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class PlaceManager implements IProjectFile {
+public class PlaceManager extends ProjectClass {
+
+	private static final String C_PLACE_MANAGER_IMPL = "com.gwtplatform.mvp.client.proxy.PlaceManagerImpl";
+	private static final String C_PLACE_REQUEST = "com.gwtplatform.mvp.client.proxy.PlaceRequest";
+	private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+	private static final String I_TOKEN_FORMATTER = "com.gwtplatform.mvp.client.proxy.TokenFormatter";
+	private static final String A_INJECT = "com.google.inject.Inject";
 	
-	private final String EXTENSION = ".java";
-	private String projectName;
-	private String placePackage;
-
-	public PlaceManager(String projectName, String placePackage) {
-		this.projectName = projectName;
-		this.placePackage = placePackage;
-	}
-	
-	@Override
-	public String getName() {
-		return projectName + "PlaceManager";
-	}
-
-	@Override
-	public String getPackage() {
-		return placePackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + placePackage.replace('.', '/');
+	public PlaceManager(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		super(root, fullyQualifiedName);
 	}
 	
-	@Override
-	public String getExtension() {
-		return EXTENSION;
+	public PlaceManager(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		super(root, packageName, elementName);
+		if(type == null) {
+			cu.createPackageDeclaration(packageName, null);
+			
+			cu.createImport(C_PLACE_MANAGER_IMPL, null, null);
+			String contents = "public class " + elementName + " extends PlaceManagerImpl {\n\n}";
+			
+			type = cu.createType(contents, null, false, null);
+		}
 	}
+	
+	public IField createPlaceRequestField(IType annotation) throws JavaModelException {
+		String fieldName = annotation.getElementName().substring(0, 1).toLowerCase() + annotation.getElementName().substring(1);
+		
+		cu.createImport(C_PLACE_REQUEST, null, null);
+		String contents = "private final PlaceRequest " + fieldName + "Request;";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
+	public IMethod createConstructor(IType[] annotations, IField[] placeRequests) throws JavaModelException {
+		String contents = "";
+		
+		cu.createImport(A_INJECT, null, null);
+		contents += "@Inject\n";
+		contents += "public " + type.getElementName() + "(\n";
+		
+		cu.createImport(I_EVENT_BUS, null, null);
+		contents += "		final EventBus eventBus, \n";
 
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.google.gwt.event.shared.EventBus;\n";
-		contents += "import com.google.inject.Inject;\n";
-		contents += "import " + placePackage + ".annotation.DefaultPlace;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.PlaceManagerImpl;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.PlaceRequest;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.TokenFormatter;\n";
+		cu.createImport(I_TOKEN_FORMATTER, null, null);
+		contents += "		final TokenFormatter tokenFormatter";
 		
-		
-		contents += "public class " + getName() + " extends PlaceManagerImpl {\n\n";
-		
-		//contents += "	private final EventBus eventBus;\n\n";
-		// TODO Translations, Session
-		contents += "	private final PlaceRequest defaultPlaceRequest;\n\n";
-		
-		contents += "	@Inject\n";
-		contents += "	public " + getName() + "(final EventBus eventBus, \n";
-		contents += "							 final TokenFormatter tokenFormatter, \n";
-		contents += "							 @DefaultPlace final String defaultPlaceNameToken) {\n";
-		contents += "		super(eventBus, tokenFormatter);\n\n";
-
-		//contents += "		this.eventBus = eventBus;\n\n";
-		
-		contents += "		this.defaultPlaceRequest = new PlaceRequest(defaultPlaceNameToken);\n";
-		contents += "	}\n\n";
-
-		contents += "	@Override\n";
-		contents += "	public void revealDefaultPlace() {\n";
-		contents += "		revealPlace(defaultPlaceRequest);\n";
-		contents += "	}\n\n";
-		
-		contents += "	@Override\n";
-		contents += "	public void revealErrorPlace(String invalidHistoryToken) {\n";
-		contents += "		super.revealErrorPlace(invalidHistoryToken);\n";
-		contents += "		// TODO replace by implemented ErrorPlace\n";
-		contents += "	}\n\n";
-		
-		contents += "	@Override\n";
-		contents += "	public void revealUnauthorizedPlace(String unauthorizedHistoryToken) {\n";
-		contents += "		super.revealUnauthorizedPlace(unauthorizedHistoryToken);\n";
-		contents += "		// TODO replace by implemented UnauthorizedPlace\n";
-		contents += "	}\n\n";
-		
+		String subContents = "";
+		for(int i = 0; i < annotations.length; i++) {
+			cu.createImport(annotations[i].getFullyQualifiedName(), null, null);
+			String fieldName = annotations[i].getElementName().substring(0, 1).toUpperCase() + annotations[i].getElementName().substring(1);
+			
+			contents += ",\n		@" + annotations[i].getElementName() + " final String " + fieldName + "NameToken";
+			subContents += "	this." + placeRequests[i].getElementName() + " = new PlaceRequest(" + fieldName + "NameToken);\n";
+		}
+		contents += ") {\n";
+		contents += "	super(eventBus, tokenFormatter);\n\n";
+		contents += subContents;
 		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
+		
+		return type.createMethod(contents, null, false, null);
 	}
-
+	
+	public IMethod createRevealDefaultPlaceMethod(IField defaultPlace) throws JavaModelException {
+		String contents = "";
+		
+		contents += "@Override\n";
+		contents += "public void revealDefaultPlace() {\n";
+		contents += "	revealPlace(" + defaultPlace.getElementName() + ");\n";
+		contents += "}";
+		
+		return type.createMethod(contents, null, false, null);
+	}
 }

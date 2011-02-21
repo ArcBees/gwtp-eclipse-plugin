@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.imagem.gwtpplugin.wizard2;
+package com.imagem.gwtpplugin.wizard;
 
 import java.util.ArrayList;
 import java.util.List;

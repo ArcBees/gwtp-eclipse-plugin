@@ -16,141 +16,35 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class View implements IProjectFile {
+public class View extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String name;
-	private String viewPackage;
-	private String presenterPackage;
-	private boolean useUiBinder = false;
-
-	@Deprecated
-	public View(String name, String viewPackage, String presenterPackage) {
-		this.name = name;
-		this.viewPackage = viewPackage;
-		this.presenterPackage = presenterPackage;
-	}
-
-	public void setUiBinder(boolean useUiBinder) {
-		this.useUiBinder  = useUiBinder;
-	}
-
-	@Override
-	public String getName() {
-		return name + "View";
-	}
-
-	@Override
-	public String getPackage() {
-		return viewPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + getPackage().replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.google.gwt.user.client.ui.Widget;\n";
-		contents += "import com.google.inject.Inject;\n";
-		contents += "import com.gwtplatform.mvp.client.ViewImpl;\n";
-		contents += "import " + presenterPackage + "." + name + "Presenter;\n";
-		if(useUiBinder) {
-			contents += "import com.google.gwt.uibinder.client.UiBinder;\n";
-		}
-
-		contents += "public class " + getName() + " extends ViewImpl implements " + name + "Presenter.MyView {\n\n";
-
-		if(useUiBinder) {
-			contents += "	public interface Binder extends UiBinder<Widget, " + getName() + "> { }\n\n";
-
-			contents += "	private final Widget widget;\n\n";
-
-			contents += "	@Inject\n";
-			contents += "	public " + getName() + "(final Binder binder) {\n";
-			contents += "		widget = binder.createAndBindUi(this);\n";
-		}
-		else {
-			contents += "	@Inject\n";
-			contents += "	public " + getName() + "() {\n";
-			contents += "		// TODO Create your controls here\n";
-		}
-		contents += "	}\n\n";
-
-		contents += "	@Override\n";
-		contents += "	public Widget asWidget() {\n";
-		if(useUiBinder) {
-			contents += "		return widget;\n";
-		}
-		else {
-			contents += "		// TODO Return the main panel of the view\n";
-			contents += "		return null;\n";
-		}
-		contents += "	}\n\n";
-
-		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
-
-	// New Version
 	private static final String C_VIEW_IMPL = "com.gwtplatform.mvp.client.ViewImpl";
 	private static final String C_WIDGET = "com.google.gwt.user.client.ui.Widget";
 	private static final String A_INJECT = "com.google.inject.Inject";
 	private static final String I_UI_BINDER = "com.google.gwt.uibinder.client.UiBinder";
-	
-	private IType type;
-	private ICompilationUnit cu;
 
 	public View(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
-		type = root.getJavaProject().findType(fullyQualifiedName);
-		cu = type.getCompilationUnit();
+		super(root, fullyQualifiedName);
 	}
 
 	public View(IPackageFragmentRoot root, String packageName, String elementName, IType presenter) throws JavaModelException {
-		type = root.getJavaProject().findType(packageName + "." + elementName);
+		super(root, packageName, elementName);
 		if(type == null) {
-			String cuName = elementName + ".java";
-
-			IPackageFragment pack = root.createPackageFragment(packageName, false, null);
-			ICompilationUnit cu = pack.createCompilationUnit(cuName, "", false, null);
 			cu.createPackageDeclaration(packageName, null);
-
-			String contents = "";
-
-
+			
 			cu.createImport(C_VIEW_IMPL, null, null);
-			contents += "public class " + elementName + " extends ViewImpl implements " + presenter.getElementName() + ".MyView {\n\n}";
+			String contents = "public class " + elementName + " extends ViewImpl implements " + presenter.getElementName() + ".MyView {\n\n}";
 
 			type = cu.createType(contents, null, false, null);
 		}
-		cu = type.getCompilationUnit();
-	}
-
-	public IType getType() {
-		return type;
 	}
 	
 	public IType createBinderInterface() throws JavaModelException {

@@ -17,41 +17,21 @@
 package com.imagem.gwtpplugin.projectfile.war;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
-public class Logging implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
-	private final String EXTENSION = ".properties";
-	private String path;
-	
-	public Logging(String path) {
-		this.path = path;
+public class Logging extends ProjectWarFile {
+
+	public Logging(IProject project, IPath path) throws CoreException {
+		super(project, path, "logging.properties");
 	}
 	
-	@Override
-	public String getName() {
-		return "logging";
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile() throws CoreException {
 		String contents = "# A default java.util.logging configuration.\n";
 		contents += "# (All App Engine logging is through java.util.logging by default).\n";
 		contents += "#\n";
@@ -65,7 +45,9 @@ public class Logging implements IProjectFile {
 
 		contents += "# Set the default logging level for all loggers to WARNING\n";
 		contents += ".level = WARNING\n";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 }

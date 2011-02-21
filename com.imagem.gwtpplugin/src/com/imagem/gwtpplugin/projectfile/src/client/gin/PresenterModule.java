@@ -16,167 +16,130 @@
 
 package com.imagem.gwtpplugin.projectfile.src.client.gin;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.imagem.gwtpplugin.project.SourceEditor;
-import com.imagem.gwtpplugin.projectfile.IUpdatableFile;
-import com.imagem.gwtpplugin.projectfile.src.client.core.Presenter;
-import com.imagem.gwtpplugin.projectfile.src.client.core.View;
-import com.imagem.gwtpplugin.tool.Formatter;
+import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
-public class PresenterModule implements IUpdatableFile {
+public class PresenterModule extends ProjectClass {
 
-	private final String EXTENSION = ".java";
-	private String projectName;
-	private String ginPackage;
-	private String placePackage;
-	private String resourcePackage;
-	private String clientPackage;
-	private Presenter presenter;
-	private View view;
-
-	@Deprecated
-	public PresenterModule(String projectName, String ginPackage, String placePackage, String resourcePackage, String clientPackage) {
-		this.projectName = projectName;
-		this.ginPackage = ginPackage;
-		this.placePackage = placePackage;
-		this.resourcePackage = resourcePackage;
-		this.clientPackage = clientPackage;
+	private static final String C_ABSTRACT_PRESENTER_MODULE = "com.gwtplatform.mvp.client.gin.AbstractPresenterModule";
+	private static final String C_SIMPLE_EVENT_BUS = "com.google.gwt.event.shared.SimpleEventBus";
+	private static final String C_PARAMETER_TOKEN_FORMATTER = "com.gwtplatform.mvp.client.proxy.ParameterTokenFormatter";
+	private static final String C_DEFAULT_PROXY_FAILURE_HANDLER = "com.gwtplatform.mvp.client.DefaultProxyFailureHandler";
+	private static final String C_ROOT_PRESENTER = "com.gwtplatform.mvp.client.RootPresenter";
+	private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+	private static final String I_TOKEN_FORMATTER = "com.gwtplatform.mvp.client.proxy.TokenFormatter";
+	private static final String I_PROXY_FAILURE_HANDLER = "com.gwtplatform.mvp.client.proxy.ProxyFailureHandler";
+	private static final String A_SINGLETON = "com.google.inject.Singleton";
+	private static final String I_PLACE_MANAGER = "com.gwtplatform.mvp.client.proxy.PlaceManager";
+	
+	public PresenterModule(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
+		super(root, fullyQualifiedName);
 	}
-
-	public void setPresenter(Presenter presenter) {
-		this.presenter = presenter;
+	
+	public PresenterModule(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
+		super(root, packageName, elementName);
+		if(type == null) {
+			cu.createPackageDeclaration(packageName, null);
+			
+			cu.createImport(C_ABSTRACT_PRESENTER_MODULE, null, null);
+			String contents = "public class " + elementName + " extends AbstractPresenterModule {\n\n}";
+			
+			type = cu.createType(contents, null, false, null);
+		}
 	}
-
-	public void setView(View view) {
-		this.view = view;
-	}
-
-	@Override
-	public String getName() {
-		return projectName + "ClientModule";
-	}
-
-	@Override
-	public String getPackage() {
-		return ginPackage;
-	}
-
-	@Override
-	public String getPath() {
-		return "src/" + ginPackage.replace('.', '/');
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
-		String contents = "package " + getPackage() + ";\n\n";
-
-		contents += "import com.google.gwt.event.shared.EventBus;\n";
-		contents += "import com.google.gwt.event.shared.SimpleEventBus;\n";
-		contents += "import com.google.inject.Singleton;\n";
-		contents += "import com.gwtplatform.mvp.client.DefaultProxyFailureHandler;\n";
-		contents += "import com.gwtplatform.mvp.client.RootPresenter;\n";
-		contents += "import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.ParameterTokenFormatter;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.PlaceManager;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.ProxyFailureHandler;\n";
-		contents += "import com.gwtplatform.mvp.client.proxy.TokenFormatter;\n\n";
-		contents += "import " + clientPackage + ".ActionCallback;\n";
-		contents += "import " + placePackage + "." + projectName + "PlaceManager;\n";
-		contents += "import " + placePackage + "." + projectName + "Tokens;\n"; // TODO Test
-		contents += "import " + placePackage + ".annotation.DefaultPlace;\n"; // TODO Test
-		contents += "import " + resourcePackage + ".Resources;\n";
-		contents += "import " + resourcePackage + ".Translations;\n";
-		contents += "import " + clientPackage + ".core.presenter.TestPresenter;\n"; // TODO Test
-		contents += "import " + clientPackage + ".core.view.TestView;\n"; // TODO Test
-
-		contents += "public class " + getName() + " extends AbstractPresenterModule {\n\n";
-
-		contents += "	@Override\n";
-		contents += "	protected void configure() {\n";
-		contents += "		// Singletons\n";
-		contents += "		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);\n";
-		contents += "		bind(PlaceManager.class).to(" + projectName + "PlaceManager.class).in(Singleton.class);\n";
-		contents += "		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);\n";
-		contents += "		bind(ProxyFailureHandler.class).to(DefaultProxyFailureHandler.class).in(Singleton.class);\n";
-		contents += "		bind(RootPresenter.class).asEagerSingleton();\n";
-		contents += "		bind(Resources.class).in(Singleton.class);\n";
-		contents += "		bind(Translations.class).in(Singleton.class);\n\n";
-
-		contents += "		requestStaticInjection(ActionCallback.class);\n\n";
-
-		contents += "		// Constants\n";
-		contents += "		// TODO bind the defaultPlace\n";
-		contents += "		bindConstant().annotatedWith(DefaultPlace.class).to(" + projectName + "Tokens.test);\n\n"; // TODO Test
-
-		contents += "		// Presenters\n";
-		contents += "		bindPresenter(TestPresenter.class, TestPresenter.MyView.class, TestView.class, TestPresenter.MyProxy.class);\n"; // TODO Test
-		contents += "	}\n\n";
-
-		contents += "}";
-
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
-
-	@Override
-	public InputStream updateFile(InputStream is) {
+	
+	// TODO RequestStaticInjection
+	// TODO BindConstant
+	
+	public IMethod createConfigureMethod(IType placeManager) throws JavaModelException {
 		String contents = "";
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			String line = "";
-			while((line = br.readLine()) != null) {
-				contents += line + "\n";
-			}
-		}
-		catch (IOException e) {
-			return is;
-		}
 
-		if(presenter != null && view != null) {
-			contents = SourceEditor.insertImport(contents, presenter.getPackage() + "." + presenter.getName());
-			contents = SourceEditor.insertImport(contents, view.getPackage() + "." + view.getName());
-			String bindType = "";
-			if(presenter.isWidget()) {
-				bindType = "		bindPresenterWidget(" + presenter.getName() + ".class, " + presenter.getName() + ".MyView.class, " + view.getName() + ".class);\n";
-			}
-			else {
-				bindType = "		bindPresenter(" + presenter.getName() + ".class, " + presenter.getName() + ".MyView.class, " + view.getName() + ".class, " + presenter.getName() + ".MyProxy.class);\n";
-			}
-			String method = "	protected void configure() {\n";
-			contents = SourceEditor.addLine(contents, bindType, method);
-		}
+		contents += "@Override\n";
+		contents += "protected void configure() {\n";
+		
+		cu.createImport(A_SINGLETON, null, null);
+		contents += "	// Singletons\n";
+		
+		cu.createImport(I_EVENT_BUS, null, null);
+		cu.createImport(C_SIMPLE_EVENT_BUS, null, null);
+		contents += "	bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);\n";
+		
+		cu.createImport(I_TOKEN_FORMATTER, null, null);
+		cu.createImport(C_PARAMETER_TOKEN_FORMATTER, null, null);
+		contents += "	bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);\n";
+		
+		cu.createImport(I_PROXY_FAILURE_HANDLER, null, null);
+		cu.createImport(C_DEFAULT_PROXY_FAILURE_HANDLER, null, null);
+		contents += "	bind(ProxyFailureHandler.class).to(DefaultProxyFailureHandler.class).in(Singleton.class);\n";
 
-		return new ByteArrayInputStream(Formatter.formatImports(contents).getBytes());
-	}
+		cu.createImport(I_PLACE_MANAGER, null, null);
+		cu.createImport(placeManager.getFullyQualifiedName(), null, null);
+		contents += "	bind(PlaceManager.class).to(" + placeManager.getElementName() + ".class).in(Singleton.class);\n";
 
-	// New Version
-	private IType type;
-	private ICompilationUnit cu;
-	
-	public PresenterModule(IJavaProject project, String fullyQualifiedName) throws JavaModelException {
-		// TODO Create if doesn't exist
-		type = project.findType(fullyQualifiedName);
-		cu = type.getCompilationUnit();
+		cu.createImport(C_ROOT_PRESENTER, null, null);
+		contents += "	bind(RootPresenter.class).asEagerSingleton();\n\n";
+
+		contents += "	// Constants\n";
+		contents += "	// TODO bind the defaultPlace\n";
+		contents += "}";
+		
+		return type.createMethod(contents, null, false, null);
 	}
 	
-	public void createBinder(IType presenter, IType view) throws JavaModelException {
+	public void createSingletonBinder(IType bind, IType to) throws JavaModelException {
+		cu.createImport(bind.getFullyQualifiedName(), null, null);
+		cu.createImport(to.getFullyQualifiedName(), null, null);
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configure", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		
+		int lastSingletonBinder = -1;
+		for(int i = lines.length - 1; i >= 0; i--) {
+			if(lines[i].contains("bind(") && lines[i].endsWith(".in(Singleton.class")) {
+				lastSingletonBinder = i;
+				break;
+			}
+		}
+		
+		int tabulations = 0;
+		for(char c : lines[lastSingletonBinder].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+		contents = "bind(" + bind.getElementName() + ".class).to(" + to.getElementName() + ".class).in(Singleton.class);";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lastSingletonBinder - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
+	
+	public void createPresenterBinder(IType presenter, IType view) throws JavaModelException {
 		cu.createImport(presenter.getFullyQualifiedName(), null, null);
 		cu.createImport(view.getFullyQualifiedName(), null, null);
 		

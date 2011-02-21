@@ -17,41 +17,20 @@
 package com.imagem.gwtpplugin.projectfile.src;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
-import com.imagem.gwtpplugin.projectfile.IProjectFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-public class Jdoconfig implements IProjectFile {
+import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
 
-	private final String EXTENSION = ".xml";
-	private String path;
-
-	public Jdoconfig(String path) {
-		this.path = path;
+public class Jdoconfig extends ProjectSrcFile {
+	
+	public Jdoconfig(IPackageFragmentRoot root) throws CoreException {
+		super(root, "", "jdoconfig.xml");
 	}
 	
-	@Override
-	public String getName() {
-		return "jdoconfig";
-	}
-
-	@Override
-	public String getPackage() {
-		return "";
-	}
-
-	@Override
-	public String getPath() {
-		return path;
-	}
-
-	@Override
-	public String getExtension() {
-		return EXTENSION;
-	}
-
-	@Override
-	public InputStream openContentStream() {
+	public IFile createFile() throws CoreException {
 		String contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 		contents += "<jdoconfig xmlns=\"http://java.sun.com/xml/ns/jdo/jdoconfig\"\n";
 		contents += "	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -67,8 +46,10 @@ public class Jdoconfig implements IProjectFile {
 		contents += "		<property name=\"datanucleus.appengine.autoCreateDatastoreTxns\" value=\"true\"/>\n";
 		contents += "	</persistence-manager-factory>\n";
 		contents += "</jdoconfig>";
-
-		return new ByteArrayInputStream(contents.getBytes());
+		
+		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+		
+		return file;
 	}
 
 }
