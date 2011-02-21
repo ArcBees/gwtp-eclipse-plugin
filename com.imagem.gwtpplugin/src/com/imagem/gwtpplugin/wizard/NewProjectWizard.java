@@ -74,16 +74,10 @@ import com.imagem.gwtpplugin.projectfile.war.Logging;
 import com.imagem.gwtpplugin.projectfile.war.ProjectCSS;
 import com.imagem.gwtpplugin.projectfile.war.ProjectHTML;
 import com.imagem.gwtpplugin.projectfile.war.WebXml;
+import com.imagem.gwtpplugin.tool.VersionTool;
 
 @SuppressWarnings("restriction")
 public class NewProjectWizard extends Wizard implements INewWizard {
-	
-	private static final String AOPALLIANCE = "aopalliance";
-	private static final String GIN = "gin-r137";
-	private static final String GUICE = "guice-2.0";
-	private static final String GUICE_SERVLET = "guice-servlet-2.0";
-	//private static final String GWTP = "gwtp-0.4";
-	private static final String GWTP = "gwtp-all-0.5";
 
 	private NewProjectWizardPage page;
 
@@ -169,20 +163,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			IPath libPath = webInfPath.append("lib");
 			project.getFolder(libPath).create(false, true, null); // TODO Progress Monitor
 			
-			Jar aopallianceJar = new Jar(project, libPath, AOPALLIANCE);
-			aopallianceJar.createFile();
-
-			Jar ginJar = new Jar(project, libPath, GIN);
-			ginJar.createFile();
-
-			Jar guiceJar = new Jar(project, libPath, GUICE);
-			guiceJar.createFile();
-
-			Jar guiceServletJar = new Jar(project, libPath, GUICE_SERVLET);
-			guiceServletJar.createFile();
-
-			Jar gwtpJar = new Jar(project, libPath, GWTP);
-			gwtpJar.createFile();
+			Jar[] libs = VersionTool.getLibs(project, libPath);
 			
 			// Classpath Entries creation
 			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
@@ -215,11 +196,9 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			entries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
 
 			// GWTP libs
-			entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + AOPALLIANCE + ".jar"), null, null));
-			entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GIN + ".jar"), null, null));
-			entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GUICE + ".jar"), null, null));
-			entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GUICE_SERVLET + ".jar"), null, null));
-			entries.add(JavaCore.newLibraryEntry(new Path("/" + javaProject.getElementName() + "/war/WEB-INF/lib/" + GWTP + ".jar"), null, null));
+			for(Jar lib : libs) {
+				entries.add(JavaCore.newLibraryEntry(lib.getFile().getFullPath(), null, null));
+			}
 
 			javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null); // TODO Progress Monitor
 			
