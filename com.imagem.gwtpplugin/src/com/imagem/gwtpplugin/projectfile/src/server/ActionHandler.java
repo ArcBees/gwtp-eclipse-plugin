@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class ActionHandler extends ProjectClass {
 
 	private static final String C_ACTION_EXCEPTION = "com.gwtplatform.dispatch.shared.ActionException";

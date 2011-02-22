@@ -25,6 +25,11 @@ import org.eclipse.jdt.core.Signature;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Event extends ProjectClass {
 
 	private static final String C_GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";

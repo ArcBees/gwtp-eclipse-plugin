@@ -24,6 +24,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Log4j extends ProjectSrcFile {
 	
 	public Log4j(IPackageFragmentRoot root) throws CoreException {

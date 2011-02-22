@@ -29,6 +29,11 @@ import org.eclipse.jdt.core.Signature;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Result extends ProjectClass {
 
 	private static final String I_RESULT = "com.gwtplatform.dispatch.shared.Result";

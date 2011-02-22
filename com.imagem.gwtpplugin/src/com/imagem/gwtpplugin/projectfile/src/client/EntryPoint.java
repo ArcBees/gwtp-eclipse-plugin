@@ -24,6 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class EntryPoint extends ProjectClass {
 	
 	private static final String I_ENTRY_POINT = "com.google.gwt.core.client.EntryPoint";

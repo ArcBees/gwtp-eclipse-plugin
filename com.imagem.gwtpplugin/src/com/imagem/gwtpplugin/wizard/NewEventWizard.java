@@ -34,6 +34,11 @@ import com.imagem.gwtpplugin.projectfile.src.client.event.Event;
 import com.imagem.gwtpplugin.projectfile.src.client.event.Handler;
 import com.imagem.gwtpplugin.projectfile.src.client.event.HasHandlers;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class NewEventWizard extends Wizard implements INewWizard {
 
 	private NewEventWizardPage page;

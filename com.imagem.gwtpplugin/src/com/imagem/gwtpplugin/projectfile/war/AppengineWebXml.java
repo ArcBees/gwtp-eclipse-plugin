@@ -25,6 +25,11 @@ import org.eclipse.core.runtime.IPath;
 
 import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class AppengineWebXml extends ProjectWarFile {
 
 	public AppengineWebXml(IProject project, IPath path) throws CoreException {

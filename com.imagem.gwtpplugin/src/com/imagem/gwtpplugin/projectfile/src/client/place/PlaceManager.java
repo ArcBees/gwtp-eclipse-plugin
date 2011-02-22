@@ -24,6 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class PlaceManager extends ProjectClass {
 
 	private static final String C_PLACE_MANAGER_IMPL = "com.gwtplatform.mvp.client.proxy.PlaceManagerImpl";

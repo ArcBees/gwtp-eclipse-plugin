@@ -24,6 +24,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Jdoconfig extends ProjectSrcFile {
 	
 	public Jdoconfig(IPackageFragmentRoot root) throws CoreException {

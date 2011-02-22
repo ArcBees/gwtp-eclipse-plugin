@@ -37,6 +37,11 @@ import com.imagem.gwtpplugin.wizard.NewModelWizard;
 import com.imagem.gwtpplugin.wizard.NewPresenterWizard;
 import com.imagem.gwtpplugin.wizard.NewProjectWizard;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
 	private IWorkbenchWindow window;

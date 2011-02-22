@@ -28,6 +28,11 @@ import org.eclipse.core.runtime.Platform;
 import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Jar extends ProjectWarFile {
 
 	public Jar(IProject project, IPath path, String name) throws CoreException {

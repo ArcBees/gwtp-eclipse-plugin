@@ -27,6 +27,11 @@ import org.eclipse.jdt.core.Signature;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Model extends ProjectClass {
 
 	private static final String I_SERIALIZABLE = "java.io.Serializable";

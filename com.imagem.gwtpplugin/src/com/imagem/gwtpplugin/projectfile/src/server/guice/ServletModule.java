@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 import com.imagem.gwtpplugin.tool.VersionTool;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class ServletModule extends ProjectClass {
 
 	private static final String C_SERVLET_MODULE = "com.google.inject.servlet.ServletModule";

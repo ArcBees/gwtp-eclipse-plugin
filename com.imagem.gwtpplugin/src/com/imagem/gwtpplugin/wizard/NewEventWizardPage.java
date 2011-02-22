@@ -43,6 +43,11 @@ import org.eclipse.swt.widgets.TableItem;
 import com.imagem.gwtpplugin.controls.AddFieldDialog;
 import com.imagem.gwtpplugin.projectfile.Field;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 @SuppressWarnings("restriction")
 public class NewEventWizardPage extends NewTypeWizardPage {
 

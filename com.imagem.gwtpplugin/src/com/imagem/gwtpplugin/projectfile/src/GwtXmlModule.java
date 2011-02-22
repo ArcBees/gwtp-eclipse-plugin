@@ -25,6 +25,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class GwtXmlModule {
 
 	private IFile file;

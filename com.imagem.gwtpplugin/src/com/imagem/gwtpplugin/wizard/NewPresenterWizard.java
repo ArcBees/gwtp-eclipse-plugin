@@ -37,6 +37,11 @@ import com.imagem.gwtpplugin.projectfile.src.client.gin.Ginjector;
 import com.imagem.gwtpplugin.projectfile.src.client.gin.PresenterModule;
 import com.imagem.gwtpplugin.projectfile.src.client.place.Tokens;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class NewPresenterWizard extends Wizard implements INewWizard {
 
 	private NewPresenterWizardPage page;

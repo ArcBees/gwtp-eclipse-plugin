@@ -25,6 +25,11 @@ import org.eclipse.core.runtime.IPath;
 
 import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class ProjectCSS extends ProjectWarFile {
 
 	public ProjectCSS(IProject project, IPath path, String name) throws CoreException {

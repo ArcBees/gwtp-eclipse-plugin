@@ -24,6 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class View extends ProjectClass {
 
 	private static final String C_VIEW_IMPL = "com.gwtplatform.mvp.client.ViewImpl";

@@ -44,6 +44,11 @@ import org.eclipse.swt.widgets.Text;
 
 import com.imagem.gwtpplugin.projectfile.Field;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 @SuppressWarnings("restriction")
 public class AddFieldDialog extends TitleAreaDialog {
 

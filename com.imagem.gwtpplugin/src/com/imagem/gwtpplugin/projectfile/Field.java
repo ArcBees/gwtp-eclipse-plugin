@@ -18,6 +18,11 @@ package com.imagem.gwtpplugin.projectfile;
 
 import org.eclipse.jdt.core.IType;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Field {
 
 	private IType type;

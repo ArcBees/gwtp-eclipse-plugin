@@ -80,6 +80,11 @@ import com.imagem.gwtpplugin.projectfile.war.ProjectHTML;
 import com.imagem.gwtpplugin.projectfile.war.WebXml;
 import com.imagem.gwtpplugin.tool.VersionTool;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 @SuppressWarnings("restriction")
 public class NewProjectWizard extends Wizard implements INewWizard {
 

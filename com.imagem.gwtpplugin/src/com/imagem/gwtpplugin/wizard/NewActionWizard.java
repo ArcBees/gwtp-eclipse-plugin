@@ -36,6 +36,11 @@ import com.imagem.gwtpplugin.projectfile.src.server.guice.HandlerModule;
 import com.imagem.gwtpplugin.projectfile.src.shared.Action;
 import com.imagem.gwtpplugin.projectfile.src.shared.Result;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class NewActionWizard extends Wizard implements INewWizard {
 
 	private NewActionWizardPage page;

@@ -25,6 +25,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class HandlerModule extends ProjectClass {
 
 	private static final String C_HANDLER_MODULE = "com.gwtplatform.dispatch.server.guice.HandlerModule";

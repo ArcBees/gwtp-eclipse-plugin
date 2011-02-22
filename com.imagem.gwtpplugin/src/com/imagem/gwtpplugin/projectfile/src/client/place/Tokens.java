@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Tokens extends ProjectClass {
 
 	public Tokens(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {

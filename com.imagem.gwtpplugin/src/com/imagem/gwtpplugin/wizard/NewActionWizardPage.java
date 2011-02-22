@@ -64,6 +64,11 @@ import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.controls.AddFieldDialog;
 import com.imagem.gwtpplugin.projectfile.Field;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 @SuppressWarnings("restriction")
 public class NewActionWizardPage extends NewTypeWizardPage {
 

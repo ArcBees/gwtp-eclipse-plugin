@@ -22,6 +22,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class PlaceAnnotation extends ProjectClass {
 
 	private static final String A_BINDING_ANNOTATION = "com.google.inject.BindingAnnotation";

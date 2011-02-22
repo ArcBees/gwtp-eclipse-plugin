@@ -57,6 +57,11 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import com.imagem.gwtpplugin.Activator;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 @SuppressWarnings("restriction")
 public class NewPresenterWizardPage extends NewTypeWizardPage {
 

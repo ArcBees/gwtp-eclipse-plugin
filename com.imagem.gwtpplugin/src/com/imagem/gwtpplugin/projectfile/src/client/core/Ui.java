@@ -24,7 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-// TODO WorkingCopy
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Ui {
 	
 	private IFile file;

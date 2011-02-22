@@ -25,6 +25,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Ginjector extends ProjectClass {
 
 	private static final String C_DISPATCH_ASYNC_MODULE = "com.gwtplatform.dispatch.client.gin.DispatchAsyncModule";

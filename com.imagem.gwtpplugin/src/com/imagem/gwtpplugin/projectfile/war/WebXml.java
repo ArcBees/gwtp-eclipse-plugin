@@ -26,6 +26,11 @@ import org.eclipse.jdt.core.IType;
 
 import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class WebXml extends ProjectWarFile {
 
 	public WebXml(IProject project, IPath path) throws CoreException {

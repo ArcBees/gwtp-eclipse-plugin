@@ -29,6 +29,11 @@ import org.eclipse.jdt.core.Signature;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Action extends ProjectClass {
 	
 	public Action(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {

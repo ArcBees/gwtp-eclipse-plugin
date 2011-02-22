@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Handler extends ProjectClass {
 
 	private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";

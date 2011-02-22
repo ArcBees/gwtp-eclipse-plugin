@@ -25,6 +25,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class Settings {
 
 	private IFile file;

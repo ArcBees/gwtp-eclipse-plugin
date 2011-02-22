@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class HasHandlers extends ProjectClass {
 
 	private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";

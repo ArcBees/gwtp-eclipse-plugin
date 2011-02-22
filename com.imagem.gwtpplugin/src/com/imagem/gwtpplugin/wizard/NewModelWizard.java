@@ -32,6 +32,11 @@ import org.eclipse.ui.IWorkbench;
 import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.projectfile.src.shared.Model;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class NewModelWizard extends Wizard implements INewWizard {
 
 	private NewModelWizardPage page;

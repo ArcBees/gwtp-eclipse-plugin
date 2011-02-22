@@ -23,6 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class GuiceServletContextListener extends ProjectClass {
 
 	private static final String C_GUICE_SERVLET_CONTEXT_LISTENER = "com.google.inject.servlet.GuiceServletContextListener";

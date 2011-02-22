@@ -25,6 +25,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
+/**
+ * 
+ * @author Michael Renaud
+ *
+ */
 public class PresenterModule extends ProjectClass {
 
 	private static final String C_ABSTRACT_PRESENTER_MODULE = "com.gwtplatform.mvp.client.gin.AbstractPresenterModule";
