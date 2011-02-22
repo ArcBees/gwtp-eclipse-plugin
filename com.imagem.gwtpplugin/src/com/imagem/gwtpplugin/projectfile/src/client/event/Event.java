@@ -60,6 +60,12 @@ public class Event extends ProjectClass {
 		return type.createField(contents, null, false, null);
 	}
 	
+	public IField createField(String fieldType, String fieldName) throws JavaModelException {
+		String contents = "private final " + fieldType + " " + fieldName + ";";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
 	public IMethod createConstructor(IField[] fields) throws JavaModelException {
 		String contents = "public " + type.getElementName() + "(";
 		String fieldContents = "";

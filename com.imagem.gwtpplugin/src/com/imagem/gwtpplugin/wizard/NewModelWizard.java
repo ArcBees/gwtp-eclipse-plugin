@@ -89,7 +89,12 @@ public class NewModelWizard extends Wizard implements INewWizard {
 			Field[] modelFields = page.getFields();
 			IField[] fields = new IField[modelFields.length];
 			for(int i = 0; i < modelFields.length; i++) {
-				fields[i] = model.createField(modelFields[i].getType(), modelFields[i].getName());
+				if(modelFields[i].isPrimitiveType()) {
+					fields[i] = model.createField(modelFields[i].getPrimitiveType(), modelFields[i].getName());
+				}
+				else {
+					fields[i] = model.createField(modelFields[i].getType(), modelFields[i].getName());
+				}
 			}
 			for(IField field : fields) {
 				model.createSetterMethod(field);

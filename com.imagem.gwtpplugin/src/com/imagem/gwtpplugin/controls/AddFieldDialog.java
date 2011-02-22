@@ -63,7 +63,7 @@ public class AddFieldDialog extends TitleAreaDialog {
 		//this.page = page;
 		value = new Field();
 	}
-	
+
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 		super.setTitle(title);
@@ -137,37 +137,44 @@ public class AddFieldDialog extends TitleAreaDialog {
 
 	protected void dialogChanged() {
 		if(type.getText().isEmpty()) {
-			setMessage("Enter a type");
+			setErrorMessage("Enter a type");
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 			return;
 		}
-		
-		try {
-			IType type = project.findType(this.type.getText());
-			if(type == null || !type.exists()) {
-				setMessage(this.type.getText() + " doesn't exist");
+
+		String t = type.getText();
+		if(t.equals("char") || t.equals("byte") || t.equals("short") || t.equals("int") || 
+				t.equals("long") || t.equals("float") || t.equals("double") || t.equals("boolean")) {
+			value.setPrimitiveType(type.getText());
+		}
+		else {
+			try {
+				IType type = project.findType(t);
+				if(type == null || !type.exists()) {
+					setErrorMessage(this.type.getText() + " doesn't exist");
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
+					return;
+				}
+				else {
+					value.setType(type);
+				}
+			}
+			catch(JavaModelException e) {
+				setErrorMessage("An unexpected error has happened. Close the wizard and retry.");
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 				return;
 			}
-			else {
-				value.setType(type);
-			}
 		}
-		catch(JavaModelException e) {
-			setMessage("An unexpected error has happened. Close the wizard and retry.");
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			return;
-		}
-		
+
 		// TODO Name validation
 		if(name.getText().isEmpty()) {
-			setMessage("Enter a name");
+			setErrorMessage("Enter a name");
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 			return;
 		}
 		value.setName(name.getText());
 
-		setMessage(null);
+		setErrorMessage(null);
 		getButton(OK).setEnabled(true);
 	}
 
@@ -197,11 +204,11 @@ public class AddFieldDialog extends TitleAreaDialog {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	
+
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 	public void setWindowTitle(String windowTitle) {
 		this.windowTitle = windowTitle;
 	}

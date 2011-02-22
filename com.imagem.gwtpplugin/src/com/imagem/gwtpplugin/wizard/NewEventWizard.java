@@ -95,7 +95,12 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			Field[] eventFields = page.getFields();
 			IField[] fields = new IField[eventFields.length];
 			for(int i = 0; i < eventFields.length; i++) {
-				fields[i] = event.createField(eventFields[i].getType(), eventFields[i].getName());
+				if(eventFields[i].isPrimitiveType()) {
+					fields[i] = event.createField(eventFields[i].getPrimitiveType(), eventFields[i].getName());
+				}
+				else {
+					fields[i] = event.createField(eventFields[i].getType(), eventFields[i].getName());
+				}
 			}
 			event.createConstructor(fields);
 			for(IField field : fields) {

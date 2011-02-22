@@ -21,18 +21,15 @@ import org.eclipse.jdt.core.IType;
 public class Field {
 
 	private IType type;
+	private String primitive;
 	private String name;
-	
-	public Field() {
-	}
-	
-	public Field(IType type, String name) {
-		this.type = type;
-		this.name = name;
-	}
 	
 	public void setType(IType type) {
 		this.type = type;
+	}
+	
+	public void setPrimitiveType(String type) {
+		this.primitive = type;
 	}
 	
 	public void setName(String name) {
@@ -43,8 +40,16 @@ public class Field {
 		return type;
 	}
 	
+	public String getPrimitiveType() {
+		return primitive;
+	}
+	
 	public String getName() {
 		return name;
+	}
+	
+	public boolean isPrimitiveType() {
+		return primitive != null && !primitive.isEmpty();
 	}
 	
 	/*public boolean isPrimaryType() {

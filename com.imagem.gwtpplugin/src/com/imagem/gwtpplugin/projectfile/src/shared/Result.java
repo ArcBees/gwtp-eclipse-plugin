@@ -64,6 +64,12 @@ public class Result extends ProjectClass {
 		return type.createField(contents, null, false, null);
 	}
 	
+	public IField createField(String fieldType, String fieldName) throws JavaModelException {
+		String contents = "private " + fieldType + " " + fieldName + ";";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
 	public IMethod createSerializationConstructor() throws JavaModelException {
 		String contents = "";
 		

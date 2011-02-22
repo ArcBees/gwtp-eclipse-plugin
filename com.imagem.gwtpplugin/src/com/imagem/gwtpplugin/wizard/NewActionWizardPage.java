@@ -345,7 +345,10 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 			Field result = dialog.getValue();
 
 			TableItem ligne = new TableItem(actionTable, SWT.NONE);
-			ligne.setText(0, result.getType().getElementName());
+			if(result.isPrimitiveType())
+				ligne.setText(0, result.getPrimitiveType());
+			else
+				ligne.setText(0, result.getType().getElementName());
 			ligne.setText(1, result.getName());
 
 			actionFields.add(result);
@@ -435,7 +438,10 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 			Field result = dialog.getValue();
 
 			TableItem ligne = new TableItem(resultTable, SWT.NONE);
-			ligne.setText(0, result.getType().getElementName());
+			if(result.isPrimitiveType())
+				ligne.setText(0, result.getPrimitiveType());
+			else
+				ligne.setText(0, result.getType().getElementName());
 			ligne.setText(1, result.getName());
 
 			resultFields.add(result);
@@ -467,7 +473,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 			}
 
 			Field field = fields.get(fields.size() - 1);
-			if(field.getType() == null || !field.getType().exists()) {
+			if(!field.isPrimitiveType() && (field.getType() == null || !field.getType().exists())) {
 				status.setError(field.getType().getElementName() + " doesn't exist");
 				return status;
 			}

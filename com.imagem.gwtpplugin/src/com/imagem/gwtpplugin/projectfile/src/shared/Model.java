@@ -68,18 +68,26 @@ public class Model extends ProjectClass {
 		return type.createField(contents, null, false, null);
 	}
 	
+	public IField createField(String fieldType, String fieldName) throws JavaModelException {
+		String contents = "private " + fieldType + " " + fieldName + ";";
+		
+		return type.createField(contents, null, false, null);
+	}
+	
 	public IMethod createSetterMethod(IField field) throws JavaModelException {
 		String contents = "public void set" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1);
-		contents += "(" + Signature.toString(field.getTypeSignature()) + " " + field.getElementName() + ") ";
-		contents += "{this." + field.getElementName() + " = " + field.getElementName() + ";}";
+		contents += "(" + Signature.toString(field.getTypeSignature()) + " " + field.getElementName() + ") {\n";
+		contents += "	this." + field.getElementName() + " = " + field.getElementName() + ";\n";
+		contents += "}";
 		
 		return type.createMethod(contents, null, false, null);
 	}
 	
 	public IMethod createGetterMethod(IField field) throws JavaModelException {
 		String contents = "public " + Signature.toString(field.getTypeSignature());
-		contents += " get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "() ";
-		contents += "{return " + field.getElementName() + ";}";
+		contents += " get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + "() {\n";
+		contents += "	return " + field.getElementName() + ";\n";
+		contents += "}";
 		
 		return type.createMethod(contents, null, false, null);
 	}

@@ -98,7 +98,12 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			Field[] resultFields = page.getResultFields();
 			IField[] fields = new IField[resultFields.length];
 			for(int i = 0; i < resultFields.length; i++) {
-				fields[i] = result.createField(resultFields[i].getType(), resultFields[i].getName());
+				if(resultFields[i].isPrimitiveType()) {
+					fields[i] = result.createField(resultFields[i].getPrimitiveType(), resultFields[i].getName());
+				}
+				else {
+					fields[i] = result.createField(resultFields[i].getType(), resultFields[i].getName());
+				}
 			}
 			result.createConstructor(fields);
 			for(IField field : fields) {
@@ -117,7 +122,12 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			Field[] actionFields = page.getActionFields();
 			fields = new IField[actionFields.length];
 			for(int i = 0; i < actionFields.length; i++) {
-				fields[i] = action.createField(actionFields[i].getType(), actionFields[i].getName());
+				if(actionFields[i].isPrimitiveType()) {
+					fields[i] = action.createField(actionFields[i].getPrimitiveType(), actionFields[i].getName());
+				}
+				else {
+					fields[i] = action.createField(actionFields[i].getType(), actionFields[i].getName());
+				}
 			}
 			action.createConstructor(fields);
 			for(IField field : fields) {
