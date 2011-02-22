@@ -16,10 +16,15 @@
 
 package com.imagem.gwtpplugin.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -35,6 +40,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
 	private NewActionWizardPage page;
 	private IStructuredSelection selection;
+	private boolean isDone;
 
 	public NewActionWizard() {
 		super();
@@ -55,14 +61,36 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		try {
+			super.getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					isDone = finish(monitor);
+				}
+			});
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return isDone;
+	}
+	
+	protected boolean finish(IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
 		Action action = null;
 		Result result = null;
 		ActionHandler actionHandler = null;
 		HandlerModule handlerModule = null;
 		try {
+			monitor.beginTask("Action creation", 4);
+			
 			IPackageFragmentRoot root = page.getPackageFragmentRoot();
 			
 			// Result
+			monitor.subTask("Result");
 			result = new Result(root, page.getResultPackageText(), page.getResultTypeName());
 			result.createSerializationField();
 			result.createSerializationConstructor();
@@ -76,8 +104,10 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			for(IField field : fields) {
 				result.createGetterMethod(field);
 			}
+			monitor.worked(1);
 			
 			// Action
+			monitor.subTask("Action");
 			IType actionSuperclass = page.getJavaProject().findType(page.getActionSuperclass());
 			
 			action = new Action(root, page.getPackageText(), page.getTypeName(), actionSuperclass, result.getType());
@@ -93,17 +123,22 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			for(IField field : fields) {
 				action.createGetterMethod(field);
 			}
+			monitor.worked(1);
 			
 			// ActionHandler
+			monitor.subTask("ActionHandler");
 			actionHandler = new ActionHandler(root, page.getActionHandlerPackageText(), page.getActionHandlerTypeName(), action.getType(), result.getType());
 			actionHandler.createConstructor();
 			actionHandler.createExecuteMethod(action.getType(), result.getType());
 			actionHandler.createUndoMethod(action.getType(), result.getType());
 			actionHandler.createActionTypeGetterMethod(action.getType());
+			monitor.worked(1);
 			
 			// HandlerModule
+			monitor.subTask("Bind in HandlerModule");
 			handlerModule = new HandlerModule(root, page.getHandlerModule());
 			handlerModule.createBinder(action.getType(), actionHandler.getType());
+			monitor.worked(1);
 			
 			// Committing
 			if(action != null) action.commit();
@@ -124,7 +159,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			
 			return false;
 		}
-		
+
+		monitor.done();
 		return true;
 	}
 

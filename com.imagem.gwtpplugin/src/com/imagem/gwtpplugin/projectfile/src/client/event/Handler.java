@@ -26,6 +26,7 @@ import com.imagem.gwtpplugin.projectfile.ProjectClass;
 public class Handler extends ProjectClass {
 
 	private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";
+	private static final String I_HANDLER_REGISTRATION = "com.google.gwt.event.shared.HandlerRegistration";
 	
 	public Handler(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
 		super(root, fullyQualifiedName);
@@ -44,8 +45,9 @@ public class Handler extends ProjectClass {
 	}
 	
 	public IMethod createTriggerMethod(IType event) throws JavaModelException {
+		cu.createImport(I_HANDLER_REGISTRATION, null, null);
 		cu.createImport(event.getFullyQualifiedName(), null, null);
-		String contents = "public void on" + event.getElementName().substring(0, event.getElementName().length() - 5) + "(" + event.getElementName() + " event);";
+		String contents = "public HandlerRegistration on" + event.getElementName().substring(0, event.getElementName().length() - 5) + "(" + event.getElementName() + " event);";
 		
 		return type.createMethod(contents, null, false, null);
 	}

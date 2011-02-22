@@ -16,6 +16,7 @@
 
 package com.imagem.gwtpplugin.wizard;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -28,6 +29,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
@@ -41,6 +44,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -80,6 +84,7 @@ import com.imagem.gwtpplugin.tool.VersionTool;
 public class NewProjectWizard extends Wizard implements INewWizard {
 
 	private NewProjectWizardPage page;
+	private boolean isDone = false;
 
 	public NewProjectWizard() {
 		super();
@@ -102,11 +107,33 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 		addPage(page);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public boolean performFinish() {
 		try {
+			super.getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					isDone = finish(monitor);
+				}
+			});
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return isDone;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected boolean finish(IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
+		try {
+			monitor.beginTask("GWT-Platform project creation", 4);
+			
 			// Project base creation
+			monitor.subTask("Base project creation");
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(page.getProjectName());
 
 			// Project location
@@ -149,8 +176,10 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			if(!project.isOpen()) {
 				project.open(null); // TODO Progress Monitor
 			}
+			monitor.worked(1);
 			
 			// Java Project creation
+			monitor.subTask("Classpath entries creation");
 			IJavaProject javaProject = JavaCore.create(project);
 			
 			// war/WEB-INF/lib folder creation
@@ -201,12 +230,14 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			}
 
 			javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null); // TODO Progress Monitor
-			
-			IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append("src"));
+			monitor.worked(1);
 			
 			// TODO Create settings
 			
-			// Create src Folder
+			monitor.subTask("Default classes creation");
+			IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append("src"));
+			
+			// Create sources
 			if(page.useGAE()) {
 				Log4j log4j = new Log4j(root);
 				log4j.createFile();
@@ -313,8 +344,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 				Logging logging = new Logging(project, warPath);
 				logging.createFile();
 			}
+			monitor.worked(1);
 			
 			// Launch Config
+			monitor.subTask("Launch config creation");
+			
 			ILaunchConfigurationWorkingCopy launchConfig = WebAppLaunchUtil.createLaunchConfigWorkingCopy(project.getName(), project, WebAppLaunchUtil.determineStartupURL(project, false), false);
 			ILaunchGroup[] groups = DebugUITools.getLaunchGroups();
 
@@ -327,10 +361,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
 			launchConfig.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
 			launchConfig.doSave();
+			monitor.worked(1);
 		}
 		catch(Exception e) {
 			return false;
 		}
+
+		monitor.done();
 		return true;
 	}
 	

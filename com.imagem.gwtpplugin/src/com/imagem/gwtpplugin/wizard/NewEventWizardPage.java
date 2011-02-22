@@ -239,7 +239,7 @@ public class NewEventWizardPage extends NewTypeWizardPage {
 		label.setText("Generate:");
 
 		generateHasHandlers = new Button(composite, SWT.CHECK);
-		generateHasHandlers.setText("HasHandles class");
+		generateHasHandlers.setText("HasHandlers class");
 
 		label = new Label(composite, SWT.NULL);
 	}

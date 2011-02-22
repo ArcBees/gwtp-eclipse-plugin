@@ -16,10 +16,15 @@
 
 package com.imagem.gwtpplugin.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -36,6 +41,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 
 	private NewPresenterWizardPage page;
 	private IStructuredSelection selection;
+	private boolean isDone = false;
 
 	public NewPresenterWizard() {
 		super();
@@ -56,15 +62,37 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		try {
+			super.getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					isDone = finish(monitor);
+				}
+			});
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return isDone;
+	}
+	
+	protected boolean finish(IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
 		Presenter presenter = null;
 		Tokens tokens = null;
 		View view = null;
 		Ginjector ginjector = null;
 		PresenterModule presenterModule = null;
 		try {
+			monitor.beginTask("Presenter creation", 3);
+			
 			IPackageFragmentRoot root = page.getPackageFragmentRoot();
 			
 			// Presenter
+			monitor.subTask("Presenter");
 			presenter = new Presenter(root, page.getPackageText(), page.getTypeName(), page.isWidget());
 			presenter.createViewInterface();
 			if(page.isPlace()) {
@@ -101,8 +129,10 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			for(String method : methods) {
 				presenter.createMethodStub(method);
 			}
+			monitor.worked(1);
 			
 			// View
+			monitor.subTask("View");
 			view = new View(root, page.getViewPackageText(), page.getViewTypeName(), presenter.getType());
 			if(page.useUiBinder()) {
 				view.createBinderInterface();
@@ -113,19 +143,24 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			
 			// Ui
 			if(page.useUiBinder()) {
+				monitor.subTask("UiBinder");
 				Ui ui = new Ui(root, page.getViewPackageText(), page.getViewTypeName());
 				ui.createFile();
 			}
 			
 			// Ginjector
 			if(!page.isWidget()) {
+				monitor.subTask("Provider in Ginjector");
 				ginjector = new Ginjector(root, page.getGinjector());
 				ginjector.createProvider(presenter.getType());
 			}
+			monitor.worked(1);
 			
 			// PresenterModule
+			monitor.subTask("Bind in PresenterModule");
 			presenterModule = new PresenterModule(root, page.getPresenterModule());
 			presenterModule.createPresenterBinder(presenter.getType(), view.getType());
+			monitor.worked(1);
 
 			if(presenter != null) presenter.commit();
 			if(tokens != null) tokens.commit();
@@ -147,7 +182,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			
 			return false;
 		}
-
+		monitor.done();
 		return true;
 	}
 

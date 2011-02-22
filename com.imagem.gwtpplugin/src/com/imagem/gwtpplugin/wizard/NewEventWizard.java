@@ -16,9 +16,14 @@
 
 package com.imagem.gwtpplugin.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -33,6 +38,7 @@ public class NewEventWizard extends Wizard implements INewWizard {
 
 	private NewEventWizardPage page;
 	private IStructuredSelection selection;
+	private boolean isDone = false;
 
 	public NewEventWizard() {
 		super();
@@ -53,14 +59,36 @@ public class NewEventWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		try {
+			super.getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					isDone = finish(monitor);
+				}
+			});
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return isDone;
+	}
+	
+	protected boolean finish(IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
 		Event event = null;
 		Handler handler = null;
 		HasHandlers hasHandlers = null;
 		try {
+			monitor.beginTask("Event creation", 3);
+			
 			IPackageFragmentRoot root = page.getPackageFragmentRoot();
 			
 			handler = new Handler(root, page.getHandlerPackageText(), page.getHandlerTypeName());
-		
+			
+			monitor.subTask("Event");
 			event = new Event(root, page.getPackageText(), page.getTypeName(), handler.getType());
 			event.createTypeField(handler.getType());
 			
@@ -76,9 +104,11 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			
 			event.createDispatchMethod(handler.getType());
 			event.createAssociatedTypeGetterMethod(handler.getType());
+			monitor.worked(1);
 			
 			
 			if(page.hasHandlers()) {
+				monitor.subTask("HasHandlers");
 				hasHandlers = new HasHandlers(root, page.getHasHandlerPackageText(), page.getHasHandlerTypeName());
 				hasHandlers.createAddHandlerMethod(handler.getType());
 				event.createFireMethod(fields, hasHandlers.getType());
@@ -86,8 +116,11 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			else {
 				event.createFireMethod(fields);
 			}
-			
+			monitor.worked(1);
+
+			monitor.subTask("Handler");
 			handler.createTriggerMethod(event.getType());
+			monitor.worked(1);
 
 			// Committing
 			if(event != null) event.commit();
@@ -106,7 +139,8 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			
 			return false;
 		}
-		
+
+		monitor.done();
 		return true;
 	}
 

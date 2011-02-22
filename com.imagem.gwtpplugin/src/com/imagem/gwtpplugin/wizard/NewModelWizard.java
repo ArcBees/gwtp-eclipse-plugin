@@ -16,9 +16,14 @@
 
 package com.imagem.gwtpplugin.wizard;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -31,6 +36,7 @@ public class NewModelWizard extends Wizard implements INewWizard {
 
 	private NewModelWizardPage page;
 	private IStructuredSelection selection;
+	private boolean isDone = false;
 
 	public NewModelWizard() {
 		super();
@@ -51,8 +57,29 @@ public class NewModelWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
+		try {
+			super.getContainer().run(false, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					isDone = finish(monitor);
+				}
+			});
+		}
+		catch(Exception e) {
+			return false;
+		}
+		return isDone;
+	}
+	
+	protected boolean finish(IProgressMonitor monitor) {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+		
 		Model model = null;
 		try {
+			monitor.beginTask("Model creation", 1);
+			
 			IPackageFragmentRoot root = page.getPackageFragmentRoot();
 			
 			model = new Model(root, page.getPackageText(), page.getTypeName());
@@ -75,6 +102,7 @@ public class NewModelWizard extends Wizard implements INewWizard {
 				model.createEqualsMethod(fields);
 				model.createHashCodeMethod(fields);
 			}
+			monitor.worked(1);
 			
 			if(model != null) model.commit();
 		}
@@ -89,6 +117,7 @@ public class NewModelWizard extends Wizard implements INewWizard {
 			return false;
 		}
 		
+		monitor.done();
 		return true;
 	}
 
