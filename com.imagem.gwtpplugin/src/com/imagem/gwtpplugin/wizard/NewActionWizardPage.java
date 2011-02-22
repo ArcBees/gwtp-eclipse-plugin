@@ -19,7 +19,9 @@ package com.imagem.gwtpplugin.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -58,6 +60,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.controls.AddFieldDialog;
 import com.imagem.gwtpplugin.projectfile.Field;
 
@@ -161,8 +164,22 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 
 		setControl(composite);
 		setFocus();
+		setDefaultValues();
 
 		Dialog.applyDialogFont(composite);
+	}
+
+	private void setDefaultValues() {
+		try {
+			if(handlerModule != null) {
+				String handlerModuleValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"));
+				handlerModule.setText(handlerModuleValue == null ? "" : handlerModuleValue);
+
+				fHandlerModuleStatus = handlerModuleChanged();
+				doStatusUpdate();
+			}
+		}
+		catch (CoreException e1) {}
 	}
 
 	protected String getTypeNameLabel() {

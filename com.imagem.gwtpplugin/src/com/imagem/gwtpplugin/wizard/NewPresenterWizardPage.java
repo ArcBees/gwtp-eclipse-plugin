@@ -19,7 +19,9 @@ package com.imagem.gwtpplugin.wizard;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,6 +54,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+
+import com.imagem.gwtpplugin.Activator;
 
 @SuppressWarnings("restriction")
 public class NewPresenterWizardPage extends NewTypeWizardPage {
@@ -165,8 +169,32 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
 		setControl(composite);
 		setFocus();
-
+		setDefaultValues();
+		
 		Dialog.applyDialogFont(composite);
+	}
+
+	private void setDefaultValues() {
+		try {
+			if(tokenName != null) {
+				String nameTokensValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "nametokens"));
+				tokenName.setText(nameTokensValue == null ? "" : nameTokensValue + "#");
+				
+				fPlaceStatus = placeChanged();
+				doStatusUpdate();
+			}
+			if(ginjector != null && presenterModule != null) {
+				String ginjectorValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"));
+				String presenterModuleValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"));
+				
+				ginjector.setText(ginjectorValue == null ? "" : ginjectorValue);
+				presenterModule.setText(presenterModuleValue == null ? "" : presenterModuleValue);
+				
+				fGinStatus = ginChanged();
+				doStatusUpdate();
+			}
+		}
+		catch (CoreException e1) {}
 	}
 
 	protected String getTypeNameLabel() {

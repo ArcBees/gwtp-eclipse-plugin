@@ -49,5 +49,22 @@
          </action>
       </actionSet>
    </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="com.imagem.gwtpplugin.view.GwtPropertyPage"
+            id="com.imagem.gwtpplugin.view.GwtPropertyPage"
+            name="GWT-Platform">
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="com.google.gwt.eclipse.core.gwtNature">
+               </test>
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
 
 </plugin>
