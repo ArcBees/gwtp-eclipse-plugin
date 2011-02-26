@@ -70,7 +70,12 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 
 	@Override
 	protected Control createContents(Composite parent) {
-		project = JavaCore.create((IProject) getElement());
+		if(getElement() instanceof IProject) {
+			project = JavaCore.create((IProject) getElement());
+		}
+		else if(getElement() instanceof IJavaProject) {
+			project = (IJavaProject) getElement();
+		}
 
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 3;

@@ -19,20 +19,21 @@ package com.imagem.gwtpplugin.projectfile.src;
 import java.io.ByteArrayInputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class Jdoconfig extends ProjectSrcFile {
+public class Jdoconfig extends ProjectFile {
 	
-	public Jdoconfig(IPackageFragmentRoot root) throws CoreException {
-		super(root, "", "jdoconfig.xml");
+	public Jdoconfig(IProject project, IPath path) throws CoreException {
+		super(project, path, "jdoconfig.xml");
 	}
 	
 	public IFile createFile() throws CoreException {

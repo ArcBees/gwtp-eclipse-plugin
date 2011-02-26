@@ -19,20 +19,21 @@ package com.imagem.gwtpplugin.projectfile.src;
 import java.io.ByteArrayInputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectSrcFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class Log4j extends ProjectSrcFile {
+public class Log4j extends ProjectFile {
 	
-	public Log4j(IPackageFragmentRoot root) throws CoreException {
-		super(root, "", "log4j.properties");
+	public Log4j(IProject project, IPath path) throws CoreException {
+		super(project, path, "log4j.properties");
 	}
 	
 	public IFile createFile() throws CoreException {

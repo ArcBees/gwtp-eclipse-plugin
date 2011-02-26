@@ -23,14 +23,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class ProjectCSS extends ProjectWarFile {
+public class ProjectCSS extends ProjectFile {
 
 	public ProjectCSS(IProject project, IPath path, String name) throws CoreException {
 		super(project, path, name + ".css");

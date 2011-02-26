@@ -23,14 +23,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class ProjectHTML extends ProjectWarFile {
+public class ProjectHTML extends ProjectFile {
 
 	public ProjectHTML(IProject project, IPath path, String name) throws CoreException {
 		super(project, path, name + ".html");

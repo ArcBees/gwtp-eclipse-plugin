@@ -23,14 +23,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class AppengineWebXml extends ProjectWarFile {
+public class AppengineWebXml extends ProjectFile {
 
 	public AppengineWebXml(IProject project, IPath path) throws CoreException {
 		super(project, path, "appengine-web.xml");

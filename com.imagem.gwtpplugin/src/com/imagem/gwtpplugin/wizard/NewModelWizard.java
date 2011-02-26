@@ -107,11 +107,6 @@ public class NewModelWizard extends Wizard implements INewWizard {
 			for(IField field : fields) {
 				model.createGetterMethod(field);
 			}
-			
-			if(page.generateEquals()) {
-				model.createEqualsMethod(fields);
-				model.createHashCodeMethod(fields);
-			}
 			monitor.worked(1);
 			
 			if(model != null) model.commit();

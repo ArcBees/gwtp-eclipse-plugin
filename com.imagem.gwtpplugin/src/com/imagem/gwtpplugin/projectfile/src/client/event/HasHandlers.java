@@ -31,6 +31,7 @@ import com.imagem.gwtpplugin.projectfile.ProjectClass;
 public class HasHandlers extends ProjectClass {
 
 	private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";
+	private static final String I_HANDLER_REGISTRATION = "com.google.gwt.event.shared.HandlerRegistration";
 	
 	public HasHandlers(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
 		super(root, fullyQualifiedName);
@@ -49,6 +50,7 @@ public class HasHandlers extends ProjectClass {
 	}
 	
 	public IMethod createAddHandlerMethod(IType eventHandler) throws JavaModelException {
+		cu.createImport(I_HANDLER_REGISTRATION, null, null);
 		cu.createImport(eventHandler.getFullyQualifiedName(), null, null);
 		String contents = "public HandlerRegistration add" + eventHandler.getElementName() + "(" + eventHandler.getElementName() + " handler);";
 		

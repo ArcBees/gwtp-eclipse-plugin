@@ -24,14 +24,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IType;
 
-import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class WebXml extends ProjectWarFile {
+public class WebXml extends ProjectFile {
 
 	public WebXml(IProject project, IPath path) throws CoreException {
 		super(project, path, "web.xml");

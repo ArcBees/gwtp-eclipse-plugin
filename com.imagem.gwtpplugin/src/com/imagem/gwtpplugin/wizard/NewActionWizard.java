@@ -98,10 +98,13 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			monitor.subTask("Result");
 			result = new Result(root, page.getResultPackageText(), page.getResultTypeName());
 			result.createSerializationField();
-			result.createSerializationConstructor();
 			
 			Field[] resultFields = page.getResultFields();
 			IField[] fields = new IField[resultFields.length];
+			
+			if(resultFields.length > 0) {
+				result.createSerializationConstructor();
+			}
 			for(int i = 0; i < resultFields.length; i++) {
 				if(resultFields[i].isPrimitiveType()) {
 					fields[i] = result.createField(resultFields[i].getPrimitiveType(), resultFields[i].getName());
@@ -122,10 +125,13 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			
 			action = new Action(root, page.getPackageText(), page.getTypeName(), actionSuperclass, result.getType());
 			action.createSerializationField();
-			action.createSerializationConstructor();
 			
 			Field[] actionFields = page.getActionFields();
 			fields = new IField[actionFields.length];
+			
+			if(actionFields.length > 0) {
+				action.createSerializationConstructor();
+			}
 			for(int i = 0; i < actionFields.length; i++) {
 				if(actionFields[i].isPrimitiveType()) {
 					fields[i] = action.createField(actionFields[i].getPrimitiveType(), actionFields[i].getName());

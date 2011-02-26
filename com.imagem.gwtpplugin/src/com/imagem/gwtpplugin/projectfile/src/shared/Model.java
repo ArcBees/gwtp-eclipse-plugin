@@ -97,7 +97,7 @@ public class Model extends ProjectClass {
 		return type.createMethod(contents, null, false, null);
 	}
 	
-	public IMethod createEqualsMethod(IField[] fields) throws IllegalArgumentException, JavaModelException {
+	/*public IMethod createEqualsMethod(IField[] fields) throws IllegalArgumentException, JavaModelException {
 		String contents = "";
 		
 		contents += "@Override\n";
@@ -159,5 +159,5 @@ public class Model extends ProjectClass {
 		contents += "}";
 		
 		return type.createMethod(contents, null, false, null);
-	}
+	}*/
 }

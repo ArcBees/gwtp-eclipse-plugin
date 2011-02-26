@@ -23,14 +23,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
-import com.imagem.gwtpplugin.projectfile.ProjectWarFile;
+import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public class Logging extends ProjectWarFile {
+public class Logging extends ProjectFile {
 
 	public Logging(IProject project, IPath path) throws CoreException {
 		super(project, path, "logging.properties");

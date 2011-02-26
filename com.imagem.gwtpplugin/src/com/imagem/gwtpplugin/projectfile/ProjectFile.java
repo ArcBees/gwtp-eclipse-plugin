@@ -18,25 +18,26 @@ package com.imagem.gwtpplugin.projectfile;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 /**
  * 
  * @author Michael Renaud
  *
  */
-public abstract class ProjectSrcFile {
-
-	protected IFile file;
-	protected IPackageFragmentRoot root;
+public abstract class ProjectFile {
 	
-	public ProjectSrcFile(IPackageFragmentRoot root, String packageName, String elementName) throws CoreException {
-		this.root = root;
-		IContainer container = (IContainer) root.createPackageFragment(packageName, false, null).getResource();
+	protected IFile file;
+	protected IProject project;
+	
+	public ProjectFile(IProject project, IPath path, String name) throws CoreException {
+		this.project = project;
+		IContainer container = (IContainer) project.findMember(path);
 		
-		file = container.getFile(new Path(elementName));
+		file = container.getFile(new Path(name));
 	}
 	
 	public IFile getFile() {

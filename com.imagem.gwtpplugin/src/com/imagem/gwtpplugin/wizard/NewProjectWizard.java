@@ -244,13 +244,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			
 			// Create sources
 			if(page.useGAE()) {
-				Log4j log4j = new Log4j(root);
+				Log4j log4j = new Log4j(project, srcPath);
 				log4j.createFile();
 
 				IPath metaInfPath = srcPath.append("META-INF");
 				project.getFolder(metaInfPath).create(false, true, null); // TODO Progress Monitor
 
-				Jdoconfig jdoconfig = new Jdoconfig(root);
+				Jdoconfig jdoconfig = new Jdoconfig(project, metaInfPath);
 				jdoconfig.createFile();
 			}
 			
@@ -343,10 +343,10 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			webXml.createFile(projectHTML.getFile(), guiceServletContextListener.getType());
 			
 			if(page.useGAE()) {
-				AppengineWebXml appengineWebXml = new AppengineWebXml(project, warPath);
+				AppengineWebXml appengineWebXml = new AppengineWebXml(project, webInfPath);
 				appengineWebXml.createFile();
 
-				Logging logging = new Logging(project, warPath);
+				Logging logging = new Logging(project, webInfPath);
 				logging.createFile();
 			}
 			monitor.worked(1);

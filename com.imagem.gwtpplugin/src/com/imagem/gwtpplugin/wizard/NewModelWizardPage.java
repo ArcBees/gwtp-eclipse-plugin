@@ -62,7 +62,7 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 		super(true, PAGE_NAME);
 		setTitle("Create a Model");
 		setDescription("Create a Model that hold data");
-		
+
 		init(selection);
 	}
 
@@ -128,7 +128,7 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 
 		createTypeNameControls(composite, nColumns);
 		createFieldsControls(composite, nColumns);
-		createGenerateControls(composite, nColumns);
+		//createGenerateControls(composite, nColumns);
 
 		setControl(composite);
 		setFocus();
@@ -143,19 +143,21 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 	protected IStatus fieldsChanged() {
 		StatusInfo status = new StatusInfo();
 
-		if(fields.size() > 0) {
-			for(int i = 0; i < fields.size() - 1; i++) {
-				if(fields.get(i).getName().equals(fields.get(fields.size() - 1).getName())) {
-					status.setError("A field named \"" + fields.get(i).getName() + "\" already exists.");
-					return status;
-				}
-			}
-
-			Field field = fields.get(fields.size() - 1);
-			if(!field.isPrimitiveType() && (field.getType() == null || !field.getType().exists())) {
-				status.setError(field.getType().getElementName() + " doesn't exist");
+		if(fields.isEmpty()) {
+			status.setError("Models must contain at least one field");
+			return status;
+		}
+		for(int i = 0; i < fields.size() - 1; i++) {
+			if(fields.get(i).getName().equals(fields.get(fields.size() - 1).getName())) {
+				status.setError("A field named \"" + fields.get(i).getName() + "\" already exists");
 				return status;
 			}
+		}
+
+		Field field = fields.get(fields.size() - 1);
+		if(!field.isPrimitiveType() && (field.getType() == null || !field.getType().exists())) {
+			status.setError(field.getType().getElementName() + " doesn't exist");
+			return status;
 		}
 
 		return status;
@@ -221,6 +223,9 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 				removeField(table.getSelectionIndex());
 			}
 		});
+		
+		fFieldsStatus = fieldsChanged();
+		doStatusUpdate();
 	}
 
 	protected void addField() {
@@ -243,7 +248,7 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 		addField.setEnabled(fFieldsStatus.isOK());
 		doStatusUpdate();
 	}
-	
+
 	protected void removeField(int index) {
 		if(index != -1) {
 			table.remove(index);
@@ -266,7 +271,7 @@ public class NewModelWizardPage extends NewTypeWizardPage {
 	public Field[] getFields() {
 		return fields.toArray(new Field[fields.size()]);
 	}
-	
+
 	public boolean generateEquals() {
 		return generateEquals.getSelection();
 	}

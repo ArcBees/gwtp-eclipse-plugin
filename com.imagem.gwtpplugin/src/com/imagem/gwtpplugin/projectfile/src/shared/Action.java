@@ -18,11 +18,9 @@ package com.imagem.gwtpplugin.projectfile.src.shared;
 
 import java.util.Random;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -86,7 +84,7 @@ public class Action extends ProjectClass {
 	}
 	
 	public IMethod createConstructor(IField[] fields) throws JavaModelException {
-		if(fields.length == 0) {
+		/*if(fields.length == 0) {
 			IMethod serializationConstructor = type.getMethod(type.getElementName(), new String[0]);
 			
 			if(serializationConstructor.exists()) {
@@ -94,8 +92,9 @@ public class Action extends ProjectClass {
 				
 				IBuffer buffer = cu.getBuffer();
 				buffer.replace(range.getOffset(), range.getLength(), "");
+				buffer.save(null, true);
 			}
-		}
+		}*/
 		String contents = "public " + type.getElementName() + "(";
 		String fieldContents = "";
 		for(IField field : fields) {
