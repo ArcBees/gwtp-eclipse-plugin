@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 IMAGEM Solutions TI santé
+ * Copyright 2011 IMAGEM Solutions TI santï¿½
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,10 +259,6 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			// Client package
 			IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName() + ".client", false, null); // TODO Progress Monitor
 			
-			root.createPackageFragment(clientPackage.getElementName() + ".core", false, null); // TODO Progress Monitor
-			
-			root.createPackageFragment(clientPackage.getElementName() + ".event", false, null); // TODO Progress Monitor
-			
 			// Place package
 			IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName() + ".place", false, null); // TODO Progress Monitor
 			
@@ -310,14 +306,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			GuiceServletContextListener guiceServletContextListener = new GuiceServletContextListener(root, guicePackage.getElementName(), "GuiceServletConfig");
 			guiceServletContextListener.createInjectorGetterMethod(handlerModule.getType(), servletModule.getType());
 			
-			// Handler package
-			root.createPackageFragment(serverPackage.getElementName() + ".handler", false, null); // TODO Progress Monitor
-			
 			// Shared package
-			IPackageFragment sharedPackage = root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null); // TODO Progress Monitor
-			
-			root.createPackageFragment(sharedPackage.getElementName() + ".action", false, null); // TODO Progress Monitor
-			root.createPackageFragment(sharedPackage.getElementName() + ".model", false, null); // TODO Progress Monitor
+			root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null); // TODO Progress Monitor
 			
 			// Commit
 			presenterModule.commit();
