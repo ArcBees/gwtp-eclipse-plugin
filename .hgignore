@@ -1,0 +1,3 @@
+
+syntax: regexp
+^com\.imagem\.gwtpplugin/\.settings$
