@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 IMAGEM Solutions TI santé
+ * Copyright 2011 IMAGEM Solutions TI santï¿½
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ public class Ginjector extends ProjectClass {
 	private static final String I_PLACE_MANAGER = "com.gwtplatform.mvp.client.proxy.PlaceManager";
 	private static final String A_GIN_MODULES = "com.google.gwt.inject.client.GinModules";
 	private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
-	private static final String I_DISPATCH_ASYNC = "com.gwtplatform.dispatch.client.DispatchAsync";
 	private static final String I_PROXY_FAILURE_HANDLER = "com.gwtplatform.mvp.client.proxy.ProxyFailureHandler";
 	private static final String I_GINJECTOR = "com.google.gwt.inject.client.Ginjector";
 	
@@ -64,19 +63,16 @@ public class Ginjector extends ProjectClass {
 	}
 	
 	public IMethod[] createDefaultGetterMethods() throws JavaModelException {
-		IMethod[] methods = new IMethod[4];
-
-		cu.createImport(I_DISPATCH_ASYNC, null, null);
-		methods[0] = type.createMethod("DispatchAsync getDispatcher();", null, false, null);
+		IMethod[] methods = new IMethod[3];
 		
 		cu.createImport(I_EVENT_BUS, null, null);
-		methods[1] = type.createMethod("EventBus getEventBus();", null, false, null);
+		methods[0] = type.createMethod("EventBus getEventBus();", null, false, null);
 		
 		cu.createImport(I_PLACE_MANAGER, null, null);
-		methods[2] = type.createMethod("PlaceManager getPlaceManager();", null, false, null);
+		methods[1] = type.createMethod("PlaceManager getPlaceManager();", null, false, null);
 		
 		cu.createImport(I_PROXY_FAILURE_HANDLER, null, null);
-		methods[3] = type.createMethod("ProxyFailureHandler getProxyFailureHandler();", null, false, null);
+		methods[2] = type.createMethod("ProxyFailureHandler getProxyFailureHandler();", null, false, null);
 		
 		return methods;
 	}
