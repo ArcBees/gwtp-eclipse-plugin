@@ -114,20 +114,22 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 					presenter.createProxyPlaceInterface(page.isProxyStandard(), tokens.getType(), page.getTokenName(), gatekeeper);
 				}
 			}
-			else {
+			else if(!page.isWidget()){
 				presenter.createProxyInterface(page.isProxyStandard());
 			}
 			
 			presenter.createConstructor();
 			
-			IType revealEvent = page.getJavaProject().findType(page.getRevealEvent());
-			if(revealEvent.getElementName().equals("RevealContentEvent")) {
-				IType parent = page.getJavaProject().findType(page.getParent());
-				
-				presenter.createRevealInParentMethod(revealEvent, parent, page.getContentSlot());
-			}
-			else {
-				presenter.createRevealInParentMethod(revealEvent);
+			if(!page.isWidget()) {
+				IType revealEvent = page.getJavaProject().findType(page.getRevealEvent());
+				if(revealEvent.getElementName().equals("RevealContentEvent")) {
+					IType parent = page.getJavaProject().findType(page.getParent());
+					
+					presenter.createRevealInParentMethod(revealEvent, parent, page.getContentSlot());
+				}
+				else {
+					presenter.createRevealInParentMethod(revealEvent);
+				}
 			}
 			
 			String[] methods = page.getMethodStubs();

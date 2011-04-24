@@ -967,7 +967,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	}
 
 	public boolean isPlace() {
-		return isPlace.getSelection();
+		return isPlace.getSelection() && isPlace.isEnabled();
 	}
 
 	public boolean isProxyStandard() {
