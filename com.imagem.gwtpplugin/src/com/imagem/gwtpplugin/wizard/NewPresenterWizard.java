@@ -166,7 +166,17 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			// PresenterModule
 			monitor.subTask("Bind in PresenterModule");
 			presenterModule = new PresenterModule(root, page.getPresenterModule());
-			presenterModule.createPresenterBinder(presenter.getType(), view.getType());
+			if(page.isWidget()) {
+				if(page.isSingleton()) {
+					presenterModule.createSingletonPresenterWidgetBinder(presenter.getType(), view.getType());
+				}
+				else {
+					presenterModule.createPresenterWidgetBinder(presenter.getType(), view.getType());
+				}
+			}
+			else {
+				presenterModule.createPresenterBinder(presenter.getType(), view.getType());
+			}
 			monitor.worked(1);
 
 			if(presenter != null) presenter.commit();

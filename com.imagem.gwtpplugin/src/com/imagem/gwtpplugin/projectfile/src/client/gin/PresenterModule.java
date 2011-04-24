@@ -148,7 +148,44 @@ public class PresenterModule extends ProjectClass {
 		cu.createImport(presenter.getFullyQualifiedName(), null, null);
 		cu.createImport(view.getFullyQualifiedName(), null, null);
 		
-		boolean isWidget = presenter.getSuperclassName().startsWith("PresenterWidget");
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configure", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+		
+		contents += "bindPresenter(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class, " + presenter.getElementName() + ".MyProxy.class);";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
+	
+	public void createPresenterWidgetBinder(IType presenter, IType view) throws JavaModelException {
+		cu.createImport(presenter.getFullyQualifiedName(), null, null);
+		cu.createImport(view.getFullyQualifiedName(), null, null);
 		
 		IBuffer buffer = cu.getBuffer();
 		
@@ -169,12 +206,47 @@ public class PresenterModule extends ProjectClass {
 		for(int i = 0; i < tabulations; i++) {
 			contents += "\t";
 		}
-		if(isWidget) {
-			contents += "bindPresenterWidget(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class);";
+
+		contents += "bindPresenterWidget(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class);";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
 		}
-		else {
-			contents += "bindPresenter(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class, " + presenter.getElementName() + ".MyProxy.class);";
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
+	
+	public void createSingletonPresenterWidgetBinder(IType presenter, IType view) throws JavaModelException {
+		cu.createImport(presenter.getFullyQualifiedName(), null, null);
+		cu.createImport(view.getFullyQualifiedName(), null, null);
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configure", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
 		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+
+		contents += "bindSingletonPresenterWidget(" + presenter.getElementName() + ".class, " + presenter.getElementName() + ".MyView.class, " + view.getElementName() + ".class);";
 		
 		String newSource = "";
 		for(int i = 0; i < lines.length; i++) {

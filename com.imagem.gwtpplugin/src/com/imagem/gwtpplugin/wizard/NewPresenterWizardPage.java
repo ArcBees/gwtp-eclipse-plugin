@@ -94,6 +94,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	private Text presenterModule;
 	private Text ginjector;
 	private Button browseGinjector;
+	private Button isSingleton;
 
 	public NewPresenterWizardPage(IStructuredSelection selection) {
 		super(true, PAGE_NAME);
@@ -167,6 +168,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
 		createTypeNameControls(composite, nColumns);
 		createUITypeControls(composite, nColumns);
+		createWidgetControls(composite, nColumns);
 		createRevealInParentControls(composite, nColumns);
 		createPlaceControls(composite, nColumns);
 		createMethodStubsControls(composite, nColumns);
@@ -243,6 +245,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				setRevealInParentEnabled(!isPresenterWidget.getSelection());
 				setPlaceEnabled(!isPresenterWidget.getSelection());
 				setGinjectorEnabled(!isPresenterWidget.getSelection());
+				isSingleton.setEnabled(isPresenterWidget.getSelection());
 			}
 
 			@Override
@@ -250,6 +253,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				setRevealInParentEnabled(!isPresenterWidget.getSelection());
 				setPlaceEnabled(!isPresenterWidget.getSelection());
 				setGinjectorEnabled(!isPresenterWidget.getSelection());
+				isSingleton.setEnabled(isPresenterWidget.getSelection());
 			}
 		});
 
@@ -258,6 +262,27 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 		useUiBinder.setSelection(true);
 
 		label = new Label(composite, SWT.NULL);
+	}
+
+	private void createWidgetControls(Composite composite, int nColumns) {
+		Label label = new Label(composite, SWT.NULL);
+		label.setText("PresenterWidget:");
+		
+		GridData gd = new GridData(GridData.FILL);
+		gd.horizontalSpan = nColumns - 1;
+
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		layout.verticalSpacing = 5;
+
+		Composite checks = new Composite(composite, SWT.NULL);
+		checks.setLayoutData(gd);
+		checks.setLayout(layout);
+		
+		isSingleton = new Button(checks, SWT.CHECK);
+		isSingleton.setText("Singleton");
+		isSingleton.setSelection(false);
+		isSingleton.setEnabled(false);
 	}
 
 	private void createRevealInParentControls(Composite composite, int nColumns) {
@@ -933,6 +958,10 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
 	public boolean useUiBinder() {
 		return useUiBinder.getSelection();
+	}
+	
+	public boolean isSingleton() {
+		return isSingleton.getSelection();
 	}
 
 	public String getRevealEvent() {
