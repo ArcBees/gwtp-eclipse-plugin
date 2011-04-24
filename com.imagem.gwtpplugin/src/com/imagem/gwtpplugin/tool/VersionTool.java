@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 IMAGEM Solutions TI santé
+ * Copyright 2011 IMAGEM Solutions TI santï¿½
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,18 +32,15 @@ public class VersionTool {
 
 	public static final String AOPALLIANCE = "aopalliance";
 
-	public static final String GIN_137 = "gin-r137";
-	public static final String GIN_170 = "gin-1.0-r170";
+	public static final String GIN_1_5_pre = "gin-1.5-post-gwt-2.2";
+	public static final String GIN_1_5 = "gin-1.5-post-gwt-2.2";
 
-	public static final String GUICE_2 = "guice-2.0";
-	public static final String GUICE_3 = "guice-3.0-rc2";
+	public static final String GUICE_3 = "guice-3.0";
 
-	public static final String GUICE_ASSISTEDINJECT_3 = "guice-assistedinject-3.0-rc2";
+	public static final String GUICE_ASSISTEDINJECT_3 = "guice-assistedinject-3.0";
 
-	public static final String GUICE_SERVLET_2 = "guice-servlet-2.0";
-	public static final String GUICE_SERVLET_3 = "guice-servlet-3.0-rc2";
+	public static final String GUICE_SERVLET_3 = "guice-servlet-3.0";
 
-	public static final String GWTP_4 = "gwtp-0.4";
 	public static final String GWTP_5 = "gwtp-all-0.5";
 	public static final String GWTP_6 = "gwtp-all-0.6-SNAPSHOT";
 
@@ -54,49 +51,38 @@ public class VersionTool {
 		String version = GWTPreferences.getDefaultRuntime().getVersion();
 
 		try {
+			libs = new Jar[7];
+			
 			// GWT < 2.2.0
 			if(compare(version, "2.2.0") == -1) {
-				libs = new Jar[5];
-
-				libs[0] = new Jar(project, libPath, AOPALLIANCE);
-				libs[0].createFile();
-
-				libs[1] = new Jar(project, libPath, GIN_137);
+				libs[1] = new Jar(project, libPath, GIN_1_5_pre);
 				libs[1].createFile();
-
-				libs[2] = new Jar(project, libPath, GUICE_2);
-				libs[2].createFile();
-
-				libs[3] = new Jar(project, libPath, GUICE_SERVLET_2);
-				libs[3].createFile();
 
 				libs[4] = new Jar(project, libPath, GWTP_5);
 				libs[4].createFile();
 			}
 			else {
-				libs = new Jar[7];
-
-				libs[0] = new Jar(project, libPath, AOPALLIANCE);
-				libs[0].createFile();
-
-				libs[1] = new Jar(project, libPath, GIN_170);
+				libs[1] = new Jar(project, libPath, GIN_1_5);
 				libs[1].createFile();
-
-				libs[2] = new Jar(project, libPath, GUICE_3);
-				libs[2].createFile();
-
-				libs[3] = new Jar(project, libPath, GUICE_ASSISTEDINJECT_3);
-				libs[3].createFile();
-
-				libs[4] = new Jar(project, libPath, GUICE_SERVLET_3);
-				libs[4].createFile();
 
 				libs[5] = new Jar(project, libPath, GWTP_6);
 				libs[5].createFile();
-
-				libs[6] = new Jar(project, libPath, JAVAC_INJECT);
-				libs[6].createFile();
 			}
+			
+			libs[0] = new Jar(project, libPath, AOPALLIANCE);
+			libs[0].createFile();
+			
+			libs[2] = new Jar(project, libPath, GUICE_3);
+			libs[2].createFile();
+
+			libs[3] = new Jar(project, libPath, GUICE_ASSISTEDINJECT_3);
+			libs[3].createFile();
+
+			libs[4] = new Jar(project, libPath, GUICE_SERVLET_3);
+			libs[4].createFile();
+			
+			libs[6] = new Jar(project, libPath, JAVAC_INJECT);
+			libs[6].createFile();
 		}
 		catch (Exception e) {
 			return libs;
