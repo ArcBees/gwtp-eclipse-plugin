@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -32,6 +33,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.ILaunchGroup;
@@ -356,6 +358,17 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
 			launchConfig.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
 			launchConfig.doSave();
+			
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "nametokens"), tokens.getType().getFullyQualifiedName());
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"), ginjector.getType().getFullyQualifiedName());
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"), presenterModule.getType().getFullyQualifiedName());
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"), handlerModule.getType().getFullyQualifiedName());
+			
+			// Remove bin folder
+			IFolder binFolder = project.getFolder(new Path("/bin"));
+			if(binFolder.exists())
+				binFolder.delete(true, null);
+			
 			monitor.worked(1);
 		}
 		catch(Exception e) {
