@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,8 +33,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
@@ -553,26 +558,66 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 		}
 		return null;
 	}
-
+	
 	private IStatus actionHandlerChanged() {
 		StatusInfo status = new StatusInfo();
-
+		
 		if(actionHandlerPackage.getText().isEmpty()) {
 			status.setError("You must select the ActionHandler's package");
 			return status;
 		}
-		IPackageFragment pack = getPackageFragmentRoot().getPackageFragment(actionHandlerPackage.getText());
-		if(pack == null || !pack.exists()) {
-			status.setError(actionHandlerPackage.getText() + " doesn't exist");
-			return status;
+		
+		IPackageFragmentRoot root = getPackageFragmentRoot();
+		IJavaProject project = root.getJavaProject();
+		IPackageFragment pack = root.getPackageFragment(actionHandlerPackage.getText());
+		
+		if(!pack.getElementName().isEmpty()) {
+			IStatus val = JavaConventionsUtil.validatePackageName(pack.getElementName(), project);
+			if(val.getSeverity() == IStatus.ERROR) {
+				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidPackageName, val.getMessage())); 
+				return status;
+			}
+			else if(val.getSeverity() == IStatus.WARNING) {
+				status.setWarning(Messages.format(NewWizardMessages.NewTypeWizardPage_warning_DiscouragedPackageName, val.getMessage())); 
+				// continue
+			}
 		}
+		else {
+			status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged); 
+		}
+		
 		if(!pack.getElementName().contains(".server")) {
 			status.setError("ActionHandler's package must be in the server package");
 			return status;
 		}
-
+		
+		if(project != null) {
+			if(project.exists() && !pack.getElementName().isEmpty()) {
+				try {
+					IPath rootPath = root.getPath();
+					IPath outputPath = project.getOutputLocation();
+					if(rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
+						// if the bin folder is inside of our root, don't allow to name a package
+						// like the bin folder
+						IPath packagePath = rootPath.append(pack.getElementName().replace('.', '/'));
+						if(outputPath.isPrefixOf(packagePath)) {
+							status.setError(NewWizardMessages.NewTypeWizardPage_error_ClashOutputLocation); 
+							return status;
+						}
+					}
+				}
+				catch(JavaModelException e) {
+					JavaPlugin.log(e);
+					// let pass			
+				}
+			}
+		}
+		else {
+			status.setError("");
+		}
 		return status;
 	}
+
 
 	private void createHanderModuleControls(Composite composite, int nColumns) {
 		Label label = new Label(composite, SWT.NULL);
