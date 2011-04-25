@@ -95,6 +95,9 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	private Text ginjector;
 	private Button browseGinjector;
 	private Button isSingleton;
+	private Text annotation;
+	private Button browseAnnotation;
+	private boolean isPlaceEnabled;
 
 	public NewPresenterWizardPage(IStructuredSelection selection) {
 		super(true, PAGE_NAME);
@@ -501,6 +504,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 			}
 		});
 		isPlace.setSelection(true);
+		isPlaceEnabled = true;
 
 		// Proxy
 		label = new Label(composite, SWT.NULL);
@@ -551,7 +555,36 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				tokenName.setText(chooseTokenName().getFullyQualifiedName('.') + "#" + selectedTokenName);
 			}
 		});
-
+		
+		// BindConstant
+		label = new Label(composite, SWT.NULL);
+		label.setText("Bind with:");
+		
+		annotation = new Text(composite, SWT.BORDER | SWT.SINGLE);
+		annotation.setLayoutData(gd);
+		annotation.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				fPlaceStatus = placeChanged();
+				doStatusUpdate();
+			}
+		});
+		
+		browseAnnotation = new Button(composite, SWT.PUSH);
+		browseAnnotation.setText("Browse...");
+		browseAnnotation.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		browseAnnotation.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				annotation.setText(chooseAnnotation().getFullyQualifiedName('.'));
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				annotation.setText(chooseAnnotation().getFullyQualifiedName('.'));
+			}
+		});
+		
 		// GateKeeper
 		label = new Label(composite, SWT.NULL);
 		label.setText("Gatekeeper:");
@@ -585,6 +618,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	}
 
 	protected IStatus placeChanged() {
+		//TODO
 		StatusInfo status = new StatusInfo();
 
 		if(isPlace.isEnabled() && isPlace.getSelection()) {
@@ -641,6 +675,27 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				status.setError("An unexpected error has happened. Close the wizard and retry.");
 				return status;
 			}
+			
+			// Annotation
+			if(!annotation.getText().isEmpty()) {
+				try {
+					IType type = getJavaProject().findType(annotation.getText());
+					if(type == null || !type.exists()) {
+						status.setError(annotation.getText() + " doesn't exist");
+						return status;
+					}
+					
+					if(!type.isAnnotation()) {
+						status.setError(annotation.getText() + " isn't an Annotation");
+						return status;
+					}
+				}
+				catch(JavaModelException e) {
+					status.setError("An unexpected error has happened. Close the wizard and retry.");
+					return status;
+				}
+			}
+			
 			// Gatekeeper
 			if(!gatekeeper.getText().isEmpty()) {
 				try {
@@ -694,6 +749,27 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 		return null;
 	}
 
+	protected IType chooseAnnotation() {
+		IJavaProject project = getJavaProject();
+
+		if (project == null) {
+			return null;
+		}
+
+		IJavaElement[] elements = new IJavaElement[] { project };
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+
+		FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.ANNOTATION_TYPE, new AnnotationSelectionExtension());
+		dialog.setTitle("Annotation Selection");
+		dialog.setMessage("Select the annotation to bind");
+		dialog.setInitialPattern("*.client.place.");
+
+		if (dialog.open() == Window.OK) {
+			return (IType) dialog.getFirstResult();
+		}
+		return null;
+	}
+
 	private IType chooseGatekeeper() {
 		IJavaProject project = getJavaProject();
 
@@ -716,11 +792,14 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	}
 
 	protected void setPlaceEnabled(boolean enabled) {
+		isPlaceEnabled = enabled;
 		isPlace.setEnabled(enabled);
 		isProxyStandard.setEnabled(isPlace.getSelection() ? enabled : false);
 		isProxyCodeSplit.setEnabled(isPlace.getSelection() ? enabled : false);
 		tokenName.setEnabled(isPlace.getSelection() ? enabled : false);
 		browseTokenName.setEnabled(isPlace.getSelection() ? enabled : false);
+		annotation.setEnabled(isPlace.getSelection() ? enabled : false);
+		browseAnnotation.setEnabled(isPlace.getSelection() ? enabled : false);
 		gatekeeper.setEnabled(isPlace.getSelection() ? enabled : false);
 		browseGatekeeper.setEnabled(isPlace.getSelection() ? enabled : false);
 
@@ -996,7 +1075,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	}
 
 	public boolean isPlace() {
-		return isPlace.getSelection() && isPlace.isEnabled();
+		return isPlace.getSelection() && isPlaceEnabled;
 	}
 
 	public boolean isProxyStandard() {
@@ -1009,6 +1088,10 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
 	public String getTokenName() {
 		return tokenName.getText().split("#")[1];
+	}
+	
+	public String getAnnotation() {
+		return annotation.getText();
 	}
 
 	public String getGatekeeper() {
@@ -1154,6 +1237,31 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 			});
 
 			return composite;
+		}
+	}
+
+	public class AnnotationSelectionExtension extends TypeSelectionExtension {
+		
+		@Override
+		public ITypeInfoFilterExtension getFilterExtension() {
+			ITypeInfoFilterExtension extension = new ITypeInfoFilterExtension() {
+				@Override
+				public boolean select(ITypeInfoRequestor requestor) {
+					try {
+						IType type = getJavaProject().findType(requestor.getPackageName() + "." + requestor.getTypeName());
+						if(type == null || !type.exists()) {
+							return false;
+						}
+					
+						return type.isAnnotation();
+					}
+					catch (JavaModelException e) {
+						return false;
+					}
+				}
+			};
+
+			return extension;
 		}
 	}
 

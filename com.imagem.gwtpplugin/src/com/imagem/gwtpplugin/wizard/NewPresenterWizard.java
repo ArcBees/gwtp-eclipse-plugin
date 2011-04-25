@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -91,6 +92,8 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 		View view = null;
 		Ginjector ginjector = null;
 		PresenterModule presenterModule = null;
+		
+		IField tokenField = null;
 		try {
 			monitor.beginTask("Presenter creation", 3);
 			
@@ -102,7 +105,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			presenter.createViewInterface();
 			if(page.isPlace()) {
 				tokens = new Tokens(root, page.getTokenClass());
-				tokens.createTokenField(page.getTokenName());
+				tokenField = tokens.createTokenField(page.getTokenName());
 				tokens.createTokenGetter(page.getTokenName());
 				
 				if(page.getGatekeeper().isEmpty()) {
@@ -176,6 +179,10 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			}
 			else {
 				presenterModule.createPresenterBinder(presenter.getType(), view.getType());
+			}
+			if(!page.getAnnotation().isEmpty()) {
+				IType annotation = root.getJavaProject().findType(page.getAnnotation());
+				presenterModule.createConstantBinder(annotation, tokens.getType(), tokenField);
 			}
 			monitor.worked(1);
 

@@ -17,6 +17,7 @@
 package com.imagem.gwtpplugin.projectfile.src.client.gin;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -89,9 +90,7 @@ public class PresenterModule extends ProjectClass {
 
 		cu.createImport(C_ROOT_PRESENTER, null, null);
 		contents += "	bind(RootPresenter.class).asEagerSingleton();\n\n";
-
-		contents += "	// Constants\n";
-		contents += "	// TODO bind the defaultPlace\n";
+		
 		contents += "}";
 		
 		return type.createMethod(contents, null, false, null);
@@ -250,6 +249,48 @@ public class PresenterModule extends ProjectClass {
 		
 		String newSource = "";
 		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
+
+	public void createConstantBinder(IType annotation, IType nameTokens, IField tokenField) throws JavaModelException {
+		cu.createImport(annotation.getFullyQualifiedName(), null, null);
+		cu.createImport(nameTokens.getFullyQualifiedName(), null, null);
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configure", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+
+		contents += "bindConstant().annotatedWith(" + annotation.getElementName() + ".class).to(" + nameTokens.getElementName() + "." + tokenField.getElementName() + ");";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			if(lines[i].contains("bindConstant().annotatedWith(" + annotation.getElementName() + ".class)")) {
+				lines[i] = "";					
+			}
 			newSource += lines[i];
 			if(i != lines.length - 1)
 				newSource += "\n";
