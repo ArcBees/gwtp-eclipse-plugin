@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/com.imagem.gwtpplugin.feature_1.5.0.qualifier.jar" id="com.imagem.gwtpplugin.feature" version="1.5.0.qualifier">
-      <category name="imagem"/>
+      <category name="gwtp"/>
    </feature>
-   <category-def name="imagem" label="Imagem Plugin">
+   <category-def name="gwtp" label="GWT-Platform">
       <description>
-         Imagem Plugin 1.0.1
+         GWT-Platform Plugin
       </description>
    </category-def>
 </site>

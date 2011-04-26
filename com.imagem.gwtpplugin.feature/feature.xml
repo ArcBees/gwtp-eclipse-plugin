@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.imagem.gwtpplugin.feature"
-      label="GWTP Plugin"
+      label="GWT-Platform Plugin"
       version="1.5.0.qualifier"
-      provider-name="IMAGEM Solutions TI santé">
+      provider-name="IMAGEM Solutions TI Santé">
 
    <description url="http://code.google.com/p/gwt-platform/">
       GWTP Plugin
