@@ -55,31 +55,31 @@ public class VersionTool {
 			
 			// GWT < 2.2.0
 			if(compare(version, "2.2.0") == -1) {
-				libs[1] = new Jar(project, libPath, GIN_1_5_pre);
-				libs[1].createFile();
+				libs[0] = new Jar(project, libPath, GIN_1_5_pre);
+				libs[0].createFile();
 
-				libs[4] = new Jar(project, libPath, GWTP_5);
-				libs[4].createFile();
+				libs[1] = new Jar(project, libPath, GWTP_5);
+				libs[1].createFile();
 			}
 			else {
-				libs[1] = new Jar(project, libPath, GIN_1_5);
-				libs[1].createFile();
+				libs[0] = new Jar(project, libPath, GIN_1_5);
+				libs[0].createFile();
 
-				libs[5] = new Jar(project, libPath, GWTP_6);
-				libs[5].createFile();
+				libs[1] = new Jar(project, libPath, GWTP_6);
+				libs[1].createFile();
 			}
 			
-			libs[0] = new Jar(project, libPath, AOPALLIANCE);
-			libs[0].createFile();
-			
-			libs[2] = new Jar(project, libPath, GUICE_3);
+			libs[2] = new Jar(project, libPath, AOPALLIANCE);
 			libs[2].createFile();
-
-			libs[3] = new Jar(project, libPath, GUICE_ASSISTEDINJECT_3);
+			
+			libs[3] = new Jar(project, libPath, GUICE_3);
 			libs[3].createFile();
 
-			libs[4] = new Jar(project, libPath, GUICE_SERVLET_3);
+			libs[4] = new Jar(project, libPath, GUICE_ASSISTEDINJECT_3);
 			libs[4].createFile();
+
+			libs[5] = new Jar(project, libPath, GUICE_SERVLET_3);
+			libs[5].createFile();
 			
 			libs[6] = new Jar(project, libPath, JAVAC_INJECT);
 			libs[6].createFile();
@@ -90,6 +90,14 @@ public class VersionTool {
 		return libs;
 	}
 
+	/**
+	 * Compare versions.
+	 * Return -1 if v1 < v2, 0 if v1 == v2 and 1 if v1 > v2.
+	 * 
+	 * @param v1	Client version
+	 * @param v2	Comparison
+	 * @return
+	 */
 	public static int compare(String v1, String v2) {
 		String[] split1 = v1.split("\\.");
 		String[] split2 = v2.split("\\.");
