@@ -66,5 +66,52 @@
          </enabledWhen>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="com.imagem.gwtpplugin"
+            name="GWT-Platform">
+      </category>
+      <wizard
+            category="com.imagem.gwtpplugin"
+            class="com.imagem.gwtpplugin.wizard.NewProjectWizard"
+            icon="icons/gwtp-plugin.png"
+            id="com.imagem.gwtpplugin.wizard.NewProjectWizard"
+            name="GWTP Project"
+            project="true">
+      </wizard>
+      <wizard
+            category="com.imagem.gwtpplugin"
+            class="com.imagem.gwtpplugin.wizard.NewActionWizard"
+            icon="icons/gwtp-plugin.png"
+            id="com.imagem.gwtpplugin.wizard.NewActionWizard"
+            name="Action"
+            project="false">
+      </wizard>
+      <wizard
+            category="com.imagem.gwtpplugin"
+            class="com.imagem.gwtpplugin.wizard.NewEventWizard"
+            icon="icons/gwtp-plugin.png"
+            id="com.imagem.gwtpplugin.wizard.NewEventWizard"
+            name="Event"
+            project="false">
+      </wizard>
+      <wizard
+            category="com.imagem.gwtpplugin"
+            class="com.imagem.gwtpplugin.wizard.NewModelWizard"
+            icon="icons/gwtp-plugin.png"
+            id="com.imagem.gwtpplugin.wizard.NewModelWizard"
+            name="Model"
+            project="false">
+      </wizard>
+      <wizard
+            category="com.imagem.gwtpplugin"
+            class="com.imagem.gwtpplugin.wizard.NewPresenterWizard"
+            icon="icons/gwtp-plugin.png"
+            id="com.imagem.gwtpplugin.wizard.NewPresenterWizard"
+            name="Presenter"
+            project="false">
+      </wizard>
+   </extension>
 
 </plugin>
