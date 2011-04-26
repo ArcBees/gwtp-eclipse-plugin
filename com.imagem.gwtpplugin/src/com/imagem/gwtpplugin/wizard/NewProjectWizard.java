@@ -199,6 +199,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			IPath libPath = webInfPath.append("lib");
 			project.getFolder(libPath).create(false, true, null); // TODO Progress Monitor
 			
+			Thread.sleep(1000);
+			
 			Jar[] libs = VersionTool.getLibs(project, libPath);
 			
 			// Classpath Entries creation
