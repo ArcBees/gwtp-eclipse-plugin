@@ -34,6 +34,7 @@ public class Presenter extends ProjectClass {
 	private static final String C_PRESENTER_WIDGET = "com.gwtplatform.mvp.client.PresenterWidget";
 	private static final String C_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
 	private static final String I_VIEW = "com.gwtplatform.mvp.client.View";
+	private static final String I_POPUP_VIEW = "com.gwtplatform.mvp.client.PopupView";
 	private static final String I_PROXY = "com.gwtplatform.mvp.client.proxy.Proxy";
 	private static final String I_PROXY_PLACE = "com.gwtplatform.mvp.client.proxy.ProxyPlace";
 	private static final String A_PROXY_STANDARD = "com.gwtplatform.mvp.client.annotations.ProxyStandard";
@@ -70,14 +71,25 @@ public class Presenter extends ProjectClass {
 			type = cu.createType(contents, null, false, null);
 		}
 	}
+
+	public IType createPopupViewInterface() throws JavaModelException {
+		cu.createImport(I_POPUP_VIEW, null, null);
+		
+		String contents = "";
+		contents += "public interface MyView extends PopupView {\n";
+		contents += "	// TODO Put your view methods here\n";
+		contents += "}\n\n";
+
+		return type.createType(contents, null, false, null);
+	}
 	
 	public IType createViewInterface() throws JavaModelException {
+		cu.createImport(I_VIEW, null, null);
+		
 		String contents = "";
 		contents += "public interface MyView extends View {\n";
 		contents += "	// TODO Put your view methods here\n";
 		contents += "}\n\n";
-		
-		cu.createImport(I_VIEW, null, null);
 
 		return type.createType(contents, null, false, null);
 	}

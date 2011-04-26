@@ -102,7 +102,12 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			// Presenter
 			monitor.subTask("Presenter");
 			presenter = new Presenter(root, page.getPackageText(), page.getTypeName(), page.isWidget());
-			presenter.createViewInterface();
+			if(page.isPopup()) {
+				presenter.createPopupViewInterface();
+			}
+			else {
+				presenter.createViewInterface();
+			}
 			if(page.isPlace()) {
 				tokens = new Tokens(root, page.getTokenClass());
 				tokenField = tokens.createTokenField(page.getTokenName());
@@ -143,12 +148,12 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
 			
 			// View
 			monitor.subTask("View");
-			view = new View(root, page.getViewPackageText(), page.getViewTypeName(), presenter.getType());
+			view = new View(root, page.getViewPackageText(), page.getViewTypeName(), presenter.getType(), page.isPopup());
 			if(page.useUiBinder()) {
 				view.createBinderInterface();
 				view.createWidgetField();
 			}
-			view.createConstructor(page.useUiBinder());
+			view.createConstructor(page.isPopup(), page.useUiBinder());
 			view.createAsWidgetMethod(page.useUiBinder());
 			
 			// Ui

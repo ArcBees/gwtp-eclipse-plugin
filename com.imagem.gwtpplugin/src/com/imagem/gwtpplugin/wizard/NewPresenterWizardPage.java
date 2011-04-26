@@ -98,6 +98,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	private Text annotation;
 	private Button browseAnnotation;
 	private boolean isPlaceEnabled;
+	private Button isPopup;
 
 	public NewPresenterWizardPage(IStructuredSelection selection) {
 		super(true, PAGE_NAME);
@@ -230,7 +231,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 		label.setText("Ui:");
 
 		GridData gd = new GridData(GridData.FILL);
-		gd.horizontalSpan = nColumns - 2;
+		gd.horizontalSpan = nColumns - 1;
 
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 2;
@@ -248,7 +249,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				setRevealInParentEnabled(!isPresenterWidget.getSelection());
 				setPlaceEnabled(!isPresenterWidget.getSelection());
 				setGinjectorEnabled(!isPresenterWidget.getSelection());
-				isSingleton.setEnabled(isPresenterWidget.getSelection());
+				setWidgetEnabled(isPresenterWidget.getSelection());
 			}
 
 			@Override
@@ -256,15 +257,13 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 				setRevealInParentEnabled(!isPresenterWidget.getSelection());
 				setPlaceEnabled(!isPresenterWidget.getSelection());
 				setGinjectorEnabled(!isPresenterWidget.getSelection());
-				isSingleton.setEnabled(isPresenterWidget.getSelection());
+				setWidgetEnabled(isPresenterWidget.getSelection());
 			}
 		});
 
 		useUiBinder = new Button(checks, SWT.CHECK);
 		useUiBinder.setText("Use UiBinder");
 		useUiBinder.setSelection(true);
-
-		label = new Label(composite, SWT.NULL);
 	}
 
 	private void createWidgetControls(Composite composite, int nColumns) {
@@ -275,7 +274,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 		gd.horizontalSpan = nColumns - 1;
 
 		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
+		layout.numColumns = 2;
 		layout.verticalSpacing = 5;
 
 		Composite checks = new Composite(composite, SWT.NULL);
@@ -286,6 +285,16 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 		isSingleton.setText("Singleton");
 		isSingleton.setSelection(false);
 		isSingleton.setEnabled(false);
+		
+		isPopup = new Button(checks, SWT.CHECK);
+		isPopup.setText("PopupView");
+		isPopup.setSelection(false);
+		isPopup.setEnabled(false);
+	}
+	
+	private void setWidgetEnabled(boolean enabled) {
+		isSingleton.setEnabled(enabled);
+		isPopup.setEnabled(enabled);
 	}
 
 	private void createRevealInParentControls(Composite composite, int nColumns) {
@@ -334,7 +343,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
 		isRevealRootPopupContentEvent = new Button(radios, SWT.RADIO);
 		isRevealRootPopupContentEvent.setText("RevealRootPopupContentEvent");
-		isRevealRootPopupContentEvent.setEnabled(false); // TODO
+		isRevealRootPopupContentEvent.setEnabled(false);
 
 		label = new Label(composite, SWT.NULL);
 		label.setText("Content Slot:");
@@ -618,7 +627,6 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	}
 
 	protected IStatus placeChanged() {
-		//TODO
 		StatusInfo status = new StatusInfo();
 
 		if(isPlace.isEnabled() && isPlace.getSelection()) {
@@ -1041,6 +1049,10 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 	
 	public boolean isSingleton() {
 		return isSingleton.getSelection();
+	}
+	
+	public boolean isPopup() {
+		return isPopup.getSelection() && isWidget();
 	}
 
 	public String getRevealEvent() {

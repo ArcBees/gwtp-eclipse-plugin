@@ -31,7 +31,9 @@ import com.imagem.gwtpplugin.projectfile.ProjectClass;
  */
 public class View extends ProjectClass {
 
+	private static final String C_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
 	private static final String C_VIEW_IMPL = "com.gwtplatform.mvp.client.ViewImpl";
+	private static final String C_POPUP_VIEW_IMPL = "com.gwtplatform.mvp.client.PopupViewImpl";
 	private static final String C_WIDGET = "com.google.gwt.user.client.ui.Widget";
 	private static final String A_INJECT = "com.google.inject.Inject";
 	private static final String I_UI_BINDER = "com.google.gwt.uibinder.client.UiBinder";
@@ -40,13 +42,20 @@ public class View extends ProjectClass {
 		super(root, fullyQualifiedName);
 	}
 
-	public View(IPackageFragmentRoot root, String packageName, String elementName, IType presenter) throws JavaModelException {
+	public View(IPackageFragmentRoot root, String packageName, String elementName, IType presenter, boolean isPopup) throws JavaModelException {
 		super(root, packageName, elementName);
 		if(type == null) {
 			cu.createPackageDeclaration(packageName, null);
 			
-			cu.createImport(C_VIEW_IMPL, null, null);
-			String contents = "public class " + elementName + " extends ViewImpl implements " + presenter.getElementName() + ".MyView {\n\n}";
+			String contents = "";
+			if(isPopup) {
+				cu.createImport(C_POPUP_VIEW_IMPL, null, null);
+				contents = "public class " + elementName + " extends PopupViewImpl implements " + presenter.getElementName() + ".MyView {\n\n}";
+			}
+			else {
+				cu.createImport(C_VIEW_IMPL, null, null);
+				contents = "public class " + elementName + " extends ViewImpl implements " + presenter.getElementName() + ".MyView {\n\n}";
+			}
 
 			type = cu.createType(contents, null, false, null);
 		}
@@ -62,12 +71,24 @@ public class View extends ProjectClass {
 		return type.createField("private final Widget widget;", null, false, null);
 	}
 	
-	public IMethod createConstructor(boolean useUiBinder) throws JavaModelException {
+	public IMethod createConstructor(boolean isPopup, boolean useUiBinder) throws JavaModelException {
 		String contents = "";
 		
 		cu.createImport(A_INJECT, null, null);
 		contents += "@Inject\n";
-		contents += "public " + type.getElementName() + "(" + (useUiBinder ? "final Binder binder" : "") + ") {\n";
+		contents += "public " + type.getElementName() + "(";
+		if(isPopup) {
+			cu.createImport(C_EVENT_BUS, null, null);
+			contents += "final EventBus eventBus";
+		}
+		if(isPopup && useUiBinder) 
+			contents += ", ";
+		if(useUiBinder)
+			contents += "final Binder binder";
+		contents += ") {\n";
+		
+		if(isPopup)
+			contents += "	super(eventBus);\n";
 		if(useUiBinder)
 			contents += "	widget = binder.createAndBindUi(this);\n";
 		contents += "}";
