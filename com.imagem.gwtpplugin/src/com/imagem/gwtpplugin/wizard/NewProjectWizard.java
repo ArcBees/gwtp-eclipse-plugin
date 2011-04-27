@@ -365,6 +365,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"), ginjector.getType().getFullyQualifiedName());
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"), presenterModule.getType().getFullyQualifiedName());
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"), handlerModule.getType().getFullyQualifiedName());
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"), "com.gwtplatform.dispatch.shared.ActionImpl");
 			
 			// Remove bin folder
 			IFolder binFolder = project.getFolder(new Path("/bin"));

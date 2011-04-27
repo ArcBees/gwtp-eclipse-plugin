@@ -185,13 +185,19 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 
 	private void setDefaultValues() {
 		try {
+			if(actionSuperclass != null) {
+				String actionSuperclassValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"));
+				actionSuperclass.setText(actionSuperclassValue == null ? "" : actionSuperclassValue);
+
+				fActionSuperclassStatus = actionSuperclassChanged();
+			}
 			if(handlerModule != null) {
 				String handlerModuleValue = getJavaProject().getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"));
 				handlerModule.setText(handlerModuleValue == null ? "" : handlerModuleValue);
 
 				fHandlerModuleStatus = handlerModuleChanged();
-				doStatusUpdate();
 			}
+			doStatusUpdate();
 		}
 		catch (CoreException e1) {}
 	}

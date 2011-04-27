@@ -63,6 +63,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 	private Text ginjector;
 	private Text presenterModule;
 	private Text handlerModule;
+	private Text action;
 
 	public GwtPropertyPage() {
 		super();
@@ -188,6 +189,32 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 			}
 		});
 
+		// Action implementation
+		label = new Label(composite, SWT.NULL);
+		label.setText("Default Action implementation:");
+
+		action = new Text(composite, SWT.BORDER | SWT.SINGLE);
+		action.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		action.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				pageChanged();
+			}
+		});
+
+		browse = new Button(composite, SWT.PUSH);
+		browse.setText("Browse...");
+		browse.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				action.setText(chooseActionSuperclass().getFullyQualifiedName('.'));
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				action.setText(chooseActionSuperclass().getFullyQualifiedName('.'));
+			}
+		});
+
 		setValues();
 
 		return composite;
@@ -304,6 +331,34 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 				return;
 			}
 		}
+		
+		// Action implementation
+		if(!action.getText().isEmpty()) {
+			try {
+				IType type = project.findType(action.getText());
+				if(type == null || !type.exists()) {
+					setErrorMessage(action.getText() + " doesn't exist");
+					return;
+				}
+				ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+				IType[] interfaces = hierarchy.getAllInterfaces();
+				boolean isAction = false;
+				for(IType inter : interfaces) {
+					if(inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.shared.Action")) {
+						isAction = true;
+						break;
+					}
+				}
+				if(!isAction) {
+					setErrorMessage(action.getText() + " doesn't implement Action");
+					return;
+				}
+			}
+			catch (JavaModelException e) {
+				setErrorMessage("An unexpected error has happened. Close the wizard and retry.");
+				return;
+			}
+		}
 
 		setErrorMessage(null);
 		super.setValid(true);
@@ -320,11 +375,13 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 			String ginjectorValue = project.getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"));
 			String presenterModuleValue = project.getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"));
 			String handlerModuleValue = project.getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"));
+			String actionValue = project.getProject().getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"));
 
 			nameTokens.setText(nameTokensValue == null ? "" : nameTokensValue);
 			ginjector.setText(ginjectorValue == null ? "" : ginjectorValue);
 			presenterModule.setText(presenterModuleValue == null ? "" : presenterModuleValue);
 			handlerModule.setText(handlerModuleValue == null ? "" : handlerModuleValue);
+			action.setText(actionValue == null ? "" : actionValue);
 		}
 		catch(CoreException e1) {}
 
@@ -337,6 +394,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"), ginjector.getText());
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"), presenterModule.getText());
 			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"), handlerModule.getText());
+			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"), action.getText());
 		}
 		catch(CoreException e) {
 			e.printStackTrace();
@@ -349,6 +407,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 		ginjector.setText("");
 		presenterModule.setText("");
 		handlerModule.setText("");
+		action.setText("com.gwtplatform.dispatch.shared.ActionImpl");
 
 		super.performDefaults();
 		pageChanged();
@@ -423,6 +482,25 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 		dialog.setTitle("HandlerModule selection");
 		dialog.setMessage("Select an HandlerModule class");
 		dialog.setInitialPattern("ServerModule");
+
+		if (dialog.open() == Window.OK) {
+			return (IType) dialog.getFirstResult();
+		}
+		return null;
+	}
+
+	private IType chooseActionSuperclass() {
+		if (project == null) {
+			return null;
+		}
+
+		IJavaElement[] elements = new IJavaElement[] { project };
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+
+		FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, null, scope, IJavaSearchConstants.CLASS, new ActionSuperclassSelectionExtension());
+		dialog.setTitle("Action Superclass selection");
+		dialog.setMessage("Choose a superclass for your action");
+		dialog.setInitialPattern("*ActionImpl");
 
 		if (dialog.open() == Window.OK) {
 			return (IType) dialog.getFirstResult();
@@ -530,6 +608,37 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
 						IType[] superclasses = hierarchy.getAllClasses();
 						for(IType superclass : superclasses) {
 							if(superclass.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.server.guice.HandlerModule")) {
+								return true;
+							}
+						}
+						return false;
+					}
+					catch (JavaModelException e) {
+						return false;
+					}
+				}
+			};
+
+			return extension;
+		}
+	}
+
+	public class ActionSuperclassSelectionExtension extends TypeSelectionExtension {
+
+		@Override
+		public ITypeInfoFilterExtension getFilterExtension() {
+			ITypeInfoFilterExtension extension = new ITypeInfoFilterExtension() {
+				@Override
+				public boolean select(ITypeInfoRequestor requestor) {
+					try {
+						IType type = project.findType(requestor.getPackageName() + "." + requestor.getTypeName());
+						if(type == null || !type.exists()) {
+							return false;
+						}
+						ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+						IType[] interfaces = hierarchy.getAllInterfaces();
+						for(IType inter : interfaces) {
+							if(inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.shared.Action")) {
 								return true;
 							}
 						}
