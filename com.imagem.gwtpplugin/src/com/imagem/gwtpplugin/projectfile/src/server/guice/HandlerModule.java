@@ -97,4 +97,43 @@ public class HandlerModule extends ProjectClass {
 		buffer.replace(range.getOffset(), range.getLength(), newSource);
 		buffer.save(null, true);
 	}
+
+	public void createBinder(IType action, IType actionHandler, IType actionValidator) throws JavaModelException {
+		cu.createImport(action.getFullyQualifiedName(), null, null);
+		cu.createImport(actionHandler.getFullyQualifiedName(), null, null);
+		cu.createImport(actionValidator.getFullyQualifiedName(), null, null);
+		
+		IBuffer buffer = cu.getBuffer();
+		
+		IMethod configure = type.getMethod("configureHandlers", new String[0]);
+		ISourceRange range = configure.getSourceRange();
+		String source = configure.getSource();
+		
+		String[] lines = source.split("\\\n");
+		int tabulations = 1;
+		for(char c : lines[lines.length - 1].toCharArray()) {
+			if(c == '\t')
+				tabulations++;
+			else
+				break;
+		}
+		
+		String contents = "";
+		for(int i = 0; i < tabulations; i++) {
+			contents += "\t";
+		}
+		contents += "bindHandler(" + action.getElementName() + ".class, " + actionHandler.getElementName() + ".class, " + actionValidator.getElementName() + ".class);";
+		
+		String newSource = "";
+		for(int i = 0; i < lines.length; i++) {
+			newSource += lines[i];
+			if(i != lines.length - 1)
+				newSource += "\n";
+			if(i == lines.length - 2)
+				newSource += contents + "\n";
+		}
+		
+		buffer.replace(range.getOffset(), range.getLength(), newSource);
+		buffer.save(null, true);
+	}
 }

@@ -87,11 +87,13 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 	private IStatus fActionSuperclassStatus = new StatusInfo();
 	private IStatus fActionFieldsStatus = new StatusInfo();
 	private IStatus fResultFieldsStatus = new StatusInfo();
-	private IStatus fHandlerModuleStatus = new StatusInfo();
 	private IStatus fActionHandlerStatus = new StatusInfo();
+	private IStatus fActionValidatorStatus = new StatusInfo();
+	private IStatus fHandlerModuleStatus = new StatusInfo();
 	private Text handlerModule;
 	private Text actionSuperclass;
 	private Text actionHandlerPackage;
+	private Text actionValidator;
 
 	public NewActionWizardPage(IStructuredSelection selection) {
 		super(true, PAGE_NAME);
@@ -128,6 +130,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 				fActionFieldsStatus,
 				fResultFieldsStatus,
 				fActionHandlerStatus, 
+				fActionValidatorStatus, 
 				fHandlerModuleStatus
 		};
 
@@ -170,6 +173,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 		createActionFieldsControls(composite, nColumns);
 		createResultFieldsControls(composite, nColumns);
 		createActionHandlerControls(composite, nColumns);
+		createActionValidatorControls(composite, nColumns);
 		createHanderModuleControls(composite, nColumns);
 
 		setControl(composite);
@@ -619,6 +623,93 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 	}
 
 
+	private void createActionValidatorControls(Composite composite, int nColumns) {
+		Label label = new Label(composite, SWT.NULL);
+		label.setText("ActionValidator:");
+
+		GridData gd = new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.horizontalSpan = nColumns - 2;
+
+		actionValidator = new Text(composite, SWT.BORDER | SWT.SINGLE);
+		actionValidator.setLayoutData(gd);
+		actionValidator.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				fActionValidatorStatus = actionValidatorChanged();
+				doStatusUpdate();
+			}
+		});
+
+		Button browse = new Button(composite, SWT.PUSH);
+		browse.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		browse.setText("Browse...");
+		browse.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				actionValidator.setText(chooseActionValidator().getFullyQualifiedName('.'));
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				actionValidator.setText(chooseActionValidator().getFullyQualifiedName('.'));
+			}
+		});
+		
+		fActionValidatorStatus = actionValidatorChanged();
+		doStatusUpdate();
+	}
+
+	private IType chooseActionValidator() {
+		IJavaProject project = getJavaProject();
+		if (project == null) {
+			return null;
+		}
+
+		IJavaElement[] elements = new IJavaElement[] { project };
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+
+		FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS, new ActionValidatorSelectionExtension());
+		dialog.setTitle("ActionValidator selection");
+		dialog.setMessage("Select an ActionValidator class");
+		dialog.setInitialPattern("*ActionValidator");
+
+		if (dialog.open() == Window.OK) {
+			return (IType) dialog.getFirstResult();
+		}
+		return null;
+	}
+
+	protected IStatus actionValidatorChanged() {
+		StatusInfo status = new StatusInfo();
+
+		try {
+			IType type = getJavaProject().findType(actionValidator.getText());
+			if(type == null || !type.exists()) {
+				status.setError(actionValidator.getText() + " doesn't exist");
+				return status;
+			}
+			ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+			IType[] interfaces = hierarchy.getAllInterfaces();
+			boolean isActionValidator = false;
+			for(IType inter : interfaces) {
+				if(inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.server.actionvalidator.ActionValidator")) {
+					isActionValidator = true;
+					break;
+				}
+			}
+			if(!isActionValidator) {
+				status.setError(actionValidator.getText() + " doesn't implement ActionValidator");
+				return status;
+			}
+		}
+		catch (JavaModelException e) {
+			status.setError("An unexpected error has happened. Close the wizard and retry.");
+			return status;
+		}
+		return status;
+	}
+
+
 	private void createHanderModuleControls(Composite composite, int nColumns) {
 		Label label = new Label(composite, SWT.NULL);
 		label.setText("HandlerModule:");
@@ -735,7 +826,11 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 	}
 
 	public String getActionHandlerTypeName() {
-		return getTypeName() + "Handler";
+		return getTypeName() + "ActionHandler";
+	}
+
+	public String getActionValidator() {
+		return actionValidator.getText();
 	}
 
 	public String getHandlerModule() {
@@ -769,6 +864,37 @@ public class NewActionWizardPage extends NewTypeWizardPage {
 				}
 			};
 
+			return extension;
+		}
+	}
+
+	public class ActionValidatorSelectionExtension extends TypeSelectionExtension {
+
+		@Override
+		public ITypeInfoFilterExtension getFilterExtension() {
+			ITypeInfoFilterExtension extension = new ITypeInfoFilterExtension() {
+				@Override
+				public boolean select(ITypeInfoRequestor requestor) {
+					try {
+						IType type = getJavaProject().findType(requestor.getPackageName() + "." + requestor.getTypeName());
+						if(type == null || !type.exists()) {
+							return false;
+						}
+						ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+						IType[] interfaces = hierarchy.getAllInterfaces();
+						for(IType inter : interfaces) {
+							if(inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.server.actionvalidator.ActionValidator")) {
+								return true;
+							}
+						}
+						return false;
+					}
+					catch (JavaModelException e) {
+						return false;
+					}
+				}
+			};
+			
 			return extension;
 		}
 	}

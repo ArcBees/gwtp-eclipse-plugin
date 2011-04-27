@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbench;
 
 import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.projectfile.src.server.ActionHandler;
+import com.imagem.gwtpplugin.projectfile.src.server.ActionValidator;
 import com.imagem.gwtpplugin.projectfile.src.server.guice.HandlerModule;
 import com.imagem.gwtpplugin.projectfile.src.shared.Action;
 import com.imagem.gwtpplugin.projectfile.src.shared.Result;
@@ -158,7 +159,13 @@ public class NewActionWizard extends Wizard implements INewWizard {
 			// HandlerModule
 			monitor.subTask("Bind in HandlerModule");
 			handlerModule = new HandlerModule(root, page.getHandlerModule());
-			handlerModule.createBinder(action.getType(), actionHandler.getType());
+			if(page.getActionValidator().isEmpty()) {
+				handlerModule.createBinder(action.getType(), actionHandler.getType());
+			}
+			else {
+				ActionValidator actionValidator = new ActionValidator(root, page.getActionValidator());
+				handlerModule.createBinder(action.getType(), actionHandler.getType(), actionValidator.getType());
+			}
 			monitor.worked(1);
 			
 			// Committing
