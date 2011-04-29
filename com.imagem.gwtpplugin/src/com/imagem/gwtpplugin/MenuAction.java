@@ -31,6 +31,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
+import com.imagem.gwtpplugin.wizard.MergeLocalesWizard;
 import com.imagem.gwtpplugin.wizard.NewActionWizard;
 import com.imagem.gwtpplugin.wizard.NewEventWizard;
 import com.imagem.gwtpplugin.wizard.NewModelWizard;
@@ -144,6 +145,29 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				INewWizard wizard = new NewPresenterWizard();
+				if(selection instanceof IStructuredSelection)
+					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+				else
+					wizard.init(window.getWorkbench(), new StructuredSelection());
+
+				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+				dialog.create();
+				dialog.open();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		item = new MenuItem(menu, SWT.SEPARATOR);
+
+		item = new MenuItem(menu, SWT.PUSH);
+		item.setText("Merge Locales");
+		item.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				INewWizard wizard = new MergeLocalesWizard();
 				if(selection instanceof IStructuredSelection)
 					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
 				else

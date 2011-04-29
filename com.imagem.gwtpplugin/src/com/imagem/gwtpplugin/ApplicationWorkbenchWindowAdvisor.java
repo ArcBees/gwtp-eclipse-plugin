@@ -21,6 +21,6 @@ public class ApplicationWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         configurer.setInitialSize(new Point(400, 300));
         configurer.setShowCoolBar(true);
         configurer.setShowStatusLine(false);
-        configurer.setTitle("GWTP Plugin (HELLO)"); //$NON-NLS-1$
+        configurer.setTitle("GWTP Plugin"); //$NON-NLS-1$
     }
 }
