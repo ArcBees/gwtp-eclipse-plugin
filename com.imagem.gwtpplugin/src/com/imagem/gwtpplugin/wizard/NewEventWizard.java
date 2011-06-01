@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -103,7 +104,7 @@ public class NewEventWizard extends Wizard implements INewWizard {
 					fields[i] = event.createField(eventFields[i].getType(), eventFields[i].getName());
 				}
 			}
-			event.createConstructor(fields);
+			IMethod constructor = event.createConstructor(fields);
 			for(IField field : fields) {
 				event.createGetterMethod(field);
 			}
@@ -116,7 +117,7 @@ public class NewEventWizard extends Wizard implements INewWizard {
 			
 			if(page.hasHandlers()) {
 				monitor.subTask("HasHandlers");
-				IType hasHandlers = event.createHasHandlersInterface(handler);
+				IType hasHandlers = event.createHasHandlersInterface(handler, constructor);
 				event.createFireMethod(fields, hasHandlers);
 			}
 			else {

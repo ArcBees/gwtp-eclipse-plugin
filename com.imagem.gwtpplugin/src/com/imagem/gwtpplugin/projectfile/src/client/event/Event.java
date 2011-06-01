@@ -49,7 +49,7 @@ public class Event extends ProjectClass {
 			cu.createPackageDeclaration(packageName, null);
 
 			cu.createImport(C_GWT_EVENT, null, null);
-			String contents = "public class " + elementName + " extends GwtEvent<" + eventName + "Handler> {\n\n}";
+			String contents = "public class " + elementName + " extends GwtEvent<" + elementName + "." + eventName + "Handler> {\n\n}";
 	
 			type = cu.createType(contents, null, false, null);
 		}
@@ -68,7 +68,7 @@ public class Event extends ProjectClass {
 		return type.createType(contents, null, false, null);
 	}
 	
-	public IType createHasHandlersInterface(IType handler) throws JavaModelException {
+	public IType createHasHandlersInterface(IType handler, IMethod constructor) throws JavaModelException {
 		cu.createImport(I_HAS_HANDLERS, null, null);
 		cu.createImport(I_HANDLER_REGISTRATION, null, null);
 		
@@ -79,12 +79,10 @@ public class Event extends ProjectClass {
 		contents += "	public HandlerRegistration add" + handler.getElementName() + "(" + handler.getElementName() + " handler);\n";
 		contents += "}\n\n";
 
-		return type.createType(contents, null, false, null);
+		return type.createType(contents, constructor, false, null);
 	}
 	
 	public IField createTypeField(IType handler) throws JavaModelException {
-		cu.createImport(handler.getFullyQualifiedName().replaceAll("\\$", "."), null, null);
-		
 		String contents = "public static Type<" + handler.getElementName() + "> TYPE = new Type<" + handler.getElementName() + ">();";
 		
 		return type.createField(contents, null, false, null);
@@ -183,7 +181,7 @@ public class Event extends ProjectClass {
 	public IMethod createFireMethod(IField[] fields, IType hasHandlers) throws JavaModelException {
 		String contents = "";
 
-		contents += "public static void fire(" + hasHandlers.getElementName() + " source";
+		contents += "public static void fire(HasHandlers source";
 		String subContents = "";
 		for(IField field : fields) {
 			if(!subContents.isEmpty()) {
