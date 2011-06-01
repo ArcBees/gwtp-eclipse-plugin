@@ -34,25 +34,57 @@ public class Event extends ProjectClass {
 
 	private static final String C_GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";
 	private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";
+	private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";
+	private static final String I_HANDLER_REGISTRATION = "com.google.gwt.event.shared.HandlerRegistration";
 	
 	public Event(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
 		super(root, fullyQualifiedName);
 	}
 	
-	public Event(IPackageFragmentRoot root, String packageName, String elementName, IType handler) throws JavaModelException {
+	public Event(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
 		super(root, packageName, elementName);
 		if(type == null) {
+			String eventName = elementName.substring(0, elementName.length() - 5);
+			
 			cu.createPackageDeclaration(packageName, null);
 
 			cu.createImport(C_GWT_EVENT, null, null);
-			cu.createImport(handler.getFullyQualifiedName(), null, null);
-			String contents = "public class " + elementName + " extends GwtEvent<" + handler.getElementName() + "> {\n\n}";
+			String contents = "public class " + elementName + " extends GwtEvent<" + eventName + "Handler> {\n\n}";
 	
 			type = cu.createType(contents, null, false, null);
 		}
 	}
 	
+	public IType createHandlerInterface() throws JavaModelException {
+		cu.createImport(I_EVENT_HANDLER, null, null);
+		
+		String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
+		
+		String contents = "";
+		contents += "public interface " + eventName + "Handler extends EventHandler {\n";
+		contents += "	public void on" + eventName + "(" + type.getElementName() + " event);\n";
+		contents += "}\n\n";
+
+		return type.createType(contents, null, false, null);
+	}
+	
+	public IType createHasHandlersInterface(IType handler) throws JavaModelException {
+		cu.createImport(I_HAS_HANDLERS, null, null);
+		cu.createImport(I_HANDLER_REGISTRATION, null, null);
+		
+		String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
+		
+		String contents = "";
+		contents += "public interface " + eventName + "HasHandlers extends HasHandlers {\n";
+		contents += "	public HandlerRegistration add" + handler.getElementName() + "(" + handler.getElementName() + " handler);\n";
+		contents += "}\n\n";
+
+		return type.createType(contents, null, false, null);
+	}
+	
 	public IField createTypeField(IType handler) throws JavaModelException {
+		cu.createImport(handler.getFullyQualifiedName().replaceAll("\\$", "."), null, null);
+		
 		String contents = "public static Type<" + handler.getElementName() + "> TYPE = new Type<" + handler.getElementName() + ">();";
 		
 		return type.createField(contents, null, false, null);
@@ -118,6 +150,16 @@ public class Event extends ProjectClass {
 		return type.createMethod(contents, null, false, null);
 	}
 	
+	public IMethod createTypeGetterMethod(IType handler) throws JavaModelException {
+		String contents = "";
+		
+		contents += "public static Type<" + handler.getElementName() + "> getType() {\n";
+		contents += "	return TYPE;\n";
+		contents += "}";
+
+		return type.createMethod(contents, null, false, null);
+	}
+	
 	public IMethod createFireMethod(IField[] fields) throws JavaModelException {
 		String contents = "";
 		
@@ -140,8 +182,7 @@ public class Event extends ProjectClass {
 	
 	public IMethod createFireMethod(IField[] fields, IType hasHandlers) throws JavaModelException {
 		String contents = "";
-		
-		cu.createImport(hasHandlers.getFullyQualifiedName(), null, null);
+
 		contents += "public static void fire(" + hasHandlers.getElementName() + " source";
 		String subContents = "";
 		for(IField field : fields) {

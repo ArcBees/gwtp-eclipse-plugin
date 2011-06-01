@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,8 +32,6 @@ import org.eclipse.ui.IWorkbench;
 
 import com.imagem.gwtpplugin.projectfile.Field;
 import com.imagem.gwtpplugin.projectfile.src.client.event.Event;
-import com.imagem.gwtpplugin.projectfile.src.client.event.Handler;
-import com.imagem.gwtpplugin.projectfile.src.client.event.HasHandlers;
 
 /**
  * 
@@ -84,18 +83,15 @@ public class NewEventWizard extends Wizard implements INewWizard {
 		}
 		
 		Event event = null;
-		Handler handler = null;
-		HasHandlers hasHandlers = null;
 		try {
-			monitor.beginTask("Event creation", 3);
+			monitor.beginTask("Event creation", 2);
 			
 			IPackageFragmentRoot root = page.getPackageFragmentRoot();
 			
-			handler = new Handler(root, page.getHandlerPackageText(), page.getHandlerTypeName());
-			
 			monitor.subTask("Event");
-			event = new Event(root, page.getPackageText(), page.getTypeName(), handler.getType());
-			event.createTypeField(handler.getType());
+			event = new Event(root, page.getPackageText(), page.getTypeName());
+			IType handler = event.createHandlerInterface();
+			event.createTypeField(handler);
 			
 			Field[] eventFields = page.getFields();
 			IField[] fields = new IField[eventFields.length];
@@ -112,38 +108,31 @@ public class NewEventWizard extends Wizard implements INewWizard {
 				event.createGetterMethod(field);
 			}
 			
-			event.createDispatchMethod(handler.getType());
-			event.createAssociatedTypeGetterMethod(handler.getType());
+			event.createDispatchMethod(handler);
+			event.createAssociatedTypeGetterMethod(handler);
+			event.createTypeGetterMethod(handler);
 			monitor.worked(1);
 			
 			
 			if(page.hasHandlers()) {
 				monitor.subTask("HasHandlers");
-				hasHandlers = new HasHandlers(root, page.getHasHandlerPackageText(), page.getHasHandlerTypeName());
-				hasHandlers.createAddHandlerMethod(handler.getType());
-				event.createFireMethod(fields, hasHandlers.getType());
+				IType hasHandlers = event.createHasHandlersInterface(handler);
+				event.createFireMethod(fields, hasHandlers);
 			}
 			else {
 				event.createFireMethod(fields);
 			}
-			monitor.worked(1);
 
-			monitor.subTask("Handler");
-			handler.createTriggerMethod(event.getType());
 			monitor.worked(1);
 
 			// Committing
 			if(event != null) event.commit();
-			if(handler != null) handler.commit();
-			if(hasHandlers != null) hasHandlers.commit();
 		}
 		catch (JavaModelException e) {
 			e.printStackTrace();
 
 			try {
 				if(event != null) event.discard();
-				if(handler != null) handler.discard();
-				if(hasHandlers != null) hasHandlers.discard();
 			}
 			catch (JavaModelException e1) {	}
 			
