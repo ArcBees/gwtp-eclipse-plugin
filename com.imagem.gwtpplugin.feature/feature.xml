@@ -2,7 +2,7 @@
 <feature
       id="com.gwtplatform.plugin.feature"
       label="GWT-Platform Plugin"
-      version="0.6.0"
+      version="0.6.0.qualifier"
       provider-name="GWT Platform">
 
    <description url="http://gwtplatform.com">
@@ -71,6 +71,10 @@ If the Work includes a &quot;NOTICE&quot; text file as part of its distribution,
 END OF TERMS AND CONDITIONS
    </license>
 
+   <url>
+      <update label="GWT-Platform update site" url="http://plugin.gwt-platform.googlecode.com/hg/3.6/0.6"/>
+   </url>
+
    <requires>
       <import plugin="org.eclipse.core.runtime" version="3.6.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
@@ -92,7 +96,7 @@ END OF TERMS AND CONDITIONS
          id="gwtp-plugin"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.6.0.qualifier"
          unpack="false"/>
 
 </feature>
