@@ -1,12 +1,12 @@
 /**
- * Copyright 2011 IMAGEM Solutions TI santï¿½
- * 
+ * Copyright 2011 IMAGEM Solutions TI santé
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,6 +62,7 @@ import com.google.gwt.eclipse.core.nature.GWTNature;
 import com.google.gwt.eclipse.core.preferences.GWTPreferences;
 import com.google.gwt.eclipse.core.runtime.GWTRuntimeContainer;
 import com.imagem.gwtpplugin.Activator;
+import com.imagem.gwtpplugin.SourceWriterFactory;
 import com.imagem.gwtpplugin.projectfile.src.GwtXmlModule;
 import com.imagem.gwtpplugin.projectfile.src.Jdoconfig;
 import com.imagem.gwtpplugin.projectfile.src.Log4j;
@@ -83,306 +84,350 @@ import com.imagem.gwtpplugin.projectfile.war.WebXml;
 import com.imagem.gwtpplugin.tool.VersionTool;
 
 /**
- * 
+ *
  * @author Michael Renaud
  *
  */
 @SuppressWarnings("restriction")
 public class NewProjectWizard extends Wizard implements INewWizard {
 
-	private NewProjectWizardPage page;
-	private boolean isDone = false;
+  private final SourceWriterFactory sourceWriterFactory;
 
-	public NewProjectWizard() {
-		super();
-		setNeedsProgressMonitor(true);
-		setWindowTitle("New GWTP Project");
+  private NewProjectWizardPage page;
+  private boolean isDone;
 
-		try {
-			URL url = new URL(Activator.getDefault().getBundle().getEntry("/"), "icons/gwtp-logo.png");
-			setDefaultPageImageDescriptor(ImageDescriptor.createFromURL(url));
-		}
-		catch(MalformedURLException e) {
-			e.printStackTrace();
-		}
+  public NewProjectWizard(SourceWriterFactory sourceWriterFactory) {
+    super();
+    this.sourceWriterFactory = sourceWriterFactory;
+    setNeedsProgressMonitor(true);
+    setWindowTitle("New GWTP Project");
 
-	}
+    try {
+      URL url = new URL(Activator.getDefault().getBundle().getEntry("/"), "icons/gwtp-logo.png");
+      setDefaultPageImageDescriptor(ImageDescriptor.createFromURL(url));
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+  }
 
-	@Override
-	public void addPages() {
-		page = new NewProjectWizardPage();
-		addPage(page);
-	}
+  @Override
+  public void addPages() {
+    page = new NewProjectWizardPage();
+    addPage(page);
+  }
 
-	@Override
-	public boolean performFinish() {
-		try {
-			super.getContainer().run(false, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					isDone = finish(monitor);
-				}
-			});
-		}
-		catch(Exception e) {
-			return false;
-		}
-		return isDone;
-	}
+  @Override
+  public boolean performFinish() {
+    try {
+      super.getContainer().run(false, false, new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor) throws InvocationTargetException,
+            InterruptedException {
+          isDone = finish(monitor);
+        }
+      });
+    } catch (Exception e) {
+      return false;
+    }
+    return isDone;
+  }
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected boolean finish(IProgressMonitor monitor) {
-		if (monitor == null) {
-			monitor = new NullProgressMonitor();
-		}
-		
-		try {
-			monitor.beginTask("GWT-Platform project creation", 4);
-			
-			// Project base creation
-			monitor.subTask("Base project creation");
-			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(page.getProjectName());
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  protected boolean finish(IProgressMonitor desiredMonitor) {
+    IProgressMonitor monitor = desiredMonitor;
+    if (monitor == null) {
+      monitor = new NullProgressMonitor();
+    }
 
-			// Project location
-			URI location = null;
-			String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocationURI().toString() + "/";
-			if(page.getProjectLocation() != null && !workspace.equals(page.getProjectLocation().toString())) {
-				location = page.getProjectLocation();
-			}
-			IProjectDescription description = project.getWorkspace().newProjectDescription(project.getName());
-			description.setLocationURI(location);
-			
-			// Project natures and builders
-			ICommand javaBuilder = description.newCommand();
-			javaBuilder.setBuilderName(JavaCore.BUILDER_ID);
-			
-			ICommand webAppBuilder = description.newCommand();
-			webAppBuilder.setBuilderName(WebAppProjectValidator.BUILDER_ID);
-			
-			ICommand gwtBuilder = description.newCommand();
-			gwtBuilder.setBuilderName("com.google.gwt.eclipse.core.gwtProjectValidator"); // TODO use the BUILDER_UI field
-			
-			if(page.useGAE()) {
-				ICommand gaeBuilder = description.newCommand();
-				gaeBuilder.setBuilderName(GaeProjectValidator.BUILDER_ID);
+    try {
+      monitor.beginTask("GWT-Platform project creation", 4);
 
-				// TODO use the BUILDER_UI field
-				ICommand enhancer = description.newCommand();
-				enhancer.setBuilderName("com.google.appengine.eclipse.core.enhancerbuilder"); // TODO use the BUILDER_UI field
-				
-				description.setBuildSpec(new ICommand[] {javaBuilder, webAppBuilder, gwtBuilder, gaeBuilder, enhancer});
-				description.setNatureIds(new String[]{JavaCore.NATURE_ID, GWTNature.NATURE_ID, GaeNature.NATURE_ID});
-			}
-			else {
-				description.setBuildSpec(new ICommand[] {javaBuilder, webAppBuilder, gwtBuilder});
-				description.setNatureIds(new String[]{JavaCore.NATURE_ID, GWTNature.NATURE_ID});
-			}
-	
+      // Project base creation
+      monitor.subTask("Base project creation");
+      IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(page.getProjectName());
 
-			project.create(description, null); // TODO Progress Monitor
-			if(!project.isOpen()) {
-				project.open(null); // TODO Progress Monitor
-			}
-			monitor.worked(1);
-			
-			// Java Project creation
-			monitor.subTask("Classpath entries creation");
-			IJavaProject javaProject = JavaCore.create(project);
-			
-			// war/WEB-INF/lib folder creation
-			IPath warPath = new Path("war");
-			project.getFolder(warPath).create(false, true, null); // TODO Progress Monitor
-			
-			IPath webInfPath = warPath.append("WEB-INF");
-			project.getFolder(webInfPath).create(false, true, null); // TODO Progress Monitor
-			
-			IPath libPath = webInfPath.append("lib");
-			project.getFolder(libPath).create(false, true, null); // TODO Progress Monitor
-			
-			Thread.sleep(1000);
-			
-			Jar[] libs = VersionTool.getLibs(project, libPath);
-			
-			// Classpath Entries creation
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+      // Project location
+      URI location = null;
+      String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocationURI().toString() + "/";
+      if (page.getProjectLocation() != null
+          && !workspace.equals(page.getProjectLocation().toString())) {
+        location = page.getProjectLocation();
+      }
+      IProjectDescription description = project.getWorkspace().newProjectDescription(
+          project.getName());
+      description.setLocationURI(location);
 
-			// Default output location
-			IPath outputPath = new Path("/" + page.getProjectName()).append(webInfPath).append("classes");
-			javaProject.setOutputLocation(outputPath, null);
+      // Project natures and builders
+      ICommand javaBuilder = description.newCommand();
+      javaBuilder.setBuilderName(JavaCore.BUILDER_ID);
 
-			// Source folder
-			IPath srcPath = new Path("src");
-			project.getFolder(srcPath).create(false, true, null); // TODO Progress Monitor
-			
-			entries.add(JavaCore.newSourceEntry(javaProject.getPath().append("src")));
+      ICommand webAppBuilder = description.newCommand();
+      webAppBuilder.setBuilderName(WebAppProjectValidator.BUILDER_ID);
 
-			// GWT SDK container
-			IPath gwtContainer = GWTRuntimeContainer.CONTAINER_PATH;
-			ClasspathContainerInitializer gwtInitializer = JavaCore.getClasspathContainerInitializer(gwtContainer.segment(0));
-			gwtInitializer.initialize(gwtContainer, javaProject);
-			entries.add(JavaCore.newContainerEntry(gwtContainer));
+      ICommand gwtBuilder = description.newCommand();
+      // TODO use the BUILDER_UI field
+      gwtBuilder.setBuilderName("com.google.gwt.eclipse.core.gwtProjectValidator");
 
-			// GAE SDK container
-			if(page.useGAE()) {
-				IPath gaeContainer = GaeSdkContainer.CONTAINER_PATH;
-				ClasspathContainerInitializer gaeInitializer = JavaCore.getClasspathContainerInitializer(gaeContainer.segment(0));
-				gaeInitializer.initialize(gaeContainer, javaProject);
-				entries.add(JavaCore.newContainerEntry(gaeContainer));
-			}
+      if (page.useGAE()) {
+        ICommand gaeBuilder = description.newCommand();
+        gaeBuilder.setBuilderName(GaeProjectValidator.BUILDER_ID);
 
-			// JRE container
-			entries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+        // TODO use the BUILDER_UI field
+        ICommand enhancer = description.newCommand();
+        // TODO use the BUILDER_UI field
+        enhancer.setBuilderName("com.google.appengine.eclipse.core.enhancerbuilder");
 
-			// GWTP libs
-			for(Jar lib : libs) {
-				entries.add(JavaCore.newLibraryEntry(lib.getFile().getFullPath(), null, null));
-			}
+        description.setBuildSpec(new ICommand[] { javaBuilder, webAppBuilder, gwtBuilder,
+            gaeBuilder, enhancer });
+        description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID,
+            GaeNature.NATURE_ID });
+      } else {
+        description.setBuildSpec(new ICommand[] { javaBuilder, webAppBuilder, gwtBuilder });
+        description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID });
+      }
 
-			javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null); // TODO Progress Monitor
-			monitor.worked(1);
-			
-			// TODO Create settings
-			
-			monitor.subTask("Default classes creation");
-			IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append("src"));
-			
-			// Create sources
-			if(page.useGAE()) {
-				Log4j log4j = new Log4j(project, srcPath);
-				log4j.createFile();
+      project.create(description, null); // TODO Progress Monitor
+      if (!project.isOpen()) {
+        project.open(null); // TODO Progress Monitor
+      }
+      monitor.worked(1);
 
-				IPath metaInfPath = srcPath.append("META-INF");
-				project.getFolder(metaInfPath).create(false, true, null); // TODO Progress Monitor
+      // Java Project creation
+      monitor.subTask("Classpath entries creation");
+      IJavaProject javaProject = JavaCore.create(project);
 
-				Jdoconfig jdoconfig = new Jdoconfig(project, metaInfPath);
-				jdoconfig.createFile();
-			}
-			
-			IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false, null); // TODO Progress Monitor
-			
-			// Client package
-			IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName() + ".client", false, null); // TODO Progress Monitor
-			
-			// Place package
-			IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName() + ".place", false, null); // TODO Progress Monitor
-			
-			PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(), "DefaultPlace");
-			
-			PlaceManager placeManager = new PlaceManager(root, placePackage.getElementName(), "ClientPlaceManager");
-			IField defaultPlaceField = placeManager.createPlaceRequestField(defaultPlace.getType());
-			placeManager.createConstructor(new IType[]{defaultPlace.getType()}, new IField[]{defaultPlaceField});
-			placeManager.createRevealDefaultPlaceMethod(defaultPlaceField);
-			
-			Tokens tokens = new Tokens(root, placePackage.getElementName(), "NameTokens");
-			
-			// Gin package
-			IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName() + ".gin", false, null); // TODO Progress Monitor
-			
-			PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(), "ClientModule");
-			presenterModule.createConfigureMethod(placeManager.getType());
-			
-			Ginjector ginjector = new Ginjector(root, ginPackage.getElementName(), "ClientGinjector", presenterModule.getType());
-			ginjector.createDefaultGetterMethods();
-			
-			// Client package contents
-			EntryPoint entryPoint = new EntryPoint(root, clientPackage.getElementName(), page.getProjectName());
-			entryPoint.createGinjectorField(ginjector.getType());
-			entryPoint.createOnModuleLoadMethod();
-			
-			// Project package contents
-			GwtXmlModule gwtXmlModule = new GwtXmlModule(root, projectPackage.getElementName(), page.getProjectName());
-			gwtXmlModule.createFile(entryPoint.getType(), ginjector.getType());
-			
-			// Server package
-			IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName() + ".server", false, null); // TODO Progress Monitor
-			
-			// Guice package
-			IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName() + ".guice", false, null); // TODO Progress Monitor
-			
-			String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
-			
-			ServletModule servletModule = new ServletModule(root, guicePackage.getElementName(), "DispatchServletModule");
-			servletModule.createConfigureServletsMethod(gwtVersion);
-			
-			HandlerModule handlerModule = new HandlerModule(root, guicePackage.getElementName(), "ServerModule");
-			handlerModule.createConfigureHandlersMethod();
-			
-			GuiceServletContextListener guiceServletContextListener = new GuiceServletContextListener(root, guicePackage.getElementName(), "GuiceServletConfig");
-			guiceServletContextListener.createInjectorGetterMethod(handlerModule.getType(), servletModule.getType());
-			
-			// Shared package
-			root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null); // TODO Progress Monitor
-			
-			// Commit
-			presenterModule.commit();
-			ginjector.commit();
-			defaultPlace.commit();
-			placeManager.commit();
-			tokens.commit();
-			entryPoint.commit();
-			
-			servletModule.commit();
-			handlerModule.commit();
-			guiceServletContextListener.commit();
-			
-			// war contents
-			ProjectHTML projectHTML = new ProjectHTML(project, warPath, project.getName());
-			projectHTML.createFile();
-			
-			ProjectCSS projectCSS = new ProjectCSS(project, warPath, project.getName());
-			projectCSS.createFile();
-			
-			// war/WEB-INF contents
-			WebXml webXml = new WebXml(project, webInfPath);
-			webXml.createFile(projectHTML.getFile(), guiceServletContextListener.getType());
-			
-			if(page.useGAE()) {
-				AppengineWebXml appengineWebXml = new AppengineWebXml(project, webInfPath);
-				appengineWebXml.createFile();
+      // war/WEB-INF/lib folder creation
+      IPath warPath = new Path("war");
+      project.getFolder(warPath).create(false, true, null); // TODO Progress Monitor
 
-				Logging logging = new Logging(project, webInfPath);
-				logging.createFile();
-			}
-			monitor.worked(1);
-			
-			// Launch Config
-			monitor.subTask("Launch config creation");
-			
-			ILaunchConfigurationWorkingCopy launchConfig = WebAppLaunchUtil.createLaunchConfigWorkingCopy(project.getName(), project, WebAppLaunchUtil.determineStartupURL(project, false), false);
-			ILaunchGroup[] groups = DebugUITools.getLaunchGroups();
+      IPath webInfPath = warPath.append("WEB-INF");
+      project.getFolder(webInfPath).create(false, true, null); // TODO Progress Monitor
 
-			ArrayList groupsNames = new ArrayList();
-			for(ILaunchGroup group : groups) {
-				if((!("org.eclipse.debug.ui.launchGroup.debug".equals(group.getIdentifier()))) && (!("org.eclipse.debug.ui.launchGroup.run".equals(group.getIdentifier()))))
-					continue;
-				groupsNames.add(group.getIdentifier());
-			}
+      IPath libPath = webInfPath.append("lib");
+      project.getFolder(libPath).create(false, true, null); // TODO Progress Monitor
 
-			launchConfig.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
-			launchConfig.doSave();
-			
-			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "nametokens"), tokens.getType().getFullyQualifiedName());
-			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"), ginjector.getType().getFullyQualifiedName());
-			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"), presenterModule.getType().getFullyQualifiedName());
-			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"), handlerModule.getType().getFullyQualifiedName());
-			project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"), "com.gwtplatform.dispatch.shared.ActionImpl");
-			
-			// Remove bin folder
-			IFolder binFolder = project.getFolder(new Path("/bin"));
-			if(binFolder.exists())
-				binFolder.delete(true, null);
-			
-			monitor.worked(1);
-		}
-		catch(Exception e) {
-			return false;
-		}
+      Thread.sleep(1000);
 
-		monitor.done();
-		return true;
-	}
-	
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {}
+      Jar[] libs = VersionTool.getLibs(project, libPath);
+
+      // Classpath Entries creation
+      List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+
+      // Default output location
+      IPath outputPath = new Path("/" + page.getProjectName()).append(webInfPath).append("classes");
+      javaProject.setOutputLocation(outputPath, null);
+
+      // Source folder
+      IPath srcPath = new Path("src");
+      project.getFolder(srcPath).create(false, true, null); // TODO Progress Monitor
+
+      entries.add(JavaCore.newSourceEntry(javaProject.getPath().append("src")));
+
+      // GWT SDK container
+      IPath gwtContainer = GWTRuntimeContainer.CONTAINER_PATH;
+      ClasspathContainerInitializer gwtInitializer = JavaCore
+          .getClasspathContainerInitializer(gwtContainer.segment(0));
+      gwtInitializer.initialize(gwtContainer, javaProject);
+      entries.add(JavaCore.newContainerEntry(gwtContainer));
+
+      // GAE SDK container
+      if (page.useGAE()) {
+        IPath gaeContainer = GaeSdkContainer.CONTAINER_PATH;
+        ClasspathContainerInitializer gaeInitializer = JavaCore
+            .getClasspathContainerInitializer(gaeContainer.segment(0));
+        gaeInitializer.initialize(gaeContainer, javaProject);
+        entries.add(JavaCore.newContainerEntry(gaeContainer));
+      }
+
+      // JRE container
+      entries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+
+      // GWTP libs
+      for (Jar lib : libs) {
+        entries.add(JavaCore.newLibraryEntry(lib.getFile().getFullPath(), null, null));
+      }
+
+      // TODO Progress Monitor
+      javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
+      monitor.worked(1);
+
+      // TODO Create settings
+
+      monitor.subTask("Default classes creation");
+      IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append(
+          "src"));
+
+      // Create sources
+      if (page.useGAE()) {
+        Log4j log4j = new Log4j(project, srcPath);
+        log4j.createFile();
+
+        IPath metaInfPath = srcPath.append("META-INF");
+        // TODO Progress Monitor
+        project.getFolder(metaInfPath).create(false, true, null);
+
+        Jdoconfig jdoconfig = new Jdoconfig(project, metaInfPath);
+        jdoconfig.createFile();
+      }
+
+      IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false,
+          null); // TODO Progress Monitor
+
+      // Client package
+      IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName()
+          + ".client", false, null); // TODO Progress Monitor
+
+      // Place package
+      IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName()
+          + ".place", false, null); // TODO Progress Monitor
+
+      PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(),
+          "DefaultPlace", sourceWriterFactory);
+
+      PlaceManager placeManager = new PlaceManager(root, placePackage.getElementName(),
+          "ClientPlaceManager", sourceWriterFactory);
+      IField defaultPlaceField = placeManager.createPlaceRequestField(defaultPlace.getType());
+      placeManager.createConstructor(new IType[] { defaultPlace.getType() },
+          new IField[] { defaultPlaceField });
+      placeManager.createRevealDefaultPlaceMethod(defaultPlaceField);
+
+      Tokens tokens = new Tokens(root, placePackage.getElementName(), "NameTokens",
+          sourceWriterFactory);
+
+      // Gin package
+      IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName()
+          + ".gin", false, null); // TODO Progress Monitor
+
+      PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(),
+          "ClientModule", sourceWriterFactory);
+      presenterModule.createConfigureMethod(placeManager.getType());
+
+      Ginjector ginjector = new Ginjector(root, ginPackage.getElementName(), "ClientGinjector",
+          presenterModule.getType(), sourceWriterFactory);
+      ginjector.createDefaultGetterMethods();
+
+      // Client package contents
+      EntryPoint entryPoint = new EntryPoint(root, clientPackage.getElementName(),
+          page.getProjectName(), sourceWriterFactory);
+      entryPoint.createGinjectorField(ginjector.getType());
+      entryPoint.createOnModuleLoadMethod();
+
+      // Project package contents
+      GwtXmlModule gwtXmlModule = new GwtXmlModule(root, projectPackage.getElementName(),
+          page.getProjectName());
+      gwtXmlModule.createFile(entryPoint.getType(), ginjector.getType());
+
+      // Server package
+      IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName()
+          + ".server", false, null); // TODO Progress Monitor
+
+      // Guice package
+      IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName()
+          + ".guice", false, null); // TODO Progress Monitor
+
+      String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
+
+      ServletModule servletModule = new ServletModule(root, guicePackage.getElementName(),
+          "DispatchServletModule", sourceWriterFactory);
+      servletModule.createConfigureServletsMethod(gwtVersion);
+
+      HandlerModule handlerModule = new HandlerModule(root, guicePackage.getElementName(),
+          "ServerModule", sourceWriterFactory);
+      handlerModule.createConfigureHandlersMethod();
+
+      GuiceServletContextListener guiceServletContextListener = new GuiceServletContextListener(
+          root, guicePackage.getElementName(), "GuiceServletConfig", sourceWriterFactory);
+      guiceServletContextListener.createInjectorGetterMethod(handlerModule.getType(),
+          servletModule.getType());
+
+      // Shared package
+      // TODO Progress Monitor
+      root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null);
+
+      // Commit
+      presenterModule.commit();
+      ginjector.commit();
+      defaultPlace.commit();
+      placeManager.commit();
+      tokens.commit();
+      entryPoint.commit();
+
+      servletModule.commit();
+      handlerModule.commit();
+      guiceServletContextListener.commit();
+
+      // war contents
+      ProjectHTML projectHTML = new ProjectHTML(project, warPath, project.getName());
+      projectHTML.createFile();
+
+      ProjectCSS projectCSS = new ProjectCSS(project, warPath, project.getName());
+      projectCSS.createFile();
+
+      // war/WEB-INF contents
+      WebXml webXml = new WebXml(project, webInfPath);
+      webXml.createFile(projectHTML.getFile(), guiceServletContextListener.getType());
+
+      if (page.useGAE()) {
+        AppengineWebXml appengineWebXml = new AppengineWebXml(project, webInfPath);
+        appengineWebXml.createFile();
+
+        Logging logging = new Logging(project, webInfPath);
+        logging.createFile();
+      }
+      monitor.worked(1);
+
+      // Launch Config
+      monitor.subTask("Launch config creation");
+
+      ILaunchConfigurationWorkingCopy launchConfig = WebAppLaunchUtil
+          .createLaunchConfigWorkingCopy(project.getName(), project,
+              WebAppLaunchUtil.determineStartupURL(project, false), false);
+      ILaunchGroup[] groups = DebugUITools.getLaunchGroups();
+
+      ArrayList groupsNames = new ArrayList();
+      for (ILaunchGroup group : groups) {
+        if ((!("org.eclipse.debug.ui.launchGroup.debug".equals(group.getIdentifier())))
+            && (!("org.eclipse.debug.ui.launchGroup.run".equals(group.getIdentifier())))) {
+          continue;
+        }
+        groupsNames.add(group.getIdentifier());
+      }
+
+      launchConfig.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
+      launchConfig.doSave();
+
+      project.getProject().setPersistentProperty(
+          new QualifiedName(Activator.PLUGIN_ID, "nametokens"),
+          tokens.getType().getFullyQualifiedName());
+      project.getProject().setPersistentProperty(
+          new QualifiedName(Activator.PLUGIN_ID, "ginjector"),
+          ginjector.getType().getFullyQualifiedName());
+      project.getProject().setPersistentProperty(
+          new QualifiedName(Activator.PLUGIN_ID, "presentermodule"),
+          presenterModule.getType().getFullyQualifiedName());
+      project.getProject().setPersistentProperty(
+          new QualifiedName(Activator.PLUGIN_ID, "handlermodule"),
+          handlerModule.getType().getFullyQualifiedName());
+      project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"),
+          "com.gwtplatform.dispatch.shared.ActionImpl");
+
+      // Remove bin folder
+      IFolder binFolder = project.getFolder(new Path("/bin"));
+      if (binFolder.exists()) {
+        binFolder.delete(true, null);
+      }
+
+      monitor.worked(1);
+    } catch (Exception e) {
+      return false;
+    }
+
+    monitor.done();
+    return true;
+  }
+
+  @Override
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
+  }
 
 }

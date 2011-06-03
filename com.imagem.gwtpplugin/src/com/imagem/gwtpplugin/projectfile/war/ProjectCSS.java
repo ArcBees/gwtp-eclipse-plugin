@@ -1,12 +1,12 @@
 /**
  * Copyright 2011 IMAGEM Solutions TI santé
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,21 +26,21 @@ import org.eclipse.core.runtime.IPath;
 import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
- * 
+ *
  * @author Michael Renaud
  *
  */
 public class ProjectCSS extends ProjectFile {
 
-	public ProjectCSS(IProject project, IPath path, String name) throws CoreException {
-		super(project, path, name + ".css");
-	}
-	
-	public IFile createFile() throws CoreException {
-		String contents = "/** Add css rules here for your application. **/\n\n";
-		
-		file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
-		
-		return file;
-	}
+  public ProjectCSS(IProject project, IPath path, String name) throws CoreException {
+    super(project, path, name + ".css");
+  }
+
+  public IFile createFile() throws CoreException {
+    String contents = "/* Add css rules here for your application. */\n\n";
+
+    file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+
+    return file;
+  }
 }

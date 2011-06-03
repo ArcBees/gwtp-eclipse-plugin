@@ -1,12 +1,12 @@
 /**
  * Copyright 2011 IMAGEM Solutions TI santé
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,172 +39,184 @@ import com.imagem.gwtpplugin.wizard.NewPresenterWizard;
 import com.imagem.gwtpplugin.wizard.NewProjectWizard;
 
 /**
- * 
- * @author Michael Renaud
+ * The entry point for defining the GWTP pull-down menu.
  *
+ * @author Michael Renaud
  */
 public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
-	private IWorkbenchWindow window;
-	private ISelection selection;
+  private IWorkbenchWindow window;
+  private ISelection selection;
+  private SourceWriterFactory sourceWriterFactory;
 
-	@Override
-	public Menu getMenu(Control parent) {
-		Menu menu = new Menu(parent);
+  @Override
+  public Menu getMenu(Control parent) {
+    Menu menu = new Menu(parent);
 
-		MenuItem item = new MenuItem(menu, SWT.PUSH);
-		item.setText("GWTP Project");
-		item.addSelectionListener(new SelectionListener() {
+    MenuItem item = new MenuItem(menu, SWT.PUSH);
+    item.setText("GWTP Project");
+    item.addSelectionListener(new SelectionListener() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new NewProjectWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new NewProjectWizard(sourceWriterFactory);
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-		item = new MenuItem(menu, SWT.SEPARATOR);
+    item = new MenuItem(menu, SWT.SEPARATOR);
 
-		item = new MenuItem(menu, SWT.PUSH);
-		item.setText("Action");
-		item.addSelectionListener(new SelectionListener() {
+    item = new MenuItem(menu, SWT.PUSH);
+    item.setText("Action");
+    item.addSelectionListener(new SelectionListener() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new NewActionWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new NewActionWizard(sourceWriterFactory);
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-		item = new MenuItem(menu, SWT.PUSH);
-		item.setText("Event");
-		item.addSelectionListener(new SelectionListener() {
+    item = new MenuItem(menu, SWT.PUSH);
+    item.setText("Event");
+    item.addSelectionListener(new SelectionListener() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new NewEventWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new NewEventWizard(sourceWriterFactory);
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-		item = new MenuItem(menu, SWT.PUSH);
-		item.setText("Model");
-		item.addSelectionListener(new SelectionListener() {
+    item = new MenuItem(menu, SWT.PUSH);
+    item.setText("Model");
+    item.addSelectionListener(new SelectionListener() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new NewModelWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new NewModelWizard(sourceWriterFactory);
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-		item = new MenuItem(menu, SWT.PUSH);
-		item.setText("Presenter");
-		item.addSelectionListener(new SelectionListener() {
+    item = new MenuItem(menu, SWT.PUSH);
+    item.setText("Presenter");
+    item.addSelectionListener(new SelectionListener() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new NewPresenterWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new NewPresenterWizard(sourceWriterFactory);
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
-		
-		item = new MenuItem(menu, SWT.SEPARATOR);
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-		item = new MenuItem(menu, SWT.PUSH);
-		item.setText("Merge Locales");
-		item.addSelectionListener(new SelectionListener() {
+    item = new MenuItem(menu, SWT.SEPARATOR);
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				INewWizard wizard = new MergeLocalesWizard();
-				if(selection instanceof IStructuredSelection)
-					wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
-				else
-					wizard.init(window.getWorkbench(), new StructuredSelection());
+    item = new MenuItem(menu, SWT.PUSH);
+    item.setText("Merge Locales");
+    item.addSelectionListener(new SelectionListener() {
 
-				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				dialog.create();
-				dialog.open();
-			}
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        INewWizard wizard = new MergeLocalesWizard();
+        if (selection instanceof IStructuredSelection) {
+          wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
+        } else {
+          wizard.init(window.getWorkbench(), new StructuredSelection());
+        }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		});
+        WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+        dialog.create();
+        dialog.open();
+      }
 
-		return menu;
-	}
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+      }
+    });
 
-	@Override
-	public void init(IWorkbenchWindow window) {
-		this.window = window;
-	}
+    return menu;
+  }
 
-	@Override
-	public void selectionChanged(IAction action, ISelection selection) {
-		this.selection = selection;
-	}
+  @Override
+  public void init(IWorkbenchWindow window) {
+    this.window = window;
+    sourceWriterFactory = new SourceWriterFactory();
+  }
 
-	@Override
-	public void run(IAction action) {
-		// TODO Auto-generated method stub
+  @Override
+  public void selectionChanged(IAction action, ISelection selection) {
+    this.selection = selection;
+  }
 
-	}
+  @Override
+  public void run(IAction action) {
+    // TODO Auto-generated method stub
+  }
 
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
-	}
+  @Override
+  public void dispose() {
+    // TODO Auto-generated method stub
+  }
 
 }

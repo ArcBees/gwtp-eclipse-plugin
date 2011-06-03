@@ -1,3 +1,4 @@
 
 syntax: regexp
 ^com\.imagem\.gwtpplugin/\.settings$
+glob:com.imagem.gwtpplugin/bin/**

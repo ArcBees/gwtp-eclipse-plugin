@@ -1,12 +1,12 @@
 /**
  * Copyright 2011 IMAGEM Solutions TI santé
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,180 +21,123 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 
+import com.imagem.gwtpplugin.SourceWriter;
+import com.imagem.gwtpplugin.SourceWriterFactory;
 import com.imagem.gwtpplugin.projectfile.ProjectClass;
 
 /**
- * 
+ *
  * @author Michael Renaud
  *
  */
 public class Event extends ProjectClass {
 
-	private static final String C_GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";
-	private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";
-	private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";
-	private static final String I_HANDLER_REGISTRATION = "com.google.gwt.event.shared.HandlerRegistration";
-	
-	public Event(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException {
-		super(root, fullyQualifiedName);
-	}
-	
-	public Event(IPackageFragmentRoot root, String packageName, String elementName) throws JavaModelException {
-		super(root, packageName, elementName);
-		if(type == null) {
-			String eventName = elementName.substring(0, elementName.length() - 5);
-			
-			cu.createPackageDeclaration(packageName, null);
+  private static final String C_GWT_EVENT = "com.google.gwt.event.shared.GwtEvent";
+  private static final String I_HAS_HANDLERS = "com.google.gwt.event.shared.HasHandlers";
+  private static final String I_EVENT_HANDLER = "com.google.gwt.event.shared.EventHandler";
+  private static final String I_HANDLER_REGISTRATION = "com.google.gwt.event.shared.HandlerRegistration";
 
-			cu.createImport(C_GWT_EVENT, null, null);
-			String contents = "public class " + elementName + " extends GwtEvent<" + elementName + "." + eventName + "Handler> {\n\n}";
-	
-			type = cu.createType(contents, null, false, null);
-		}
-	}
-	
-	public IType createHandlerInterface() throws JavaModelException {
-		cu.createImport(I_EVENT_HANDLER, null, null);
-		
-		String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
-		
-		String contents = "";
-		contents += "public interface " + eventName + "Handler extends EventHandler {\n";
-		contents += "	public void on" + eventName + "(" + type.getElementName() + " event);\n";
-		contents += "}\n\n";
+  public Event(IPackageFragmentRoot root, String fullyQualifiedName,
+      SourceWriterFactory sourceWriterFactory) throws JavaModelException {
+    super(root, fullyQualifiedName, sourceWriterFactory);
+  }
 
-		return type.createType(contents, null, false, null);
-	}
-	
-	public IType createHasHandlersInterface(IType handler, IMethod constructor) throws JavaModelException {
-		cu.createImport(I_HAS_HANDLERS, null, null);
-		cu.createImport(I_HANDLER_REGISTRATION, null, null);
-		
-		String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
-		
-		String contents = "";
-		contents += "public interface " + eventName + "HasHandlers extends HasHandlers {\n";
-		contents += "	public HandlerRegistration add" + handler.getElementName() + "(" + handler.getElementName() + " handler);\n";
-		contents += "}\n\n";
+  public Event(IPackageFragmentRoot root, String packageName, String elementName,
+      SourceWriterFactory sourceWriterFactory) throws JavaModelException {
+    super(root, packageName, elementName, sourceWriterFactory);
+    init();
+  }
 
-		return type.createType(contents, constructor, false, null);
-	}
-	
-	public IField createTypeField(IType handler) throws JavaModelException {
-		String contents = "public static Type<" + handler.getElementName() + "> TYPE = new Type<" + handler.getElementName() + ">();";
-		
-		return type.createField(contents, null, false, null);
-	}
-	
-	public IField createField(IType fieldType, String fieldName) throws JavaModelException {
-		cu.createImport(fieldType.getFullyQualifiedName(), null, null);
-		String contents = "private final " + fieldType.getElementName() + " " + fieldName + ";";
-		
-		return type.createField(contents, null, false, null);
-	}
-	
-	public IField createField(String fieldType, String fieldName) throws JavaModelException {
-		String contents = "private final " + fieldType + " " + fieldName + ";";
-		
-		return type.createField(contents, null, false, null);
-	}
-	
-	public IMethod createConstructor(IField[] fields) throws JavaModelException {
-		String contents = "public " + type.getElementName() + "(";
-		String fieldContents = "";
-		for(IField field : fields) {
-			if(!contents.endsWith("("))
-				contents += ", ";
-			contents += Signature.toString(field.getTypeSignature()) + " " + field.getElementName();
-			fieldContents += "	this." + field.getElementName() + " = " + field.getElementName() + ";\n";
-		}
-		contents += ") {\n";
-		contents += fieldContents;
-		contents += "}";
-		
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createGetterMethod(IField field) throws JavaModelException {
-		String contents = "public " + Signature.toString(field.getTypeSignature());
-		contents += " get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1) + " () {\n";
-		contents += "	return " + field.getElementName() + ";\n";
-		contents += "}";
-		
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createDispatchMethod(IType handler) throws JavaModelException {
-		String contents = "";
-		
-		contents += "@Override\n";
-		contents += "protected void dispatch(" + handler.getElementName() + " handler) {\n";
-		contents += "	handler.on" + type.getElementName().substring(0, type.getElementName().length() - 5) + "(this);\n";
-		contents += "}";
-		
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createAssociatedTypeGetterMethod(IType handler) throws JavaModelException {
-		String contents = "";
-		
-		contents += "@Override\n";
-		contents += "public Type<" + handler.getElementName() + "> getAssociatedType() {\n";
-		contents += "	return TYPE;\n";
-		contents += "}";
+  @Override
+  protected IType createType() throws JavaModelException {
+    cu.createImport(C_GWT_EVENT, null, null);
+    String eventName = elementName.substring(0, elementName.length() - 5);
+    return createClass("GwtEvent<" + elementName + "." + eventName + "Handler>", null);
+  }
 
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createTypeGetterMethod(IType handler) throws JavaModelException {
-		String contents = "";
-		
-		contents += "public static Type<" + handler.getElementName() + "> getType() {\n";
-		contents += "	return TYPE;\n";
-		contents += "}";
+  public IType createHandlerInterface() throws JavaModelException {
+    cu.createImport(I_EVENT_HANDLER, null, null);
 
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createFireMethod(IField[] fields) throws JavaModelException {
-		String contents = "";
-		
-		cu.createImport(I_HAS_HANDLERS, null, null);
-		contents += "public static void fire(HasHandlers source";
-		String subContents = "";
-		for(IField field : fields) {
-			if(!subContents.isEmpty()) {
-				subContents += ", ";
-			}
-			contents += ", " + Signature.toString(field.getTypeSignature()) + " " + field.getElementName();
-			subContents += field.getElementName();
-		}
-		contents += ") {\n";
-		contents += "	source.fireEvent(new " + type.getElementName() + "(" + subContents + "));\n";
-		contents += "}";
-		
-		return type.createMethod(contents, null, false, null);
-	}
-	
-	public IMethod createFireMethod(IField[] fields, IType hasHandlers) throws JavaModelException {
-		String contents = "";
+    String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
 
-		contents += "public static void fire(HasHandlers source";
-		String subContents = "";
-		for(IField field : fields) {
-			if(!subContents.isEmpty()) {
-				subContents += ", ";
-			}
-			contents += ", " + Signature.toString(field.getTypeSignature()) + " " + field.getElementName();
-			subContents += field.getElementName();
-		}
-		contents += ") {\n";
-		contents += "	source.fireEvent(new " + type.getElementName() + "(" + subContents + "));\n";
-		contents += "}";
-		
-		return type.createMethod(contents, null, false, null);
-	}
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines("public interface " + eventName + "Handler extends EventHandler {",
+        "  public void on" + eventName + "(" + type.getElementName() + " event);", "}");
 
+    return type.createType(sw.toString(), null, false, null);
+  }
+
+  public IType createHasHandlersInterface(IType handler, IMethod constructor)
+      throws JavaModelException {
+    cu.createImport(I_HAS_HANDLERS, null, null);
+    cu.createImport(I_HANDLER_REGISTRATION, null, null);
+
+    String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
+
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines(
+        "public interface " + eventName + "HasHandlers extends HasHandlers {",
+        "  public HandlerRegistration add" + handler.getElementName() + "("
+            + handler.getElementName() + " handler);",
+        "}");
+
+    return type.createType(sw.toString(), constructor, false, null);
+  }
+
+  public IField createTypeField(IType handler) throws JavaModelException {
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLine("public static Type<" + handler.getElementName() + "> TYPE = new Type<"
+        + handler.getElementName() + ">();");
+
+    return createField(sw);
+  }
+
+  public IMethod createDispatchMethod(IType handler) throws JavaModelException {
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines(
+        "@Override",
+        "protected void dispatch(" + handler.getElementName() + " handler) {",
+        "  handler.on" + type.getElementName().substring(0, type.getElementName().length() - 5)
+        + "(this);",
+        "}");
+
+    return createMethod(sw);
+  }
+
+  public IMethod createAssociatedTypeGetterMethod(IType handler) throws JavaModelException {
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines(
+        "@Override",
+        "public Type<" + handler.getElementName() + "> getAssociatedType() {",
+        "  return TYPE;",
+        "}");
+
+    return createMethod(sw);
+  }
+
+  public IMethod createTypeGetterMethod(IType handler) throws JavaModelException {
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines(
+        "public static Type<" + handler.getElementName() + "> getType() {",
+        "  return TYPE;",
+        "}");
+
+    return createMethod(sw);
+  }
+
+  public IMethod createFireMethod(IField[] fields) throws JavaModelException {
+    cu.createImport(I_HAS_HANDLERS, null, null);
+
+    String params = getParamsString(fields, true, true);
+    String paramVars = getParamsString(fields, false, false);
+
+    SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    sw.writeLines(
+        "public static void fire(HasHandlers source" + params + ") {",
+        "  source.fireEvent(new " + type.getElementName() + "(" + paramVars + "));",
+        "}");
+
+    return createMethod(sw);
+  }
 }

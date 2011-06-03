@@ -1,12 +1,12 @@
 /**
  * Copyright 2011 IMAGEM Solutions TI santé
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,177 +45,178 @@ import org.eclipse.swt.widgets.Text;
 import com.imagem.gwtpplugin.projectfile.Field;
 
 /**
- * 
+ *
  * @author Michael Renaud
  *
  */
 @SuppressWarnings("restriction")
 public class AddFieldDialog extends TitleAreaDialog {
 
-	private Text type;
-	private IJavaProject project;
-	//private IWizardPage page;
-	private Text name;
-	private Field value;
-	private String title = "";
-	private String message = "";
-	private String windowTitle = "";
+  private Text type;
+  private IJavaProject project;
+  // private IWizardPage page;
+  private Text name;
+  private Field value;
+  private String title = "";
+  private String message = "";
+  private String windowTitle = "";
 
-	public AddFieldDialog(Shell parentShell, IJavaProject project, IWizardPage page) {
-		super(parentShell);
+  public AddFieldDialog(Shell parentShell, IJavaProject project,
+      IWizardPage page) {
+    super(parentShell);
 
-		this.project = project;
-		//this.page = page;
-		value = new Field();
-	}
+    this.project = project;
+    // this.page = page;
+    value = new Field();
+  }
 
-	protected Control createContents(Composite parent) {
-		Control contents = super.createContents(parent);
-		super.setTitle(title);
-		super.setMessage(message);
-		getShell().setText(windowTitle);
-		return contents;
-	}
+  protected Control createContents(Composite parent) {
+    Control contents = super.createContents(parent);
+    super.setTitle(title);
+    super.setMessage(message);
+    getShell().setText(windowTitle);
+    return contents;
+  }
 
-	protected Control createDialogArea(Composite parent) {
-		// create composite
+  protected Control createDialogArea(Composite parent) {
+    // create composite
 
-		Composite container = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		container.setLayout(layout);
-		layout.numColumns = 3;
-		layout.verticalSpacing = 5;
-		container.setLayoutData(new GridData(GridData.FILL_BOTH));
+    Composite container = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    container.setLayout(layout);
+    layout.numColumns = 3;
+    layout.verticalSpacing = 5;
+    container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		//Type
-		Label label = new Label(container, SWT.NULL);
-		label.setText("Type:");
+    // Type
+    Label label = new Label(container, SWT.NULL);
+    label.setText("Type:");
 
-		type = new Text(container, SWT.BORDER | SWT.SINGLE);
-		type.setText("java.lang.String");
-		type.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		type.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				dialogChanged();
-			}
-		});
+    type = new Text(container, SWT.BORDER | SWT.SINGLE);
+    type.setText("java.lang.String");
+    type.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    type.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent e) {
+        dialogChanged();
+      }
+    });
 
-		Button browse = new Button(container, SWT.PUSH);
-		browse.setText("Browse...");
-		browse.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				type.setText(chooseType().getFullyQualifiedName());
-			}
+    Button browse = new Button(container, SWT.PUSH);
+    browse.setText("Browse...");
+    browse.addSelectionListener(new SelectionListener() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        type.setText(chooseType().getFullyQualifiedName());
+      }
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				type.setText(chooseType().getFullyQualifiedName());
-			}
-		});
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        type.setText(chooseType().getFullyQualifiedName());
+      }
+    });
 
-		//Name
-		label = new Label(container, SWT.NULL);
-		label.setText("Name:");
+    // Name
+    label = new Label(container, SWT.NULL);
+    label.setText("Name:");
 
-		name = new Text(container, SWT.BORDER | SWT.SINGLE);
-		name.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		name.setFocus();
-		name.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				dialogChanged();
-			}
-		});
+    name = new Text(container, SWT.BORDER | SWT.SINGLE);
+    name.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    name.setFocus();
+    name.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent e) {
+        dialogChanged();
+      }
+    });
 
-		label = new Label(container, SWT.NULL);
+    label = new Label(container, SWT.NULL);
 
-		setMessage("Enter a name");
-		return container;
-	}
+    setMessage("Enter a name");
+    return container;
+  }
 
-	protected void createButtonsForButtonBar(Composite parent) {
-		super.createButtonsForButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
-	}
+  protected void createButtonsForButtonBar(Composite parent) {
+    super.createButtonsForButtonBar(parent);
+    getButton(IDialogConstants.OK_ID).setEnabled(false);
+  }
 
-	protected void dialogChanged() {
-		if(type.getText().isEmpty()) {
-			setErrorMessage("Enter a type");
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			return;
-		}
+  protected void dialogChanged() {
+    if (type.getText().isEmpty()) {
+      setErrorMessage("Enter a type");
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+      return;
+    }
 
-		String t = type.getText();
-		if(t.equals("char") || t.equals("byte") || t.equals("short") || t.equals("int") || 
-				t.equals("long") || t.equals("float") || t.equals("double") || t.equals("boolean")) {
-			value.setPrimitiveType(type.getText());
-		}
-		else {
-			try {
-				IType type = project.findType(t);
-				if(type == null || !type.exists()) {
-					setErrorMessage(this.type.getText() + " doesn't exist");
-					getButton(IDialogConstants.OK_ID).setEnabled(false);
-					return;
-				}
-				else {
-					value.setType(type);
-				}
-			}
-			catch(JavaModelException e) {
-				setErrorMessage("An unexpected error has happened. Close the wizard and retry.");
-				getButton(IDialogConstants.OK_ID).setEnabled(false);
-				return;
-			}
-		}
+    String t = type.getText();
+    if (t.equals("char") || t.equals("byte") || t.equals("short")
+        || t.equals("int") || t.equals("long") || t.equals("float")
+        || t.equals("double") || t.equals("boolean")) {
+      value.setPrimitiveType(type.getText());
+    } else {
+      try {
+        IType typeInProject = project.findType(t);
+        if (typeInProject == null || !typeInProject.exists()) {
+          setErrorMessage(this.type.getText() + " doesn't exist");
+          getButton(IDialogConstants.OK_ID).setEnabled(false);
+          return;
+        } else {
+          value.setType(typeInProject);
+        }
+      } catch (JavaModelException e) {
+        setErrorMessage("An unexpected error has happened. Close the wizard and retry.");
+        getButton(IDialogConstants.OK_ID).setEnabled(false);
+        return;
+      }
+    }
 
-		// TODO Name validation
-		if(name.getText().isEmpty()) {
-			setErrorMessage("Enter a name");
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-			return;
-		}
-		value.setName(name.getText());
+    // TODO Name validation
+    if (name.getText().isEmpty()) {
+      setErrorMessage("Enter a name");
+      getButton(IDialogConstants.OK_ID).setEnabled(false);
+      return;
+    }
+    value.setName(name.getText());
 
-		setErrorMessage(null);
-		getButton(OK).setEnabled(true);
-	}
+    setErrorMessage(null);
+    getButton(OK).setEnabled(true);
+  }
 
-	public Field getValue() {
-		return value;
-	}
+  public Field getValue() {
+    return value;
+  }
 
-	protected IType chooseType() {
-		if (project == null) {
-			return null;
-		}
+  protected IType chooseType() {
+    if (project == null) {
+      return null;
+    }
 
-		IJavaElement[] elements= new IJavaElement[] { project };
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+    IJavaElement[] elements = new IJavaElement[] { project };
+    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
-		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false, null, scope, IJavaSearchConstants.CLASS_AND_INTERFACE);
-		dialog.setTitle("Type Selection");
-		dialog.setMessage("Select a type for the field");
-		dialog.setInitialPattern("String");
+    FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(
+        getShell(), false, null, scope,
+        IJavaSearchConstants.CLASS_AND_INTERFACE);
+    dialog.setTitle("Type Selection");
+    dialog.setMessage("Select a type for the field");
+    dialog.setInitialPattern("String");
 
-		if (dialog.open() == Window.OK) {
-			return (IType) dialog.getFirstResult();
-		}
-		return null;
-	}
+    if (dialog.open() == Window.OK) {
+      return (IType) dialog.getFirstResult();
+    }
+    return null;
+  }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+  public void setMessage(String message) {
+    this.message = message;
+  }
 
-	public void setWindowTitle(String windowTitle) {
-		this.windowTitle = windowTitle;
-	}
+  public void setWindowTitle(String windowTitle) {
+    this.windowTitle = windowTitle;
+  }
 
 }

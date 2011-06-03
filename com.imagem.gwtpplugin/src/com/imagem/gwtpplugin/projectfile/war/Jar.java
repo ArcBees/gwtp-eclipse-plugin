@@ -1,12 +1,12 @@
 /**
  * Copyright 2011 IMAGEM Solutions TI santé
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,21 +29,22 @@ import com.imagem.gwtpplugin.Activator;
 import com.imagem.gwtpplugin.projectfile.ProjectFile;
 
 /**
- * 
+ *
  * @author Michael Renaud
  *
  */
 public class Jar extends ProjectFile {
 
-	public Jar(IProject project, IPath path, String name) throws CoreException {
-		super(project, path, name + ".jar");
-	}
-	
-	public IFile createFile() throws IOException, CoreException {
-		InputStream inputStream = Platform.getBundle(Activator.PLUGIN_ID).getEntry("/file/" + file.getName()).openStream();
-		
-		file.create(inputStream, false, null);
-		
-		return file;
-	}
+  public Jar(IProject project, IPath path, String name) throws CoreException {
+    super(project, path, name + ".jar");
+  }
+
+  public IFile createFile() throws IOException, CoreException {
+    InputStream inputStream = Platform.getBundle(Activator.PLUGIN_ID)
+        .getEntry("/file/" + file.getName()).openStream();
+
+    file.create(inputStream, false, null);
+
+    return file;
+  }
 }
