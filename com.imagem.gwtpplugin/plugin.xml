@@ -7,24 +7,24 @@
          point="org.eclipse.core.runtime.applications">
       <application>
          <run
-               class="com.imagem.gwtpplugin.Application">
+               class="com.gwtplatform.plugin.Application">
          </run>
       </application>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            name="RCP Perspective"
-            class="com.imagem.gwtpplugin.Perspective"
-            id="com.imagem.gwtpplugin.perspective">
+            name="%perspective.name"
+            class="com.gwtplatform.plugin.Perspective"
+            id="com.gwtplatform.plugin.perspective">
       </perspective>
    </extension>
    <extension
          id="product"
          point="org.eclipse.core.runtime.products">
       <product
-            application="com.imagem.gwtpplugin.application"
-            name="gwtpplugin">
+            application="com.gwtplatform.plugin.application"
+            name="%product.name">
          <property
                name="appName"
                value="gwtpplugin">
@@ -34,27 +34,27 @@
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
-            id="com.imagem.gwtpplugin.actionSet"
-            label="GWTP Action"
+            id="com.gwtplatform.plugin.actionSet"
+            label="%actionSet.label"
             visible="true">
          <action
-               class="com.imagem.gwtpplugin.MenuAction"
+               class="com.gwtplatform.plugin.MenuAction"
                icon="icons/gwtp-plugin.png"
-               id="com.imagem.gwtpplugin.action"
-               label="GWTP Menu"
+               id="com.gwtplatform.plugin.action"
+               label="%action.label"
                state="true"
                style="pulldown"
                toolbarPath="GWTP"
-               tooltip="GWTP Plugin">
+               tooltip="%action.tooltip">
          </action>
       </actionSet>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="com.imagem.gwtpplugin.view.GwtPropertyPage"
-            id="com.imagem.gwtpplugin.view.GwtPropertyPage"
-            name="GWT-Platform">
+            class="com.gwtplatform.plugin.view.GwtPropertyPage"
+            id="com.gwtplatform.plugin.view.GwtPropertyPage"
+            name="%page.name">
          <enabledWhen>
             <adapt
                   type="org.eclipse.core.resources.IProject">
@@ -69,47 +69,47 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            id="com.imagem.gwtpplugin"
-            name="GWT-Platform">
+            id="com.gwtplatform.plugin"
+            name="%category.name">
       </category>
       <wizard
-            category="com.imagem.gwtpplugin"
-            class="com.imagem.gwtpplugin.wizard.NewProjectWizard"
+            category="com.gwtplatform.plugin"
+            class="com.gwtplatform.plugin.wizard.NewProjectWizard"
             icon="icons/gwtp-plugin.png"
-            id="com.imagem.gwtpplugin.wizard.NewProjectWizard"
-            name="GWTP Project"
+            id="com.gwtplatform.plugin.wizard.NewProjectWizard"
+            name="%wizard.name"
             project="true">
       </wizard>
       <wizard
-            category="com.imagem.gwtpplugin"
-            class="com.imagem.gwtpplugin.wizard.NewActionWizard"
+            category="com.gwtplatform.plugin"
+            class="com.gwtplatform.plugin.wizard.NewActionWizard"
             icon="icons/gwtp-plugin.png"
-            id="com.imagem.gwtpplugin.wizard.NewActionWizard"
-            name="Action"
+            id="com.gwtplatform.plugin.wizard.NewActionWizard"
+            name="%wizard.name.0"
             project="false">
       </wizard>
       <wizard
-            category="com.imagem.gwtpplugin"
-            class="com.imagem.gwtpplugin.wizard.NewEventWizard"
+            category="com.gwtplatform.plugin"
+            class="com.gwtplatform.plugin.wizard.NewEventWizard"
             icon="icons/gwtp-plugin.png"
-            id="com.imagem.gwtpplugin.wizard.NewEventWizard"
-            name="Event"
+            id="com.gwtplatform.plugin.wizard.NewEventWizard"
+            name="%wizard.name.1"
             project="false">
       </wizard>
       <wizard
-            category="com.imagem.gwtpplugin"
-            class="com.imagem.gwtpplugin.wizard.NewModelWizard"
+            category="com.gwtplatform.plugin"
+            class="com.gwtplatform.plugin.wizard.NewModelWizard"
             icon="icons/gwtp-plugin.png"
-            id="com.imagem.gwtpplugin.wizard.NewModelWizard"
-            name="Model"
+            id="com.gwtplatform.plugin.wizard.NewModelWizard"
+            name="%wizard.name.2"
             project="false">
       </wizard>
       <wizard
-            category="com.imagem.gwtpplugin"
-            class="com.imagem.gwtpplugin.wizard.NewPresenterWizard"
+            category="com.gwtplatform.plugin"
+            class="com.gwtplatform.plugin.wizard.NewPresenterWizard"
             icon="icons/gwtp-plugin.png"
-            id="com.imagem.gwtpplugin.wizard.NewPresenterWizard"
-            name="Presenter"
+            id="com.gwtplatform.plugin.wizard.NewPresenterWizard"
+            name="%wizard.name.3"
             project="false">
       </wizard>
    </extension>

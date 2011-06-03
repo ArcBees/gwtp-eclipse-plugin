@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.imagem.gwtpplugin.feature"
+      id="com.gwtplatform.plugin.feature"
       label="GWT-Platform Plugin"
-      version="1.5.0.qualifier"
-      provider-name="IMAGEM Solutions TI Santé">
+      version="0.6.0"
+      provider-name="GWT Platform">
 
-   <description url="http://code.google.com/p/gwt-platform/">
-      GWTP Plugin
+   <description url="http://gwtplatform.com">
+      GWT-Platform Plugin
    </description>
 
    <copyright url="http://www.imagemsoft.com">
@@ -71,8 +71,25 @@ If the Work includes a &quot;NOTICE&quot; text file as part of its distribution,
 END OF TERMS AND CONDITIONS
    </license>
 
+   <requires>
+      <import plugin="org.eclipse.core.runtime" version="3.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.6.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.debug.ui" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.core" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.launching" version="3.5.100" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface.text" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.editors" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.ide" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor" version="3.6.1" match="greaterOrEqual"/>
+      <import plugin="com.google.appengine.eclipse.core" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="com.google.gwt.eclipse.core" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="com.google.gdt.eclipse.suite" version="2.1.0" match="greaterOrEqual"/>
+   </requires>
+
    <plugin
-         id="com.imagem.gwtpplugin"
+         id="gwtp-plugin"
          download-size="0"
          install-size="0"
          version="0.0.0"
