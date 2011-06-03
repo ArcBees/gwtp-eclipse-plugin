@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: gwtp-plugin;singleton:=true
+Bundle-SymbolicName: gwtpplugin;singleton:=true
 Bundle-Version: 0.6.0.qualifier
 Bundle-Activator: com.gwtplatform.plugin.Activator
 Bundle-Vendor: %Bundle-Vendor

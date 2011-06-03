@@ -93,7 +93,7 @@ END OF TERMS AND CONDITIONS
    </requires>
 
    <plugin
-         id="gwtp-plugin"
+         id="gwtpplugin"
          download-size="0"
          install-size="0"
          version="0.6.0.qualifier"
