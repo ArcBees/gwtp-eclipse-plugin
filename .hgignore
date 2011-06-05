@@ -1,8 +1,1 @@
-
-syntax: regexp
-^com\.imagem\.gwtpplugin/\.settings$
-glob:com.imagem.gwtpplugin/bin/**
-glob:gwtp-plugin-update-site/artifacts.jar
-glob:gwtp-plugin-update-site/content.jar
-glob:gwtp-plugin-update-site/features/**
-glob:gwtp-plugin-update-site/plugins/**
+glob:gwtpplugin/bin/**

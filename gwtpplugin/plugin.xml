@@ -23,8 +23,8 @@
          id="product"
          point="org.eclipse.core.runtime.products">
       <product
-            application="com.gwtplatform.plugin.application"
-            name="%product.name">
+            application="gwtpplugin.application"
+            name="gwtpplugin">
          <property
                name="appName"
                value="gwtpplugin">

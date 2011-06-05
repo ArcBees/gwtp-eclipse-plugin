@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.gwtplatform.plugin.feature_0.6.0.jar" id="com.gwtplatform.plugin.feature" version="0.6.0">
-      <category name="gwtp"/>
+   <feature url="features/com.gwtplatform.plugin.feature_0.6.0.qualifier.jar" id="com.gwtplatform.plugin.feature" version="0.6.0.qualifier">
+      <category name="gwtpplugin_helios"/>
    </feature>
-   <category-def name="gwtp" label="GWT-Platform">
+   <category-def name="gwtpplugin_helios" label="GWTP Plugin, Helios">
       <description>
-         GWT-Platform Plugin
+         Eclipse plugin for the GWT-Platform project, for Eclipse 3.6 (Helios)
       </description>
    </category-def>
 </site>
