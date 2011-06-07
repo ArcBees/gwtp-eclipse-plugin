@@ -37,6 +37,7 @@ import com.gwtplatform.plugin.projectfile.src.client.core.Ui;
 import com.gwtplatform.plugin.projectfile.src.client.core.View;
 import com.gwtplatform.plugin.projectfile.src.client.gin.Ginjector;
 import com.gwtplatform.plugin.projectfile.src.client.gin.PresenterModule;
+import com.gwtplatform.plugin.projectfile.src.client.place.PlaceAnnotation;
 import com.gwtplatform.plugin.projectfile.src.client.place.Tokens;
 
 /**
@@ -97,6 +98,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
     View view = null;
     Ginjector ginjector = null;
     PresenterModule presenterModule = null;
+    PlaceAnnotation newPlaceAnnotation = null;
 
     IField tokenField = null;
     try {
@@ -190,6 +192,11 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
       }
       if (!page.getAnnotation().isEmpty()) {
         IType annotation = root.getJavaProject().findType(page.getAnnotation());
+        if (annotation == null) {
+          // Annotation type doesn't exist, create it!
+          newPlaceAnnotation = new PlaceAnnotation(root, page.getAnnotation(), sourceWriterFactory);
+          annotation = newPlaceAnnotation.getType();
+        }
         presenterModule.createConstantBinder(annotation, tokens.getType(), tokenField);
       }
       monitor.worked(1);
@@ -208,6 +215,9 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
       }
       if (presenterModule != null) {
         presenterModule.commit();
+      }
+      if (newPlaceAnnotation != null) {
+        newPlaceAnnotation.commit();
       }
     } catch (CoreException e) {
       e.printStackTrace();

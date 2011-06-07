@@ -42,7 +42,7 @@ public class VersionTool {
   public static final String GUICE_SERVLET_3 = "guice-servlet-3.0";
 
   public static final String GWTP_5 = "gwtp-all-0.5";
-  public static final String GWTP_6 = "gwtp-all-0.6-SNAPSHOT";
+  public static final String GWTP_6 = "gwtp-all-0.6";
 
   public static final String JAVAC_INJECT = "javax.inject";
 

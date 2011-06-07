@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -578,7 +580,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
 
     // BindConstant
     label = new Label(composite, SWT.NULL);
-    label.setText("Bind with:");
+    label.setText("Place annotation:");
 
     annotation = new Text(composite, SWT.BORDER | SWT.SINGLE);
     annotation.setLayoutData(gd);
@@ -686,7 +688,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
         }
         IField field = type.getField(token);
         if (field.exists()) {
-          status.setError("The token " + token + " already exists");
+          status.setError("The token " + token + " already exists.");
           return status;
         }
       } catch (JavaModelException e) {
@@ -699,13 +701,19 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
         try {
           IType type = getJavaProject().findType(annotation.getText());
           if (type == null || !type.exists()) {
-            status.setError(annotation.getText() + " doesn't exist");
-            return status;
-          }
-
-          if (!type.isAnnotation()) {
-            status.setError(annotation.getText() + " isn't an Annotation");
-            return status;
+            // New type, we will try to create the annotation
+            IStatus nameStatus = JavaConventions.validateJavaTypeName(annotation.getText(),
+                JavaCore.VERSION_1_6, JavaCore.VERSION_1_7);
+            if (nameStatus.getCode() != IStatus.OK && nameStatus.getCode() != IStatus.WARNING) {
+              status.setError(annotation.getText() + " is not a valid type name.");
+              return status;
+            }
+          } else {
+            // Existing type, just reuse it
+            if (!type.isAnnotation()) {
+              status.setError(annotation.getText() + " isn't an Annotation");
+              return status;
+            }
           }
         } catch (JavaModelException e) {
           status.setError("An unexpected error has happened. Close the wizard and retry.");

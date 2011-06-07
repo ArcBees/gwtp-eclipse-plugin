@@ -47,18 +47,16 @@ public abstract class ProjectClass {
   public ProjectClass(IPackageFragmentRoot root, String fullyQualifiedName,
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
     this.root = root;
-    int lastDotIndex = fullyQualifiedName.lastIndexOf(',');
+    int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
     if (lastDotIndex <= 1) {
       packageName = "";
     } else {
-      packageName = fullyQualifiedName.substring(0, lastDotIndex - 1);
+      packageName = fullyQualifiedName.substring(0, lastDotIndex);
     }
     elementName = fullyQualifiedName.substring(lastDotIndex + 1);
-    type = root.getJavaProject().findType(fullyQualifiedName);
-    assert type != null : "Use the 4-parameter constructor to create new types.";
-    cu = type.getCompilationUnit();
-    cu.becomeWorkingCopy(null);
     this.sourceWriterFactory = sourceWriterFactory;
+    type = root.getJavaProject().findType(fullyQualifiedName);
+    cu = createTypeIfNeeded();
   }
 
   public ProjectClass(IPackageFragmentRoot root, String packageName, String elementName,
@@ -68,15 +66,22 @@ public abstract class ProjectClass {
     this.elementName = elementName;
     this.sourceWriterFactory = sourceWriterFactory;
     type = root.getJavaProject().findType(packageName + "." + elementName);
+    cu = createTypeIfNeeded();
+  }
+
+  private ICompilationUnit createTypeIfNeeded() throws JavaModelException {
+    ICompilationUnit compilationUnit;
     if (type == null) {
       String cuName = elementName + ".java";
       IPackageFragment pack = root.createPackageFragment(packageName, false, null);
-      cu = pack.createCompilationUnit(cuName, "", false, null);
-      cu.becomeWorkingCopy(null);
-      cu.createPackageDeclaration(packageName, null);
+      compilationUnit = pack.createCompilationUnit(cuName, "", false, null);
+      compilationUnit.becomeWorkingCopy(null);
+      compilationUnit.createPackageDeclaration(packageName, null);
     } else {
-      cu = type.getCompilationUnit();
+      compilationUnit = type.getCompilationUnit();
+      compilationUnit.becomeWorkingCopy(null);
     }
+    return compilationUnit;
   }
 
   protected void init() throws JavaModelException {
@@ -157,6 +162,7 @@ public abstract class ProjectClass {
 
   public IMethod createGetterMethod(IField field) throws JavaModelException {
      SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+     // TODO Use NamingConventions.suggestGetterName
      sw.writeLines(
          "public " + signature(field) + " " + methodName("get", field) + "() {",
          "  return " + field.getElementName() + ";",
@@ -167,6 +173,7 @@ public abstract class ProjectClass {
 
   public IMethod createSetterMethod(IField field) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
+    // TODO Use NamingConventions.suggestSetterName
     sw.writeLines(
         "public void " + methodName("set", field) + "(" + signature(field) + " "
         + field.getElementName() + ") {",

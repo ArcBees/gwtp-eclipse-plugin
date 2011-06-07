@@ -44,6 +44,7 @@ public class PlaceAnnotation extends ProjectClass {
       SourceWriterFactory sourceWriterFactory)
       throws JavaModelException {
     super(root, fullyQualifiedName, sourceWriterFactory);
+    init();
   }
 
   public PlaceAnnotation(IPackageFragmentRoot root, String packageName, String elementName,
