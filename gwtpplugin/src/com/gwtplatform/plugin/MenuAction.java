@@ -47,7 +47,6 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
   private IWorkbenchWindow window;
   private ISelection selection;
-  private SourceWriterFactory sourceWriterFactory;
 
   @Override
   public Menu getMenu(Control parent) {
@@ -59,7 +58,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        INewWizard wizard = new NewProjectWizard(sourceWriterFactory);
+        INewWizard wizard = new NewProjectWizard();
         if (selection instanceof IStructuredSelection) {
           wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
         } else {
@@ -84,7 +83,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        INewWizard wizard = new NewActionWizard(sourceWriterFactory);
+        INewWizard wizard = new NewActionWizard();
         if (selection instanceof IStructuredSelection) {
           wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
         } else {
@@ -107,7 +106,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        INewWizard wizard = new NewEventWizard(sourceWriterFactory);
+        INewWizard wizard = new NewEventWizard();
         if (selection instanceof IStructuredSelection) {
           wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
         } else {
@@ -130,7 +129,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        INewWizard wizard = new NewModelWizard(sourceWriterFactory);
+        INewWizard wizard = new NewModelWizard();
         if (selection instanceof IStructuredSelection) {
           wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
         } else {
@@ -153,7 +152,7 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
 
       @Override
       public void widgetSelected(SelectionEvent e) {
-        INewWizard wizard = new NewPresenterWizard(sourceWriterFactory);
+        INewWizard wizard = new NewPresenterWizard();
         if (selection instanceof IStructuredSelection) {
           wizard.init(window.getWorkbench(), (IStructuredSelection) selection);
         } else {
@@ -201,7 +200,6 @@ public class MenuAction implements IWorkbenchWindowPulldownDelegate {
   @Override
   public void init(IWorkbenchWindow window) {
     this.window = window;
-    sourceWriterFactory = new SourceWriterFactory();
   }
 
   @Override

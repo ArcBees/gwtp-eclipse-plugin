@@ -46,11 +46,11 @@ public class NewModelWizard extends Wizard implements INewWizard {
   private IStructuredSelection selection;
   private boolean isDone;
 
-  public NewModelWizard(SourceWriterFactory sourceWriterFactory) {
+  public NewModelWizard() {
     super();
-    this.sourceWriterFactory = sourceWriterFactory;
     setNeedsProgressMonitor(true);
     setWindowTitle("New Model");
+    sourceWriterFactory = new SourceWriterFactory();
   }
 
   @Override

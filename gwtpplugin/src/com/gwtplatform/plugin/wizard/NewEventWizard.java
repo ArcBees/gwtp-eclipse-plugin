@@ -48,11 +48,11 @@ public class NewEventWizard extends Wizard implements INewWizard {
   private IStructuredSelection selection;
   private boolean isDone;
 
-  public NewEventWizard(SourceWriterFactory sourceWriterFactory) {
+  public NewEventWizard() {
     super();
-    this.sourceWriterFactory = sourceWriterFactory;
     setNeedsProgressMonitor(true);
     setWindowTitle("New Event");
+    sourceWriterFactory = new SourceWriterFactory();
   }
 
   @Override

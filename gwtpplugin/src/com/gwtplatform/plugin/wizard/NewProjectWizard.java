@@ -96,11 +96,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
   private NewProjectWizardPage page;
   private boolean isDone;
 
-  public NewProjectWizard(SourceWriterFactory sourceWriterFactory) {
+  public NewProjectWizard() {
     super();
-    this.sourceWriterFactory = sourceWriterFactory;
     setNeedsProgressMonitor(true);
     setWindowTitle("New GWTP Project");
+    sourceWriterFactory = new SourceWriterFactory();
 
     try {
       URL url = new URL(Activator.getDefault().getBundle().getEntry("/"), "icons/gwtp-logo.png");

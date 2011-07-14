@@ -49,11 +49,11 @@ public class NewActionWizard extends Wizard implements INewWizard {
   private IStructuredSelection selection;
   private boolean isDone;
 
-  public NewActionWizard(SourceWriterFactory sourceWriterFactory) {
+  public NewActionWizard() {
     super();
-    this.sourceWriterFactory = sourceWriterFactory;
     setNeedsProgressMonitor(true);
     setWindowTitle("New Action");
+    sourceWriterFactory = new SourceWriterFactory();
   }
 
   @Override
