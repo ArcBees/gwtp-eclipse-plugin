@@ -44,7 +44,7 @@ public class Ui {
     return file;
   }
 
-  public IFile createFile() throws CoreException {
+  public IFile createFile(boolean isPopupPanel) throws CoreException {
     String contents = "<!DOCTYPE ui:UiBinder SYSTEM \"http://dl.google.com/gwt/DTD/xhtml.ent\">\n\n";
 
     contents += "<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'\n";
@@ -53,7 +53,13 @@ public class Ui {
     contents += "\tui:generateKeys='com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator'\n";
     contents += "\tui:generateLocales='default'>\n\n";
 
-    contents += "\t<g:HTMLPanel/>\n";
+    //Issue 340: Creating a popupwidget will produce the wrong code in the .ui.xml
+    if(isPopupPanel) {
+        contents += "\t<g:PopupPanel/>\n";
+    }
+    else {
+    	contents += "\t<g:HTMLPanel/>\n";
+    }
 
     contents += "</ui:UiBinder>\n";
 

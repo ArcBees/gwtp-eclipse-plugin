@@ -167,7 +167,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
       if (page.useUiBinder()) {
         monitor.subTask("UiBinder");
         Ui ui = new Ui(root, page.getViewPackageText(), page.getViewTypeName());
-        ui.createFile();
+        ui.createFile(page.isPopup());
       }
 
       // Ginjector
