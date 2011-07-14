@@ -133,7 +133,7 @@ public abstract class ProjectClass {
     sw.writeLines(
         "@SuppressWarnings(\"unused\")",
         "private " + type.getElementName() + "() {",
-        "  // For serialization only\n",
+        "  // For serialization only",
         "}");
 
     return createMethod(sw);

@@ -102,7 +102,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
       monitor.subTask("Result");
       result = new Result(root, page.getResultPackageText(), page.getResultTypeName(),
         sourceWriterFactory);
-      result.createSerializationField();
+      //Issue 335: Remove serialization generated uid in Action and Result
+      //result.createSerializationField();
 
       Field[] resultFields = page.getResultFields();
       IField[] fields = new IField[resultFields.length];
@@ -130,7 +131,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
       action = new Action(root, page.getPackageText(), page.getTypeName(), sourceWriterFactory,
           actionSuperclass, result.getType());
-      action.createSerializationField();
+      //Issue 335: Remove serialization generated uid in Action and Result
+      //action.createSerializationField();
 
       Field[] actionFields = page.getActionFields();
       fields = new IField[actionFields.length];
