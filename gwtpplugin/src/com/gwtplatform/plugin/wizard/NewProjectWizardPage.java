@@ -52,6 +52,8 @@ public class NewProjectWizardPage extends WizardPage {
   private Button browse;
   private Label locationLabel;
   private Button useGAE;
+private Button generationRemove;
+private Button generationReplace;
 
   protected NewProjectWizardPage() {
     super("ProjectWizardPage");
@@ -96,16 +98,16 @@ public class NewProjectWizardPage extends WizardPage {
     });
 
     // Location
-    Group group = new Group(container, SWT.NULL);
-    group.setText("Location");
+    Group locationGroup = new Group(container, SWT.NULL);
+    locationGroup.setText("Location");
     gd = new GridData(GridData.FILL_HORIZONTAL);
-    group.setLayoutData(gd);
+    locationGroup.setLayoutData(gd);
     layout = new GridLayout();
-    group.setLayout(layout);
+    locationGroup.setLayout(layout);
     layout.numColumns = 1;
     layout.verticalSpacing = 5;
 
-    locationWorkspace = new Button(group, SWT.RADIO);
+    locationWorkspace = new Button(locationGroup, SWT.RADIO);
     locationWorkspace.setText("Create new project in workspace");
     locationWorkspace.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
@@ -122,10 +124,10 @@ public class NewProjectWizardPage extends WizardPage {
       }
     });
 
-    Button locationOther = new Button(group, SWT.RADIO);
+    Button locationOther = new Button(locationGroup, SWT.RADIO);
     locationOther.setText("Create new project in:");
 
-    locationContainer = new Composite(group, SWT.NULL);
+    locationContainer = new Composite(locationGroup, SWT.NULL);
     gd = new GridData(GridData.FILL_HORIZONTAL);
     locationContainer.setLayoutData(gd);
     layout = new GridLayout();
@@ -151,6 +153,22 @@ public class NewProjectWizardPage extends WizardPage {
       }
     });
 
+    // Code Generation
+    Group generationGroup = new Group(container, SWT.NULL);
+    generationGroup.setText("Code Generation");
+    gd = new GridData(GridData.FILL_HORIZONTAL);
+    generationGroup.setLayoutData(gd);
+    layout = new GridLayout();
+    generationGroup.setLayout(layout);
+    layout.numColumns = 1;
+    layout.verticalSpacing = 5;
+
+    generationRemove = new Button(generationGroup, SWT.RADIO);
+    generationRemove.setText("Remove invalid characters in Java Identifiers");
+
+    generationReplace = new Button(generationGroup, SWT.RADIO);
+    generationReplace.setText("Replace invalid characters in Java Identifiers by '_'");
+
     // GAE
     useGAE = new Button(container, SWT.CHECK);
     useGAE.setText("Use App Engine");
@@ -170,6 +188,7 @@ public class NewProjectWizardPage extends WizardPage {
     location.setEnabled(false);
     location.setText(workspace);
     browse.setEnabled(false);
+    generationRemove.setSelection(true);
   }
 
   private void dialogChanged() {
@@ -214,6 +233,10 @@ public class NewProjectWizardPage extends WizardPage {
 
   public String getProjectPackage() {
     return projectPackage.getText();
+  }
+  
+  public boolean isRemoveEnabled() {
+	  return generationRemove.getSelection();
   }
 
   public URI getProjectLocation() {

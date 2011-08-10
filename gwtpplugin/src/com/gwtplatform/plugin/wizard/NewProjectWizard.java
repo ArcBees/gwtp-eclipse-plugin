@@ -96,6 +96,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
   private NewProjectWizardPage page;
   private boolean isDone;
 
+  private String formattedName;
+
   public NewProjectWizard() {
     super();
     setNeedsProgressMonitor(true);
@@ -144,6 +146,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Project base creation
       monitor.subTask("Base project creation");
+      formattedName = projectNameToClassName(page.getProjectName(), page.isRemoveEnabled());
       IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(page.getProjectName());
 
       // Project location
@@ -308,13 +311,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Client package contents
       EntryPoint entryPoint = new EntryPoint(root, clientPackage.getElementName(),
-          page.getProjectName(), sourceWriterFactory);
+    		  formattedName, sourceWriterFactory);
       entryPoint.createGinjectorField(ginjector.getType());
       entryPoint.createOnModuleLoadMethod();
 
       // Project package contents
       GwtXmlModule gwtXmlModule = new GwtXmlModule(root, projectPackage.getElementName(),
-          page.getProjectName());
+    		  formattedName);
       gwtXmlModule.createFile(entryPoint.getType(), ginjector.getType());
 
       // Server package
@@ -429,5 +432,45 @@ public class NewProjectWizard extends Wizard implements INewWizard {
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
-
+  
+  /**
+   * Convert an Eclipse project name into a valid Java class name.  This method does not work with Unicode;
+   * the fix for this involves using <code>codePointAt</code> instead of <code>charAt</code> but I am going
+   * to leave this for somebody else to tackle.
+   *
+   * @param projectName the Eclipse project name to convert
+   * @param remove <code>true</code> remove invalid characters, <code>false</code> replace them by _
+   * @return a valid Java class name based on the given project name
+   */
+  private String projectNameToClassName(String projectName, boolean remove) {
+    StringBuffer buffer = new StringBuffer(projectName);
+  
+    while (!Character.isJavaIdentifierStart(buffer.charAt(0))) {
+      // Java identifiers can't start with a non-letter
+      if (remove) {
+        buffer.deleteCharAt(0);
+      } else {
+        buffer.setCharAt(0, '_');
+      }
+    } 
+    
+    if (Character.isLowerCase(buffer.charAt(0))) {
+      // By convention, Java class names start with a capital letter.
+      buffer.setCharAt(0, Character.toUpperCase(buffer.charAt(0)));
+    }
+    
+    for (int i = 1; i < buffer.length(); ++i) {
+      if (!Character.isJavaIdentifierPart(buffer.charAt(i))) {
+        // Delete or replace any invalid characters.
+        if (remove) {
+          buffer.deleteCharAt(i);
+        } else {
+          buffer.setCharAt(i, '_');
+        }
+      }
+    }
+  
+    return buffer.toString();
+  }
+  
 }
