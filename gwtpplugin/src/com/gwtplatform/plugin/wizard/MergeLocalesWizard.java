@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -54,9 +55,9 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
   private IStructuredSelection selection;
   private boolean isDone;
 
-  private boolean deprecatedCommentIssued;
-  private boolean translateCommentIssued;
-  private boolean confirmCommentIssued;
+  //private boolean deprecatedCommentIssued;
+  //private boolean translateCommentIssued;
+  //private boolean confirmCommentIssued;
 
   public MergeLocalesWizard() {
     super();
@@ -120,22 +121,31 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
       }
 
       List<IResource> resourceResources = enumeratePropertyFiles(resourcesDir);
-      IResource defaultLocalResource = null;
+      IResource defaultLocaleResource = null;
       File defaultLocaleFile = null;
       for (IResource resourceResource : resourceResources) {
         File resourceFile = new File(resourceResource.getLocationURI());
         if (findLocale(resourceFile).isEmpty()) {
-          defaultLocalResource = resourceResource;
+          defaultLocaleResource = resourceResource;
           defaultLocaleFile = resourceFile;
           break;
         }
+      }
+      
+      if(defaultLocaleFile == null) {
+    	  IFile localeFile = resourcesDir.getFile(new Path("LocalizableResource.properties"));
+    	  localeFile.create(new ByteArrayInputStream("".getBytes()), false, null);
+    	  localeFile.setCharset(localeFile.getProject().getDefaultCharset(), null);
+    	  
+    	  defaultLocaleResource = localeFile;
+    	  defaultLocaleFile = new File(localeFile.getLocationURI());
       }
 
       PropertyCollection defaultLocaleProperties = new PropertyCollection();
       defaultLocaleProperties.readPropertiesFromFile(defaultLocaleFile);
       defaultLocaleProperties.mergeWith(incomingProperties, true, false);
 
-      IFile file = (IFile) defaultLocalResource.getAdapter(IFile.class);
+      IFile file = (IFile) defaultLocaleResource.getAdapter(IFile.class);
       file.setContents(new ByteArrayInputStream(defaultLocaleProperties.toString().getBytes()),
           false, true, null);
 
@@ -314,7 +324,7 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
       if (!comments.contains(DEPRACATED_COMMENT)) {
         comments += DEPRACATED_COMMENT;
       }
-      deprecatedCommentIssued = true;
+      //deprecatedCommentIssued = true;
     }
 
     /**
@@ -325,7 +335,7 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
       if (!comments.contains(TRANSLATE_COMMENT)) {
         comments += TRANSLATE_COMMENT;
       }
-      translateCommentIssued = true;
+      //translateCommentIssued = true;
     }
 
     /**
@@ -336,7 +346,7 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
       if (!comments.contains(CONFIRM_COMMENT)) {
         comments += CONFIRM_COMMENT;
       }
-      confirmCommentIssued = true;
+      //confirmCommentIssued = true;
     }
 
     /**

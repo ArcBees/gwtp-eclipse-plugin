@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -40,101 +41,139 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
  */
 public class MergeLocalesWizardPage extends WizardPage {
 
-  private IProject project;
-  private IContainer initialSelection;
-  private Text extraDir;
-  private IContainer selection;
+	private IProject project;
+	private IContainer initialSelection;
+	private Text extraDir;
+	private IContainer selection;
 
-  protected MergeLocalesWizardPage(IStructuredSelection selection) {
-    super("Merge Locales");
-    setTitle("Merge Locales");
-    setDescription("Merge Locales");
+	protected MergeLocalesWizardPage(IStructuredSelection selection) {
+		super("Merge Locales");
+		setTitle("Merge Locales");
+		setDescription("Merge Locales");
 
-    init(selection);
-  }
+		init(selection);
+	}
 
-  private void init(IStructuredSelection selection) {
-    if (selection.getFirstElement() instanceof IAdaptable) {
-      IAdaptable adaptable = (IAdaptable) selection.getFirstElement();
-      IResource resource = (IResource) adaptable.getAdapter(IResource.class);
-      if (resource != null) {
-        project = resource.getProject();
-      }
-      IContainer container = (IContainer) resource.getAdapter(IContainer.class);
-      if (container == null) {
-        container = resource.getParent();
-      }
-      IFolder folder = project.getFolder(container.getFullPath());
-      initialSelection = (IContainer) folder.getAdapter(IContainer.class);
-      this.selection = container;
-    }
-  }
+	private void init(IStructuredSelection selection) {
+		if (selection.getFirstElement() instanceof IAdaptable) {
+			IAdaptable adaptable = (IAdaptable) selection.getFirstElement();
+			IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+			if (resource != null) {
+				project = resource.getProject();
+			}
+			IContainer container = (IContainer) resource.getAdapter(IContainer.class);
+			if (container == null) {
+				container = resource.getParent();
+			}
+			IFolder folder = project.getFolder(container.getFullPath());
+			initialSelection = (IContainer) folder.getAdapter(IContainer.class);
+			this.selection = container;
+		}
+	}
 
-  @Override
-  public void createControl(Composite parent) {
-    initializeDialogUnits(parent);
+	@Override
+	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
 
-    Composite composite = new Composite(parent, SWT.NONE);
-    composite.setFont(parent.getFont());
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 
-    int nColumns = 3;
+		int nColumns = 3;
 
-    GridLayout layout = new GridLayout();
-    layout.numColumns = nColumns;
-    composite.setLayout(layout);
-    composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout layout = new GridLayout();
+		layout.numColumns = nColumns;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    GridData gd = new GridData();
-    gd.horizontalAlignment = GridData.FILL;
-    gd.horizontalSpan = nColumns - 2;
+		GridData gd = new GridData();
+		gd.horizontalAlignment = GridData.FILL;
+		gd.horizontalSpan = nColumns - 2;
 
-    Label label = new Label(composite, SWT.NULL);
-    label.setText("Extras directory:");
+		Label label = new Label(composite, SWT.NULL);
+		label.setText("Extras directory:");
 
-    extraDir = new Text(composite, SWT.BORDER | SWT.SINGLE);
-    extraDir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		extraDir = new Text(composite, SWT.BORDER | SWT.SINGLE);
+		extraDir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    Button browse = new Button(composite, SWT.PUSH);
-    browse.setText("Browse...");
-    browse.addSelectionListener(new SelectionListener() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
-      }
+		Button browse = new Button(composite, SWT.PUSH);
+		browse.setText("Browse...");
+		browse.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
+				dialogChanged();
+			}
 
-      @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
-        extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
-      }
-    });
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
+				dialogChanged();
+			}
+		});
 
-    extraDir.setText(initialSelection.getProjectRelativePath().toOSString());
-    setControl(composite);
-  }
+		extraDir.setText(initialSelection.getProjectRelativePath().toOSString());
+		setControl(composite);
+		dialogChanged();
+	}
 
-  protected IContainer chooseExtraDir() {
-    ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), initialSelection,
-        false, "Message");
-    dialog.open();
+	protected IContainer chooseExtraDir() {
+		ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), initialSelection,
+				false, "Message");
+		dialog.open();
 
-    IPath path = (IPath) dialog.getResult()[0];
-    IFolder folder = project.getFolder(path);
-    selection = (IContainer) folder.getAdapter(IContainer.class);
+		IPath path = ((IPath) dialog.getResult()[0]).removeFirstSegments(1);
+		IFolder folder = project.getFolder(path);
+		selection = (IContainer) folder.getAdapter(IContainer.class);
 
-    return selection;
-  }
+		return selection;
+	}
 
-  public IContainer getExtraDir() {
-    return selection;
-  }
+	private void dialogChanged() {
+		if (extraDir.getText().isEmpty()) {
+			setMessage("Select the directory containing the locales to merge. (usally {extraFolder}/{projectName})");
+			setErrorMessage(null);
+			setPageComplete(false);
+			return;
+		}
 
-  public IContainer getResourcesDir() {
-    return (IContainer) project.findMember("src/com/google/gwt/i18n/client/").getAdapter(
-        IContainer.class);
-  }
+		if (selection != null ) {
+			try {
+				int n = 0;
+				IResource[] resources = selection.members(IResource.FILE);
+				for (IResource resource : resources) {
+					if (resource.getName().endsWith(".properties")) {
+						n++;
+					}
+				}
 
-  public IProject getProject() {
-    return project;
-  }
+				if (n == 0) {
+					setErrorMessage("This directory doesn't contain any .properties file");
+					setPageComplete(false);
+					return;
+				}
+			} catch (CoreException e) {
+				setErrorMessage("An unexpected error has happened. Close the wizard and retry.");
+				setPageComplete(false);
+				return;
+			}
+		}
+
+	    setMessage(null);
+	    setErrorMessage(null);
+	    setPageComplete(true);
+	}
+
+	public IContainer getExtraDir() {
+		return selection;
+	}
+
+	public IContainer getResourcesDir() {
+		return (IContainer) project.findMember("src/com/google/gwt/i18n/client/").getAdapter(
+				IContainer.class);
+	}
+
+	public IProject getProject() {
+		return project;
+	}
 
 }
