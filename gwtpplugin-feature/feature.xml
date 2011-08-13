@@ -2,7 +2,7 @@
 <feature
       id="com.gwtplatform.plugin.feature"
       label="GWT-Platform Plugin"
-      version="0.6.0.qualifier"
+      version="0.7.0.qualifier"
       provider-name="GWT Platform">
 
    <description url="http://gwtplatform.com">
@@ -72,7 +72,7 @@ END OF TERMS AND CONDITIONS
    </license>
 
    <url>
-      <update label="GWT-Platform update site" url="http://plugin.gwt-platform.googlecode.com/hg/3.6"/>
+      <update label="GWT-Platform update site" url="http://plugin.gwt-platform.googlecode.com/hg/update"/>
    </url>
 
    <requires>
