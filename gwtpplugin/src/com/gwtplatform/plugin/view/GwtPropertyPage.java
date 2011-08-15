@@ -55,7 +55,6 @@ import com.gwtplatform.plugin.Activator;
  * @author Michael Renaud
  *
  */
-@SuppressWarnings("restriction")
 public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 
   private IJavaProject project;

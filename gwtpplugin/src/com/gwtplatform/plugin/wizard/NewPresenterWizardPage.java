@@ -68,7 +68,6 @@ import com.gwtplatform.plugin.Activator;
  * @author beaudoin
  *
  */
-@SuppressWarnings("restriction")
 public class NewPresenterWizardPage extends NewTypeWizardPage {
 
   private static final String PAGE_NAME = "NewPresenterWizardPage";

@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins">
+		<accessrules>
+			<accessrule kind="accessible" pattern="**/internal/**"/>
+			<accessrule kind="accessible" pattern="**/google/appengine/eclipse/**"/>
+			<accessrule kind="accessible" pattern="**/google/gdt/eclipse/**"/>
+			<accessrule kind="accessible" pattern="**/google/gwt/eclipse/**"/>
+		</accessrules>
+	</classpathentry>
 	<classpathentry excluding="com/imagem/gwtpplugin/projectfile/src/client/resource/Resources.java|com/imagem/gwtpplugin/projectfile/src/client/resource/Translations.java|com/imagem/gwtpplugin/projectfile/src/client/ActionCallback.java" kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

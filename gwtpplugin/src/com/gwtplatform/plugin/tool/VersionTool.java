@@ -27,7 +27,6 @@ import com.gwtplatform.plugin.projectfile.war.Jar;
  * @author Michael Renaud
  *
  */
-@SuppressWarnings("restriction")
 public class VersionTool {
 
   public static final String AOPALLIANCE = "aopalliance";

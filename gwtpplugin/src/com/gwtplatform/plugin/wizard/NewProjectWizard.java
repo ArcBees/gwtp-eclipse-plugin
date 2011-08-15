@@ -91,7 +91,6 @@ import com.gwtplatform.plugin.tool.VersionTool;
  * @author Michael Renaud
  *
  */
-@SuppressWarnings("restriction")
 public class NewProjectWizard extends Wizard implements INewWizard {
 
   private final SourceWriterFactory sourceWriterFactory;

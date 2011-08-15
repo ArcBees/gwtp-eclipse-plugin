@@ -58,7 +58,7 @@ public class SourceWriter {
   }
 
   SourceWriter(IMethod methodToAppendTo) throws JavaModelException {
-    IScopeContext[] scopeContext = new IScopeContext[] { new InstanceScope() };
+    IScopeContext[] scopeContext = new IScopeContext[] { InstanceScope.INSTANCE };
     String lineSeparator = Platform.getPreferencesService().getString(Platform.PI_RUNTIME,
         Platform.PREF_LINE_SEPARATOR, System.getProperty("line.separator"), scopeContext);
     this.formatKind = CodeFormatter.K_STATEMENTS;

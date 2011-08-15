@@ -74,7 +74,6 @@ import com.gwtplatform.plugin.projectfile.Field;
  * @author Michael Renaud
  *
  */
-@SuppressWarnings("restriction")
 public class NewActionWizardPage extends NewTypeWizardPage {
 
   private static final String PAGE_NAME = "NewActionWizardPage";

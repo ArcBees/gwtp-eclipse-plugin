@@ -49,7 +49,6 @@ import com.gwtplatform.plugin.projectfile.Field;
  * @author Michael Renaud
  *
  */
-@SuppressWarnings("restriction")
 public class AddFieldDialog extends TitleAreaDialog {
 
   private Text type;
