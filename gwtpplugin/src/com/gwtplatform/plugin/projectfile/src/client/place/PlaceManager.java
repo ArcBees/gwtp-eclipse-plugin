@@ -55,12 +55,12 @@ public class PlaceManager extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_PLACE_MANAGER_IMPL, null, null);
+    workingCopy.createImport(C_PLACE_MANAGER_IMPL, null, null);
     return createClass("PlaceManagerImpl", null);
   }
 
   public IField createPlaceRequestField(IType annotation) throws JavaModelException {
-    cu.createImport(C_PLACE_REQUEST, null, null);
+    workingCopy.createImport(C_PLACE_REQUEST, null, null);
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final PlaceRequest " + fieldName(annotation) + "Request;");
     return createField(sw);
@@ -73,7 +73,7 @@ public class PlaceManager extends ProjectClass {
     String params = "";
     List<String> assignations = new ArrayList<String>(annotations.length);
     for (int i = 0; i < annotations.length; i++) {
-      cu.createImport(annotations[i].getFullyQualifiedName(), null, null);
+      workingCopy.createImport(annotations[i].getFullyQualifiedName(), null, null);
       params += ", @" + annotations[i].getElementName() + " final String "
           + fieldName(annotations[i]) + "NameToken";
       assignations.add("this." + placeRequests[i].getElementName() + " = new PlaceRequest("
@@ -82,12 +82,12 @@ public class PlaceManager extends ProjectClass {
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    cu.createImport(A_INJECT, null, null);
-    cu.createImport(I_EVENT_BUS, null, null);
-    cu.createImport(I_TOKEN_FORMATTER, null, null);
+    workingCopy.createImport(A_INJECT, null, null);
+    workingCopy.createImport(I_EVENT_BUS, null, null);
+    workingCopy.createImport(I_TOKEN_FORMATTER, null, null);
     sw.writeLines(
         "@Inject",
-        "public " + type.getElementName() + "(final EventBus eventBus, "
+        "public " + workingCopyType.getElementName() + "(final EventBus eventBus, "
         + "final TokenFormatter tokenFormatter" + params + ") {",
         "  super(eventBus, tokenFormatter);");
 

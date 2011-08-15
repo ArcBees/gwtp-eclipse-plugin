@@ -51,29 +51,29 @@ public class Event extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_GWT_EVENT, null, null);
+    workingCopy.createImport(C_GWT_EVENT, null, null);
     String eventName = elementName.substring(0, elementName.length() - 5);
     return createClass("GwtEvent<" + elementName + "." + eventName + "Handler>", null);
   }
 
   public IType createHandlerInterface() throws JavaModelException {
-    cu.createImport(I_EVENT_HANDLER, null, null);
+    workingCopy.createImport(I_EVENT_HANDLER, null, null);
 
-    String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
+    String eventName = workingCopyType.getElementName().substring(0, workingCopyType.getElementName().length() - 5);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines("public interface " + eventName + "Handler extends EventHandler {",
-        "  public void on" + eventName + "(" + type.getElementName() + " event);", "}");
+        "  public void on" + eventName + "(" + workingCopyType.getElementName() + " event);", "}");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IType createHasHandlersInterface(IType handler, IMethod constructor)
       throws JavaModelException {
-    cu.createImport(I_HAS_HANDLERS, null, null);
-    cu.createImport(I_HANDLER_REGISTRATION, null, null);
+    workingCopy.createImport(I_HAS_HANDLERS, null, null);
+    workingCopy.createImport(I_HANDLER_REGISTRATION, null, null);
 
-    String eventName = type.getElementName().substring(0, type.getElementName().length() - 5);
+    String eventName = workingCopyType.getElementName().substring(0, workingCopyType.getElementName().length() - 5);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
@@ -82,7 +82,7 @@ public class Event extends ProjectClass {
             + handler.getElementName() + " handler);",
         "}");
 
-    return type.createType(sw.toString(), constructor, false, null);
+    return workingCopyType.createType(sw.toString(), constructor, false, null);
   }
 
   public IField createTypeField(IType handler) throws JavaModelException {
@@ -98,7 +98,7 @@ public class Event extends ProjectClass {
     sw.writeLines(
         "@Override",
         "protected void dispatch(" + handler.getElementName() + " handler) {",
-        "  handler.on" + type.getElementName().substring(0, type.getElementName().length() - 5)
+        "  handler.on" + workingCopyType.getElementName().substring(0, workingCopyType.getElementName().length() - 5)
         + "(this);",
         "}");
 
@@ -127,7 +127,7 @@ public class Event extends ProjectClass {
   }
 
   public IMethod createFireMethod(IField[] fields) throws JavaModelException {
-    cu.createImport(I_HAS_HANDLERS, null, null);
+    workingCopy.createImport(I_HAS_HANDLERS, null, null);
 
     String params = getParamsString(fields, true, true);
     String paramVars = getParamsString(fields, false, false);
@@ -135,7 +135,7 @@ public class Event extends ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "public static void fire(HasHandlers source" + params + ") {",
-        "  source.fireEvent(new " + type.getElementName() + "(" + paramVars + "));",
+        "  source.fireEvent(new " + workingCopyType.getElementName() + "(" + paramVars + "));",
         "}");
 
     return createMethod(sw);

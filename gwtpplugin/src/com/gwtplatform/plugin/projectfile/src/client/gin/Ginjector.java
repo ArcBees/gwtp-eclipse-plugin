@@ -58,10 +58,10 @@ public class Ginjector extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(A_GIN_MODULES, null, null);
-    cu.createImport(C_DISPATCH_ASYNC_MODULE, null, null);
-    cu.createImport(presenterModule.getFullyQualifiedName(), null, null);
-    cu.createImport(I_GINJECTOR, null, null);
+    workingCopy.createImport(A_GIN_MODULES, null, null);
+    workingCopy.createImport(C_DISPATCH_ASYNC_MODULE, null, null);
+    workingCopy.createImport(presenterModule.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(I_GINJECTOR, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClass();
 
@@ -71,17 +71,17 @@ public class Ginjector extends ProjectClass {
         "public interface " + elementName + " extends Ginjector {",
         "}");
 
-    return cu.createType(sw.toString(), null, false, null);
+    return workingCopy.createType(sw.toString(), null, false, null);
   }
 
   public IMethod[] createDefaultGetterMethods() throws JavaModelException {
     IMethod[] methods = new IMethod[3];
 
-    cu.createImport(I_EVENT_BUS, null, null);
-    methods[0] = type.createMethod("EventBus getEventBus();", null, false, null);
+    workingCopy.createImport(I_EVENT_BUS, null, null);
+    methods[0] = workingCopyType.createMethod("EventBus getEventBus();", null, false, null);
 
-    cu.createImport(I_PLACE_MANAGER, null, null);
-    methods[1] = type.createMethod("PlaceManager getPlaceManager();", null, false, null);
+    workingCopy.createImport(I_PLACE_MANAGER, null, null);
+    methods[1] = workingCopyType.createMethod("PlaceManager getPlaceManager();", null, false, null);
 
     return methods;
   }
@@ -96,8 +96,8 @@ public class Ginjector extends ProjectClass {
       }
     }
 
-    cu.createImport(annotation.exists() ? C_PROVIDER : I_ASYNC_PROVIDER, null, null);
-    cu.createImport(presenter.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(annotation.exists() ? C_PROVIDER : I_ASYNC_PROVIDER, null, null);
+    workingCopy.createImport(presenter.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine(

@@ -34,13 +34,18 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+
+import com.gwtplatform.plugin.Activator;
 
 /**
  * @author Michael Renaud
@@ -173,8 +178,9 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
        * translateComment.strip() )
        */
     } catch (Exception e) {
-      e.printStackTrace();
-
+      IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "An unexpected error has happened. Close the wizard and retry.", e);
+        
+      ErrorDialog.openError(getShell(), null, null, status);
       return false;
     }
     return true;

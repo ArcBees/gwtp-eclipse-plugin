@@ -49,7 +49,7 @@ public class PresenterModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_ABSTRACT_PRESENTER_MODULE, null, null);
+    workingCopy.createImport(C_ABSTRACT_PRESENTER_MODULE, null, null);
     return createClass("AbstractPresenterModule", null);
   }
 
@@ -61,8 +61,8 @@ public class PresenterModule extends ProjectClass {
     sw.writeLines(
         "@Override",
         "protected void configure() {");
-    cu.createImport(C_DEFAULT_MODULE, null, null);
-    cu.createImport(placeManager.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(C_DEFAULT_MODULE, null, null);
+    workingCopy.createImport(placeManager.getFullyQualifiedName(), null, null);
     sw.writeLine(
         "install(new DefaultModule(" + placeManager.getElementName() + ".class));");
     sw.writeLine("}");
@@ -91,19 +91,19 @@ public class PresenterModule extends ProjectClass {
 
   private void appendBindPresenterCode(IType presenter, IType view, String code)
       throws JavaModelException {
-    cu.createImport(presenter.getFullyQualifiedName(), null, null);
-    cu.createImport(view.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(presenter.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(view.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configure");
     sw.writeLine(code);
 
-    sw.commit(cu.getBuffer());
+    sw.commit(workingCopy.getBuffer());
   }
 
   public void createConstantBinder(IType annotation, IType nameTokens, IField tokenField)
       throws JavaModelException {
-    cu.createImport(annotation.getFullyQualifiedName(), null, null);
-    cu.createImport(nameTokens.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(annotation.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(nameTokens.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configure");
 
@@ -111,6 +111,6 @@ public class PresenterModule extends ProjectClass {
         + nameTokens.getElementName() + "." + tokenField.getElementName() + ");";
     sw.writeLine(code);
 
-    sw.commit(cu.getBuffer());
+    sw.commit(workingCopy.getBuffer());
   }
 }

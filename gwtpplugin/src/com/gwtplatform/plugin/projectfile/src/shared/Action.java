@@ -50,8 +50,8 @@ public class Action extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(superclass.getFullyQualifiedName(), null, null);
-    cu.createImport(result.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(superclass.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(result.getFullyQualifiedName(), null, null);
     return createClass(superclass.getElementName() + "<" + result.getElementName() + ">", null);
   }
 }

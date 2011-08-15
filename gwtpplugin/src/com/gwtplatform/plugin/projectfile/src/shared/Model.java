@@ -47,14 +47,14 @@ public class Model extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(I_SERIALIZABLE, null, null);
+    workingCopy.createImport(I_SERIALIZABLE, null, null);
     return createClass(null, "Serializable");
   }
 
   public IMethod createConstructor() throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
-        "public " + type.getElementName() + "() {",
+        "public " + workingCopyType.getElementName() + "() {",
         "}");
 
     return createMethod(sw);

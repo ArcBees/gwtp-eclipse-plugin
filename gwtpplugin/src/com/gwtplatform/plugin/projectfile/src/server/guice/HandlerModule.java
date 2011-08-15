@@ -47,7 +47,7 @@ public class HandlerModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_HANDLER_MODULE, null, null);
+    workingCopy.createImport(C_HANDLER_MODULE, null, null);
     return createClass("HandlerModule", null);
   }
 
@@ -62,25 +62,25 @@ public class HandlerModule extends ProjectClass {
   }
 
   public void createBinder(IType action, IType actionHandler) throws JavaModelException {
-    cu.createImport(action.getFullyQualifiedName(), null, null);
-    cu.createImport(actionHandler.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "
         + actionHandler.getElementName() + ".class);");
-    sw.commit(cu.getBuffer());
+    sw.commit(workingCopy.getBuffer());
   }
 
   public void createBinder(IType action, IType actionHandler, IType actionValidator)
       throws JavaModelException {
-    cu.createImport(action.getFullyQualifiedName(), null, null);
-    cu.createImport(actionHandler.getFullyQualifiedName(), null, null);
-    cu.createImport(actionValidator.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(actionValidator.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "
         + actionHandler.getElementName() + ".class, "
         + actionValidator.getElementName() + ".class);");
-    sw.commit(cu.getBuffer());
+    sw.commit(workingCopy.getBuffer());
   }
 }

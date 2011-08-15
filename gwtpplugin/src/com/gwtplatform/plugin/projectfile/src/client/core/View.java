@@ -47,7 +47,7 @@ public class View extends ProjectClass {
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
     super(root, fullyQualifiedName, sourceWriterFactory);
     presenter = null;
-    isPopupView = type.getSuperclassName().startsWith("PopupView");
+    isPopupView = workingCopyType.getSuperclassName().startsWith("PopupView");
   }
 
   public View(IPackageFragmentRoot root, String packageName, String elementName,
@@ -62,26 +62,26 @@ public class View extends ProjectClass {
   @Override
   protected IType createType() throws JavaModelException {
     if (isPopupView) {
-      cu.createImport(C_POPUP_VIEW_IMPL, null, null);
+      workingCopy.createImport(C_POPUP_VIEW_IMPL, null, null);
       return createClass("PopupViewImpl", presenter.getElementName() + ".MyView");
     } else {
-      cu.createImport(C_VIEW_IMPL, null, null);
+      workingCopy.createImport(C_VIEW_IMPL, null, null);
       return createClass("ViewImpl", presenter.getElementName() + ".MyView");
     }
   }
 
   public IType createBinderInterface() throws JavaModelException {
-    cu.createImport(I_UI_BINDER, null, null);
+    workingCopy.createImport(I_UI_BINDER, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine(
-        "public interface Binder extends UiBinder<Widget, " + type.getElementName() + "> { }");
+        "public interface Binder extends UiBinder<Widget, " + workingCopyType.getElementName() + "> { }");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IField createWidgetField() throws JavaModelException {
-    cu.createImport(C_WIDGET, null, null);
+    workingCopy.createImport(C_WIDGET, null, null);
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final Widget widget;");
     return createField(sw);
@@ -92,7 +92,7 @@ public class View extends ProjectClass {
 
     String parameters = "";
     if (isPopupView) {
-      cu.createImport(C_EVENT_BUS, null, null);
+      workingCopy.createImport(C_EVENT_BUS, null, null);
       parameters += "final EventBus eventBus";
       if (useUiBinder) {
         parameters += ", ";
@@ -102,10 +102,10 @@ public class View extends ProjectClass {
       parameters += "final Binder binder";
     }
 
-    cu.createImport(A_INJECT, null, null);
+    workingCopy.createImport(A_INJECT, null, null);
     sw.writeLines(
         "@Inject",
-        "public " + type.getElementName() + "(" + parameters + ") {");
+        "public " + workingCopyType.getElementName() + "(" + parameters + ") {");
 
     if (isPopupView) {
       sw.writeLine("  super(eventBus);");
@@ -121,7 +121,7 @@ public class View extends ProjectClass {
   public IMethod createAsWidgetMethod(boolean useUiBinder) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    cu.createImport(C_WIDGET, null, null);
+    workingCopy.createImport(C_WIDGET, null, null);
     sw.writeLines(
         "@Override",
         "public Widget asWidget() {",

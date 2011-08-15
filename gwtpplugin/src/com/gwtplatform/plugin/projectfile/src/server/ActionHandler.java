@@ -56,28 +56,28 @@ public class ActionHandler extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(I_ACTION_HANDLER, null, null);
-    cu.createImport(action.getFullyQualifiedName(), null, null);
-    cu.createImport(result.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(I_ACTION_HANDLER, null, null);
+    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(result.getFullyQualifiedName(), null, null);
     return createClass(null,
         "ActionHandler<" + action.getElementName() + ", " + result.getElementName() + ">");
   }
 
   public IMethod createConstructor() throws JavaModelException {
-    cu.createImport(A_INJECT, null, null);
+    workingCopy.createImport(A_INJECT, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "@Inject",
-        "public " + type.getElementName() + "() {",
+        "public " + workingCopyType.getElementName() + "() {",
         "}");
 
     return createMethod(sw);
   }
 
   public IMethod createExecuteMethod(IType action, IType result) throws JavaModelException {
-    cu.createImport(I_EXECUTION_CONTEXT, null, null);
-    cu.createImport(C_ACTION_EXCEPTION, null, null);
+    workingCopy.createImport(I_EXECUTION_CONTEXT, null, null);
+    workingCopy.createImport(C_ACTION_EXCEPTION, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(

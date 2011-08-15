@@ -18,19 +18,21 @@ package com.gwtplatform.plugin.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.gwtplatform.plugin.Activator;
 import com.gwtplatform.plugin.SourceWriterFactory;
 import com.gwtplatform.plugin.projectfile.src.client.core.Presenter;
 import com.gwtplatform.plugin.projectfile.src.client.core.Ui;
@@ -96,6 +98,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
     Presenter presenter = null;
     Tokens tokens = null;
     View view = null;
+    Ui ui = null;
     Ginjector ginjector = null;
     PresenterModule presenterModule = null;
     PlaceAnnotation newPlaceAnnotation = null;
@@ -166,7 +169,7 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
       // Ui
       if (page.useUiBinder()) {
         monitor.subTask("UiBinder");
-        Ui ui = new Ui(root, page.getViewPackageText(), page.getViewTypeName());
+        ui = new Ui(root, page.getViewPackageText(), page.getViewTypeName());
         ui.createFile(page.isPopup());
       }
 
@@ -219,27 +222,33 @@ public class NewPresenterWizard extends Wizard implements INewWizard {
       if (newPlaceAnnotation != null) {
         newPlaceAnnotation.commit();
       }
-    } catch (CoreException e) {
-      e.printStackTrace();
-
+    } catch (Exception e) {
       try {
         if (presenter != null) {
-          presenter.discard();
+          presenter.discard(true);
         }
         if (tokens != null) {
-          tokens.discard();
+          tokens.discard(false);
         }
         if (view != null) {
-          view.discard();
+          view.discard(true);
+        }
+        if (ui != null) {
+          ui.getFile().delete(true, null);
         }
         if (ginjector != null) {
-          ginjector.discard();
+          ginjector.discard(false);
         }
         if (presenterModule != null) {
-          presenterModule.discard();
+          presenterModule.discard(false);
         }
-      } catch (JavaModelException e1) {
-      }
+      } catch (Exception e1) {
+          e1.printStackTrace();
+      	}
+      
+      IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "An unexpected error has happened. Close the wizard and retry.", e);
+      
+      ErrorDialog.openError(getShell(), null, null, status);
 
       return false;
     }

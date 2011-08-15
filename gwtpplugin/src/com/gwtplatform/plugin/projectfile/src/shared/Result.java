@@ -45,7 +45,7 @@ public class Result extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(I_RESULT, null, null);
+    workingCopy.createImport(I_RESULT, null, null);
     return createClass(null, "Result");
   }
 }

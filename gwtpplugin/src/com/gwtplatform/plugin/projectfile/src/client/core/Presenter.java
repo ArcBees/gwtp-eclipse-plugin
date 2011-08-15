@@ -50,7 +50,7 @@ public class Presenter extends ProjectClass {
   public Presenter(IPackageFragmentRoot root, String fullyQualifiedName,
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
     super(root, fullyQualifiedName, sourceWriterFactory);
-    isPresenterWidget = type.getSuperclassName().startsWith("PresenterWidget");
+    isPresenterWidget = workingCopyType.getSuperclassName().startsWith("PresenterWidget");
   }
 
   public Presenter(IPackageFragmentRoot root, String packageName, String elementName,
@@ -64,17 +64,17 @@ public class Presenter extends ProjectClass {
   @Override
   protected IType createType() throws JavaModelException {
     if (isPresenterWidget) {
-      cu.createImport(C_PRESENTER_WIDGET, null, null);
+      workingCopy.createImport(C_PRESENTER_WIDGET, null, null);
       return createClass("PresenterWidget<" + elementName + ".MyView>", null);
     } else {
-      cu.createImport(C_PRESENTER, null, null);
+      workingCopy.createImport(C_PRESENTER, null, null);
       return createClass("Presenter<" + elementName + ".MyView, " + elementName + ".MyProxy>",
           null);
     }
   }
 
   public IType createPopupViewInterface() throws JavaModelException {
-    cu.createImport(I_POPUP_VIEW, null, null);
+    workingCopy.createImport(I_POPUP_VIEW, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
@@ -82,11 +82,11 @@ public class Presenter extends ProjectClass {
         "  // TODO Put your view methods here",
         "}");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IType createViewInterface() throws JavaModelException {
-    cu.createImport(I_VIEW, null, null);
+    workingCopy.createImport(I_VIEW, null, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
@@ -94,17 +94,17 @@ public class Presenter extends ProjectClass {
         "  // TODO Put your view methods here",
         "}");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IType createProxyInterface(boolean isStandard) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     outputProxyAnnotation(isStandard, sw);
 
-    cu.createImport(I_PROXY, null, null);
-    sw.writeLine("public interface MyProxy extends Proxy<" + type.getElementName() + "> {}");
+    workingCopy.createImport(I_PROXY, null, null);
+    sw.writeLine("public interface MyProxy extends Proxy<" + workingCopyType.getElementName() + "> {}");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IType createProxyPlaceInterface(boolean isStandard, IType tokens, String tokenName)
@@ -119,30 +119,30 @@ public class Presenter extends ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     outputProxyAnnotation(isStandard, sw);
 
-    cu.createImport(A_NAME_TOKEN, null, null);
-    cu.createImport(tokens.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(A_NAME_TOKEN, null, null);
+    workingCopy.createImport(tokens.getFullyQualifiedName(), null, null);
     sw.writeLine("@NameToken(" + tokens.getElementName() + "." + tokenNameWithoutBang + ")");
 
     if (gatekeeper != null) {
-      cu.createImport(A_USE_GATEKEEPER, null, null);
-      cu.createImport(gatekeeper.getFullyQualifiedName(), null, null);
+      workingCopy.createImport(A_USE_GATEKEEPER, null, null);
+      workingCopy.createImport(gatekeeper.getFullyQualifiedName(), null, null);
       sw.writeLine("@UseGatekeeper(" + gatekeeper.getElementName() + ".class)");
     }
 
-    cu.createImport(I_PROXY_PLACE, null, null);
-    sw.writeLine("public interface MyProxy extends ProxyPlace<" + type.getElementName() + "> {}");
+    workingCopy.createImport(I_PROXY_PLACE, null, null);
+    sw.writeLine("public interface MyProxy extends ProxyPlace<" + workingCopyType.getElementName() + "> {}");
 
-    return type.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, null);
   }
 
   public IMethod createConstructor() throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    cu.createImport(A_INJECT, null, null);
-    cu.createImport(C_EVENT_BUS, null, null);
+    workingCopy.createImport(A_INJECT, null, null);
+    workingCopy.createImport(C_EVENT_BUS, null, null);
     sw.writeLines(
         "@Inject",
-        "public " + type.getElementName() + "(");
+        "public " + workingCopyType.getElementName() + "(");
 
     if (isPresenterWidget) {
       sw.writeLines(
@@ -173,10 +173,10 @@ public class Presenter extends ProjectClass {
         "@Override",
         "protected void revealInParent() {");
 
-    cu.createImport(revealEvent.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(revealEvent.getFullyQualifiedName(), null, null);
     String slotConstant = "";
     if (revealEvent.getElementName().equals("RevealContentEvent")) {
-      cu.createImport(parent.getFullyQualifiedName(), null, null);
+      workingCopy.createImport(parent.getFullyQualifiedName(), null, null);
       slotConstant = parent.getElementName() + "." + contentSlot + ", ";
     }
     sw.writeLines(
@@ -200,10 +200,10 @@ public class Presenter extends ProjectClass {
 
   private void outputProxyAnnotation(boolean isStandard, SourceWriter sw) throws JavaModelException {
     if (isStandard) {
-      cu.createImport(A_PROXY_STANDARD, null, null);
+      workingCopy.createImport(A_PROXY_STANDARD, null, null);
       sw.writeLine("@ProxyStandard");
     } else {
-      cu.createImport(A_PROXY_CODESPLIT, null, null);
+      workingCopy.createImport(A_PROXY_CODESPLIT, null, null);
       sw.writeLine("@ProxyCodeSplit");
     }
   }

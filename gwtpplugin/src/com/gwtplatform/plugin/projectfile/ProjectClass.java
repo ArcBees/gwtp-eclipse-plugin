@@ -40,9 +40,11 @@ public abstract class ProjectClass {
   protected final IPackageFragmentRoot root;
   protected final String packageName;
   protected final String elementName;
-  protected final ICompilationUnit cu;
   protected final SourceWriterFactory sourceWriterFactory;
-  protected IType type;
+  protected final ICompilationUnit originalUnit;
+  protected final ICompilationUnit workingCopy;
+  protected IType workingCopyType;
+  private IType type;
 
   public ProjectClass(IPackageFragmentRoot root, String fullyQualifiedName,
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
@@ -56,7 +58,9 @@ public abstract class ProjectClass {
     elementName = fullyQualifiedName.substring(lastDotIndex + 1);
     this.sourceWriterFactory = sourceWriterFactory;
     type = root.getJavaProject().findType(fullyQualifiedName);
-    cu = createTypeIfNeeded();
+    originalUnit = createCompilationUnitIfNeeded();
+    workingCopy = originalUnit.getWorkingCopy(null);
+    workingCopyType = workingCopy.getType(type.getElementName());
   }
 
   public ProjectClass(IPackageFragmentRoot root, String packageName, String elementName,
@@ -66,20 +70,21 @@ public abstract class ProjectClass {
     this.elementName = elementName;
     this.sourceWriterFactory = sourceWriterFactory;
     type = root.getJavaProject().findType(packageName + "." + elementName);
-    cu = createTypeIfNeeded();
+    originalUnit = createCompilationUnitIfNeeded();
+    workingCopy = originalUnit.getWorkingCopy(null);
   }
 
-  private ICompilationUnit createTypeIfNeeded() throws JavaModelException {
+  private ICompilationUnit createCompilationUnitIfNeeded() throws JavaModelException {
     ICompilationUnit compilationUnit;
     if (type == null) {
       String cuName = elementName + ".java";
       IPackageFragment pack = root.createPackageFragment(packageName, false, null);
       compilationUnit = pack.createCompilationUnit(cuName, "", false, null);
-      compilationUnit.becomeWorkingCopy(null);
+      //compilationUnit.becomeWorkingCopy(null);
       compilationUnit.createPackageDeclaration(packageName, null);
     } else {
       compilationUnit = type.getCompilationUnit();
-      compilationUnit.becomeWorkingCopy(null);
+      //compilationUnit.becomeWorkingCopy(null);
     }
     return compilationUnit;
   }
@@ -87,20 +92,22 @@ public abstract class ProjectClass {
   protected void init() throws JavaModelException {
     if (type == null) {
       type = createType();
+      workingCopyType = workingCopy.getType(type.getElementName());
     }
   }
 
   protected abstract IType createType() throws JavaModelException;
 
   public void commit() throws JavaModelException {
-    cu.commitWorkingCopy(true, null);
-    cu.discardWorkingCopy();
+	workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+    workingCopy.commitWorkingCopy(true, null);
+    workingCopy.discardWorkingCopy();
   }
 
-  public void discard() throws JavaModelException {
-    cu.discardWorkingCopy();
-    if (cu.getSource().isEmpty()) {
-      cu.delete(true, null);
+  public void discard(boolean andDelete) throws JavaModelException {
+    workingCopy.discardWorkingCopy();
+    if (andDelete) {
+    	originalUnit.delete(true, null);
     }
   }
 
@@ -116,7 +123,7 @@ public abstract class ProjectClass {
   }
 
   public IField createField(IType fieldType, String fieldName) throws JavaModelException {
-    cu.createImport(fieldType.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(fieldType.getFullyQualifiedName(), null, null);
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private " + fieldType.getElementName() + " " + fieldName + ";");
     return createField(sw);
@@ -132,7 +139,7 @@ public abstract class ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "@SuppressWarnings(\"unused\")",
-        "private " + type.getElementName() + "() {",
+        "private " + workingCopyType.getElementName() + "() {",
         "  // For serialization only",
         "}");
 
@@ -153,7 +160,7 @@ public abstract class ProjectClass {
     String params = getParamsString(fields, false, true);
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
-    sw.writeLine("public " + type.getElementName() + "(" + params + ") {");
+    sw.writeLine("public " + workingCopyType.getElementName() + "(" + params + ") {");
     writeAssignations(fields, sw);
     sw.writeLine("}");
 
@@ -185,7 +192,7 @@ public abstract class ProjectClass {
 
   protected SourceWriter createSourceWriterFor(String methodName, String... params)
       throws JavaModelException {
-    return sourceWriterFactory.createForMethod(type.getMethod(methodName, params));
+    return sourceWriterFactory.createForMethod(workingCopyType.getMethod(methodName, params));
   }
 
   protected IType createClass(String extendedClass, String implementedInterface)
@@ -202,15 +209,15 @@ public abstract class ProjectClass {
 
     sw.writeLines("public class " + elementName + extendsString + implementsString + " {", "}");
 
-    return cu.createType(sw.toString(), null, false, null);
+    return workingCopy.createType(sw.toString(), null, false, null);
   }
 
   protected IMethod createMethod(SourceWriter sw) throws JavaModelException {
-    return type.createMethod(sw.toString(), null, false, null);
+    return workingCopyType.createMethod(sw.toString(), null, false, null);
   }
 
   protected IField createField(SourceWriter sw) throws JavaModelException {
-    return type.createField(sw.toString(), null, false, null);
+    return workingCopyType.createField(sw.toString(), null, false, null);
   }
 
   protected String getParamsString(IField[] fields, boolean leadingComma, boolean includeType)

@@ -50,7 +50,7 @@ public class ServletModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_SERVLET_MODULE, null, null);
+    workingCopy.createImport(C_SERVLET_MODULE, null, null);
     return createClass("ServletModule", null);
   }
 
@@ -62,15 +62,15 @@ public class ServletModule extends ProjectClass {
 
     if (VersionTool.compare(gwtVersion, "2.1") == -1) {
       // GWT < 2.1
-      String projectName = cu.getJavaProject().getElementName();
-      cu.createImport(C_ACTION_IMPL, null, null);
-      cu.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+      String projectName = workingCopy.getJavaProject().getElementName();
+      workingCopy.createImport(C_ACTION_IMPL, null, null);
+      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
       sw.writeLine("  serve(\"/" + projectName.toLowerCase()
           + "/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);");
     } else {
       // GWT >= 2.1
-      cu.createImport(C_ACTION_IMPL, null, null);
-      cu.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+      workingCopy.createImport(C_ACTION_IMPL, null, null);
+      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
       sw.writeLine(
           "  serve(\"/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);");
     }

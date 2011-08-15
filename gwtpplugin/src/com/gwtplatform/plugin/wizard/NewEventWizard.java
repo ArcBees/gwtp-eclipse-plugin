@@ -19,18 +19,22 @@ package com.gwtplatform.plugin.wizard;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.gwtplatform.plugin.Activator;
 import com.gwtplatform.plugin.SourceWriterFactory;
 import com.gwtplatform.plugin.projectfile.Field;
 import com.gwtplatform.plugin.projectfile.src.client.event.Event;
@@ -139,10 +143,14 @@ public class NewEventWizard extends Wizard implements INewWizard {
 
       try {
         if (event != null) {
-          event.discard();
+          event.discard(true);
         }
       } catch (JavaModelException e1) {
       }
+      
+      IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "An unexpected error has happened. Close the wizard and retry.", e);
+      
+      ErrorDialog.openError(getShell(), null, null, status);
 
       return false;
     }

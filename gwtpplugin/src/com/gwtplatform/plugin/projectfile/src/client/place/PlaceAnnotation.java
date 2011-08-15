@@ -56,14 +56,14 @@ public class PlaceAnnotation extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(A_BINDING_ANNOTATION, null, null);
+    workingCopy.createImport(A_BINDING_ANNOTATION, null, null);
 
-    cu.createImport(A_TARGET, null, null);
-    cu.createImport(E_FIELD, null, Flags.AccStatic, null);
-    cu.createImport(E_PARAMETER, null, Flags.AccStatic, null);
-    cu.createImport(E_METHOD, null, Flags.AccStatic, null);
-    cu.createImport(A_RETENTION, null, null);
-    cu.createImport(E_RUNTIME, null, Flags.AccStatic, null);
+    workingCopy.createImport(A_TARGET, null, null);
+    workingCopy.createImport(E_FIELD, null, Flags.AccStatic, null);
+    workingCopy.createImport(E_PARAMETER, null, Flags.AccStatic, null);
+    workingCopy.createImport(E_METHOD, null, Flags.AccStatic, null);
+    workingCopy.createImport(A_RETENTION, null, null);
+    workingCopy.createImport(E_RUNTIME, null, Flags.AccStatic, null);
 
     SourceWriter sw = sourceWriterFactory.createForNewClass();
 
@@ -74,7 +74,7 @@ public class PlaceAnnotation extends ProjectClass {
         "public @interface " + elementName + " {",
         "}");
 
-    return cu.createType(sw.toString(), null, false, null);
+    return workingCopy.createType(sw.toString(), null, false, null);
   }
 
 }

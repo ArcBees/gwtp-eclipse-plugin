@@ -51,13 +51,13 @@ public class EntryPoint extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(I_ENTRY_POINT, null, null);
+    workingCopy.createImport(I_ENTRY_POINT, null, null);
     return createClass(null, "EntryPoint");
   }
 
   public IField createGinjectorField(IType ginjector) throws JavaModelException {
-    cu.createImport(ginjector.getFullyQualifiedName(), null, null);
-    cu.createImport(C_GWT, null, null);
+    workingCopy.createImport(ginjector.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(C_GWT, null, null);
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final " + ginjector.getElementName() + " ginjector = GWT.create("
         + ginjector.getElementName() + ".class);");
@@ -69,7 +69,7 @@ public class EntryPoint extends ProjectClass {
     sw.writeLines(
         "@Override",
         "public void onModuleLoad() {");
-    cu.createImport(C_DELAYED_BIND_REGISTRY, null, null);
+    workingCopy.createImport(C_DELAYED_BIND_REGISTRY, null, null);
     sw.writeLines(
         "  // This is required for Gwt-Platform proxy's generator",
         "  DelayedBindRegistry.bind(ginjector);",

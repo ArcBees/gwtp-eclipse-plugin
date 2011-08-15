@@ -49,17 +49,17 @@ public class GuiceServletContextListener extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    cu.createImport(C_GUICE_SERVLET_CONTEXT_LISTENER, null, null);
+    workingCopy.createImport(C_GUICE_SERVLET_CONTEXT_LISTENER, null, null);
     return createClass("GuiceServletContextListener", null);
   }
 
   public IMethod createInjectorGetterMethod(IType handlerModule, IType servletModule)
       throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
-    cu.createImport(I_INJECTOR, null, null);
-    cu.createImport(C_GUICE, null, null);
-    cu.createImport(handlerModule.getFullyQualifiedName(), null, null);
-    cu.createImport(servletModule.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(I_INJECTOR, null, null);
+    workingCopy.createImport(C_GUICE, null, null);
+    workingCopy.createImport(handlerModule.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(servletModule.getFullyQualifiedName(), null, null);
 
     sw.writeLines(
         "@Override",
