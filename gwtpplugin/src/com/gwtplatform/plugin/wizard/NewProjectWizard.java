@@ -192,9 +192,9 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID });
       }
 
-      project.create(description, null); // TODO Progress Monitor
+      project.create(description, null);
       if (!project.isOpen()) {
-        project.open(null); // TODO Progress Monitor
+        project.open(null);
       }
       monitor.worked(1);
 
@@ -204,13 +204,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // war/WEB-INF/lib folder creation
       IPath warPath = new Path("war");
-      project.getFolder(warPath).create(false, true, null); // TODO Progress Monitor
+      project.getFolder(warPath).create(false, true, null);
 
       IPath webInfPath = warPath.append("WEB-INF");
-      project.getFolder(webInfPath).create(false, true, null); // TODO Progress Monitor
+      project.getFolder(webInfPath).create(false, true, null);
 
       IPath libPath = webInfPath.append("lib");
-      project.getFolder(libPath).create(false, true, null); // TODO Progress Monitor
+      project.getFolder(libPath).create(false, true, null);
 
       Thread.sleep(1000);
 
@@ -225,7 +225,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Source folder
       IPath srcPath = new Path("src");
-      project.getFolder(srcPath).create(false, true, null); // TODO Progress Monitor
+      project.getFolder(srcPath).create(false, true, null);
 
       entries.add(JavaCore.newSourceEntry(javaProject.getPath().append("src")));
 
@@ -253,11 +253,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         entries.add(JavaCore.newLibraryEntry(lib.getFile().getFullPath(), null, null));
       }
 
-      // TODO Progress Monitor
       javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
       monitor.worked(1);
-
-      // TODO Create settings
 
       monitor.subTask("Default classes creation");
       IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append(
@@ -269,7 +266,6 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         log4j.createFile();
 
         IPath metaInfPath = srcPath.append("META-INF");
-        // TODO Progress Monitor
         project.getFolder(metaInfPath).create(false, true, null);
 
         Jdoconfig jdoconfig = new Jdoconfig(project, metaInfPath);
@@ -277,15 +273,15 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       }
 
       IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false,
-          null); // TODO Progress Monitor
+          null);
 
       // Client package
       IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".client", false, null); // TODO Progress Monitor
+          + ".client", false, null);
 
       // Place package
       IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".place", false, null); // TODO Progress Monitor
+          + ".place", false, null);
 
       PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(),
           "DefaultPlace", sourceWriterFactory);
@@ -302,7 +298,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Gin package
       IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".gin", false, null); // TODO Progress Monitor
+          + ".gin", false, null);
 
       PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(),
           "ClientModule", sourceWriterFactory);
@@ -325,11 +321,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Server package
       IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".server", false, null); // TODO Progress Monitor
+          + ".server", false, null);
 
       // Guice package
       IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName()
-          + ".guice", false, null); // TODO Progress Monitor
+          + ".guice", false, null);
 
       String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
 
@@ -347,7 +343,6 @@ public class NewProjectWizard extends Wizard implements INewWizard {
           servletModule.getType());
 
       // Shared package
-      // TODO Progress Monitor
       root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null);
 
       // Commit

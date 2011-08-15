@@ -25,7 +25,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import com.gwtplatform.plugin.SourceWriter;
 import com.gwtplatform.plugin.SourceWriterFactory;
@@ -80,11 +82,9 @@ public abstract class ProjectClass {
       String cuName = elementName + ".java";
       IPackageFragment pack = root.createPackageFragment(packageName, false, null);
       compilationUnit = pack.createCompilationUnit(cuName, "", false, null);
-      //compilationUnit.becomeWorkingCopy(null);
       compilationUnit.createPackageDeclaration(packageName, null);
     } else {
       compilationUnit = type.getCompilationUnit();
-      //compilationUnit.becomeWorkingCopy(null);
     }
     return compilationUnit;
   }
@@ -169,9 +169,8 @@ public abstract class ProjectClass {
 
   public IMethod createGetterMethod(IField field) throws JavaModelException {
      SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
-     // TODO Use NamingConventions.suggestGetterName
      sw.writeLines(
-         "public " + signature(field) + " " + methodName("get", field) + "() {",
+         "public " + signature(field) + " " + getterName(field) + "() {",
          "  return " + field.getElementName() + ";",
          "}");
 
@@ -180,9 +179,8 @@ public abstract class ProjectClass {
 
   public IMethod createSetterMethod(IField field) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
-    // TODO Use NamingConventions.suggestSetterName
     sw.writeLines(
-        "public void " + methodName("set", field) + "(" + signature(field) + " "
+        "public void " + setterName(field) + "(" + signature(field) + " "
         + field.getElementName() + ") {",
         "  this." + field.getElementName() + " = " + field.getElementName() + ";" +
         "}");
@@ -241,12 +239,20 @@ public abstract class ProjectClass {
     }
   }
 
-  protected String methodName(String prefix, IField field) {
-    return methodName(prefix, field.getElementName());
+  protected String getterName(IField field) {
+	try {
+		return NamingConventions.suggestGetterName(root.getJavaProject(), field.getElementName(), field.getFlags(), JavaModelUtil.isBoolean(field), new String[0]);
+	} catch (JavaModelException e) {
+	    return "get" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1);
+	}
   }
 
-  protected String methodName(String prefix, String fieldName) {
-    return prefix + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+  protected String setterName(IField field) {
+	try {
+		return NamingConventions.suggestSetterName(root.getJavaProject(), field.getElementName(), field.getFlags(), JavaModelUtil.isBoolean(field), new String[0]);
+	} catch (JavaModelException e) {
+	    return "set" + field.getElementName().substring(0, 1).toUpperCase() + field.getElementName().substring(1);
+	}
   }
 
   protected String fieldName(IType type) {

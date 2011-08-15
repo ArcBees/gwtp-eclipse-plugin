@@ -62,8 +62,8 @@ public class Tokens extends ProjectClass {
     String tokenNameWithoutBang = tokenName.replaceAll("!", "");
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine(
-        "public static String " + methodName("get", tokenNameWithoutBang)
-        + "() { return " + tokenNameWithoutBang + "; }");
+        "public static String get" + tokenNameWithoutBang.substring(0, 1).toUpperCase()
+        + tokenNameWithoutBang.substring(1) + "() { return " + tokenNameWithoutBang + "; }");
 
     return createMethod(sw);
   }
