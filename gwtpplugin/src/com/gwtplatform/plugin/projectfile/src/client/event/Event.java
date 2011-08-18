@@ -63,7 +63,7 @@ public class Event extends ProjectClass {
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines("public interface " + eventName + "Handler extends EventHandler {",
-        "  public void on" + eventName + "(" + workingCopyType.getElementName() + " event);", "}");
+        "  void on" + eventName + "(" + workingCopyType.getElementName() + " event);", "}");
 
     return workingCopyType.createType(sw.toString(), null, false, null);
   }
@@ -78,7 +78,7 @@ public class Event extends ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "public interface " + eventName + "HasHandlers extends HasHandlers {",
-        "  public HandlerRegistration add" + handler.getElementName() + "("
+        "  HandlerRegistration add" + handler.getElementName() + "("
             + handler.getElementName() + " handler);",
         "}");
 
