@@ -84,6 +84,7 @@ import com.gwtplatform.plugin.projectfile.war.Logging;
 import com.gwtplatform.plugin.projectfile.war.ProjectCSS;
 import com.gwtplatform.plugin.projectfile.war.ProjectHTML;
 import com.gwtplatform.plugin.projectfile.war.WebXml;
+import com.gwtplatform.plugin.sample.BasicSampleBuilder;
 import com.gwtplatform.plugin.tool.VersionTool;
 
 /**
@@ -344,6 +345,12 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       // Shared package
       root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null);
 
+      // Basic sample creation
+      if (page.isSample()) {
+          BasicSampleBuilder sampleBuilder = new BasicSampleBuilder(root, projectPackage, sourceWriterFactory);
+          sampleBuilder.createSample(ginjector, presenterModule, tokens, defaultPlace, handlerModule);
+      }
+      
       // Commit
       presenterModule.commit();
       ginjector.commit();

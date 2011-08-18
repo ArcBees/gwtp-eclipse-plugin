@@ -91,7 +91,6 @@ public class Presenter extends ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "public interface MyView extends View {",
-        "  // TODO Put your view methods here",
         "}");
 
     return workingCopyType.createType(sw.toString(), null, false, null);

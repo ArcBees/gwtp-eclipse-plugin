@@ -52,8 +52,9 @@ public class NewProjectWizardPage extends WizardPage {
   private Button browse;
   private Label locationLabel;
   private Button useGAE;
-private Button generationRemove;
-private Button generationReplace;
+  private Button generationRemove;
+  private Button generationReplace;
+private Button isSample;
 
   protected NewProjectWizardPage() {
     super("ProjectWizardPage");
@@ -173,6 +174,10 @@ private Button generationReplace;
     useGAE = new Button(container, SWT.CHECK);
     useGAE.setText("Use App Engine");
 
+    // Generate basic sample project
+    isSample = new Button(container, SWT.CHECK);
+    isSample.setText("Generate gwtp-sample-basic");
+
     // TODO Google SDKs
 
     setDefaultValues();
@@ -248,6 +253,10 @@ private Button generationReplace;
 
   public boolean useGAE() {
     return useGAE.getSelection();
+  }
+
+  public boolean isSample() {
+    return isSample.getSelection();
   }
 
 }

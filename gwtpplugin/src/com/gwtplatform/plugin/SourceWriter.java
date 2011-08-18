@@ -46,8 +46,8 @@ public class SourceWriter {
   private final CodeFormatter codeFormatter;
   private final StringWriter stringWriter = new StringWriter();
   private final ISourceRange methodRange;
-  private final String prefix;
-  private final String suffix;
+  private String prefix;
+  private String suffix;
 
   SourceWriter(int formatKind) {
     this.formatKind = formatKind;
@@ -102,6 +102,20 @@ public class SourceWriter {
     for (String line : lines) {
       writeLine(line);
     }
+  }
+  
+  public void appendParameter(String param) {
+	  if (methodRange != null) {
+		  int index = prefix.indexOf(')');
+		  String start = prefix.substring(0, index);
+		  String end = prefix.substring(index);
+		  if (start.endsWith("(")) {
+			  prefix = start + param + end;
+		  }
+		  else {
+			  prefix = start + ", " + param + end;
+		  }
+	  }
   }
 
   /**

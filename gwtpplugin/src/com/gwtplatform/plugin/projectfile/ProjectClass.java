@@ -18,8 +18,10 @@ package com.gwtplatform.plugin.projectfile;
 
 import java.util.Random;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -110,9 +112,13 @@ public abstract class ProjectClass {
     	originalUnit.delete(true, null);
     }
   }
+  
+  public void becomeWorkingCopy() throws JavaModelException {
+	  workingCopy.becomeWorkingCopy(null);
+  }
 
   public IType getType() {
-    return type;
+    return workingCopyType;
   }
 
   public IField createSerializationField() throws JavaModelException {
@@ -146,7 +152,7 @@ public abstract class ProjectClass {
     return createMethod(sw);
   }
 
-  public IMethod createConstructor(IField[] fields) throws JavaModelException {
+  public IMethod createConstructor(IField... fields) throws JavaModelException {
     /*
      * if(fields.length == 0) { IMethod serializationConstructor =
      * type.getMethod(type.getElementName(), new String[0]);
@@ -210,12 +216,16 @@ public abstract class ProjectClass {
     return workingCopy.createType(sw.toString(), null, false, null);
   }
 
-  protected IMethod createMethod(SourceWriter sw) throws JavaModelException {
+  public IMethod createMethod(SourceWriter sw) throws JavaModelException {
     return workingCopyType.createMethod(sw.toString(), null, false, null);
   }
 
-  protected IField createField(SourceWriter sw) throws JavaModelException {
+  public IField createField(SourceWriter sw) throws JavaModelException {
     return workingCopyType.createField(sw.toString(), null, false, null);
+  }
+  
+  public IImportDeclaration createImport(String name) throws JavaModelException {
+	  return workingCopy.createImport(name, null, null);
   }
 
   protected String getParamsString(IField[] fields, boolean leadingComma, boolean includeType)
@@ -261,5 +271,13 @@ public abstract class ProjectClass {
 
   protected String signature(IField field) throws JavaModelException {
     return Signature.toString(field.getTypeSignature());
+  }
+  
+  public IBuffer getBuffer() {
+	try {
+	  return workingCopy.getBuffer();
+	} catch (JavaModelException e) {
+	  return null;
+	}
   }
 }
