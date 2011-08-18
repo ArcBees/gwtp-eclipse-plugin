@@ -103,7 +103,14 @@ public class SourceWriter {
       writeLine(line);
     }
   }
-  
+
+  /**
+   * Add a parameter to existing method.
+   *
+   * @param param
+   *          The parameter to add.
+   * @author Michael Renaud
+   */
   public void appendParameter(String param) {
 	  if (methodRange != null) {
 		  int index = prefix.indexOf(')');
@@ -134,7 +141,6 @@ public class SourceWriter {
     } else {
       buffer.setContents(toString());
     }
-    //buffer.save(null, true);
   }
 
   @Override
