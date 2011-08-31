@@ -75,8 +75,8 @@ import com.gwtplatform.plugin.projectfile.src.client.gin.PresenterModule;
 import com.gwtplatform.plugin.projectfile.src.client.place.PlaceAnnotation;
 import com.gwtplatform.plugin.projectfile.src.client.place.PlaceManager;
 import com.gwtplatform.plugin.projectfile.src.client.place.Tokens;
+import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceHandlerModule;
 import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceServletContextListener;
-import com.gwtplatform.plugin.projectfile.src.server.guice.HandlerModule;
 import com.gwtplatform.plugin.projectfile.src.server.guice.ServletModule;
 import com.gwtplatform.plugin.projectfile.war.AppengineWebXml;
 import com.gwtplatform.plugin.projectfile.war.Jar;
@@ -333,7 +333,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
           "DispatchServletModule", sourceWriterFactory);
       servletModule.createConfigureServletsMethod(gwtVersion);
 
-      HandlerModule handlerModule = new HandlerModule(root, guicePackage.getElementName(),
+      GuiceHandlerModule handlerModule = new GuiceHandlerModule(root, guicePackage.getElementName(),
           "ServerModule", sourceWriterFactory);
       handlerModule.createConfigureHandlersMethod();
 

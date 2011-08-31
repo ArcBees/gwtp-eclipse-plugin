@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -36,14 +37,20 @@ import org.eclipse.ui.IWorkbench;
 import com.gwtplatform.plugin.Activator;
 import com.gwtplatform.plugin.SourceWriterFactory;
 import com.gwtplatform.plugin.projectfile.Field;
+import com.gwtplatform.plugin.projectfile.src.server.AbstractHandlerModule;
 import com.gwtplatform.plugin.projectfile.src.server.ActionHandler;
 import com.gwtplatform.plugin.projectfile.src.server.ActionValidator;
-import com.gwtplatform.plugin.projectfile.src.server.guice.HandlerModule;
+import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceHandlerModule;
+import com.gwtplatform.plugin.projectfile.src.server.spring.SpringActionHandler;
+import com.gwtplatform.plugin.projectfile.src.server.spring.SpringHandlerModule;
 import com.gwtplatform.plugin.projectfile.src.shared.Action;
 import com.gwtplatform.plugin.projectfile.src.shared.Result;
 
 /**
+ * 
  * @author Michael Renaud
+ * @author Nicolas Morel
+ * 
  */
 public class NewActionWizard extends Wizard implements INewWizard {
 
@@ -82,6 +89,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
         }
       });
     } catch (Exception e) {
+      e.printStackTrace();
       return false;
     }
     return isDone;
@@ -96,7 +104,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
     Action action = null;
     Result result = null;
     ActionHandler actionHandler = null;
-    HandlerModule handlerModule = null;
+    AbstractHandlerModule handlerModule = null;
     try {
       monitor.beginTask("Action creation", 4);
 
@@ -106,8 +114,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
       monitor.subTask("Result");
       result = new Result(root, page.getResultPackageText(), page.getResultTypeName(),
         sourceWriterFactory);
-      //Issue 335: Remove serialization generated uid in Action and Result
-      //result.createSerializationField();
+      // Issue 335: Remove serialization generated uid in Action and Result
+      // result.createSerializationField();
 
       Field[] resultFields = page.getResultFields();
       IField[] fields = new IField[resultFields.length];
@@ -135,8 +143,8 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
       action = new Action(root, page.getPackageText(), page.getTypeName(), sourceWriterFactory,
           actionSuperclass, result.getType());
-      //Issue 335: Remove serialization generated uid in Action and Result
-      //action.createSerializationField();
+      // Issue 335: Remove serialization generated uid in Action and Result
+      // action.createSerializationField();
 
       Field[] actionFields = page.getActionFields();
       fields = new IField[actionFields.length];
@@ -160,8 +168,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
       // ActionHandler
       monitor.subTask("ActionHandler");
-      actionHandler = new ActionHandler(root, page.getActionHandlerPackageText(),
-          page.getActionHandlerTypeName(), sourceWriterFactory, action.getType(), result.getType());
+      actionHandler = createActionHandler(root, action, result);
       actionHandler.createConstructor();
       actionHandler.createExecuteMethod(action.getType(), result.getType());
       actionHandler.createUndoMethod(action.getType(), result.getType());
@@ -170,7 +177,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
       // HandlerModule
       monitor.subTask("Bind in HandlerModule");
-      handlerModule = new HandlerModule(root, page.getHandlerModule(), sourceWriterFactory);
+      handlerModule = createHandlerModule(root);
       if (page.getActionValidator().isEmpty()) {
         handlerModule.createBinder(action.getType(), actionHandler.getType());
       } else {
@@ -222,6 +229,38 @@ public class NewActionWizard extends Wizard implements INewWizard {
 
     monitor.done();
     return true;
+  }
+  
+  private ActionHandler createActionHandler(IPackageFragmentRoot root, Action action, Result result) throws JavaModelException {
+    if (isSpringHandlerModule(root)) {
+      return new SpringActionHandler(root, page.getActionHandlerPackageText(), page.getActionHandlerTypeName(), sourceWriterFactory, action.getType(), result.getType());
+    } else {
+      return new ActionHandler(root, page.getActionHandlerPackageText(), page.getActionHandlerTypeName(), sourceWriterFactory, action.getType(), result.getType());
+    }
+  }
+
+  private AbstractHandlerModule createHandlerModule(IPackageFragmentRoot root) throws JavaModelException {
+    if (isSpringHandlerModule(root)) {
+      return new SpringHandlerModule(root, page.getHandlerModule(), sourceWriterFactory);
+    } else {
+      return new GuiceHandlerModule(root, page.getHandlerModule(), sourceWriterFactory);
+    }
+   }
+
+  private boolean isSpringHandlerModule(IPackageFragmentRoot root) throws JavaModelException {
+    String handlerModuleString = page.getHandlerModule();
+    IType handlerModuleType = root.getJavaProject().findType(handlerModuleString);
+    ITypeHierarchy hierarchy = handlerModuleType.newSupertypeHierarchy(null);
+    IType[] superclasses = hierarchy.getAllClasses();
+    for (IType superclass : superclasses) {
+      if (superclass.getFullyQualifiedName('.').equals(GuiceHandlerModule.C_HANDLER_MODULE)) {
+        return false;
+      } else if (superclass.getFullyQualifiedName('.').equals(
+        SpringHandlerModule.C_HANDLER_MODULE)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

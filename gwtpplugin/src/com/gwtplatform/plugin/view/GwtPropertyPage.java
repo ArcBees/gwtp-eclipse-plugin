@@ -49,10 +49,13 @@ import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.gwtplatform.plugin.Activator;
+import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceHandlerModule;
+import com.gwtplatform.plugin.projectfile.src.server.spring.SpringHandlerModule;
 
 /**
  *
  * @author Michael Renaud
+ * @author Nicolas Morel
  *
  */
 public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
@@ -313,7 +316,9 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
         boolean isHandlerModule = false;
         for (IType superclass : superclasses) {
           if (superclass.getFullyQualifiedName('.').equals(
-              "com.gwtplatform.dispatch.server.guice.HandlerModule")) {
+              GuiceHandlerModule.C_HANDLER_MODULE)
+              || superclass.getFullyQualifiedName('.').equals(
+              SpringHandlerModule.C_HANDLER_MODULE)) {
             isHandlerModule = true;
             break;
           }
@@ -517,9 +522,6 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
     return null;
   }
 
-  /**
-   *
-   */
   public class TokenNameSelectionExtension extends TypeSelectionExtension {
     @Override
     public ITypeInfoFilterExtension getFilterExtension() {
@@ -542,9 +544,6 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
     }
   }
 
-  /**
-   *
-   */
   public class GinjectorSelectionExtension extends TypeSelectionExtension {
 
     @Override
@@ -611,9 +610,6 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
     }
   }
 
-  /**
-   *
-   */
   public class HandlerModuleSelectionExtension extends TypeSelectionExtension {
 
     @Override
@@ -631,7 +627,9 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(
-                  "com.gwtplatform.dispatch.server.guice.HandlerModule")) {
+                  GuiceHandlerModule.C_HANDLER_MODULE)
+                  || superclass.getFullyQualifiedName('.').equals(
+                  SpringHandlerModule.C_HANDLER_MODULE)) {
                 return true;
               }
             }

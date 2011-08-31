@@ -68,10 +68,13 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import com.gwtplatform.plugin.Activator;
 import com.gwtplatform.plugin.controls.AddFieldDialog;
 import com.gwtplatform.plugin.projectfile.Field;
+import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceHandlerModule;
+import com.gwtplatform.plugin.projectfile.src.server.spring.SpringHandlerModule;
 
 /**
  *
  * @author Michael Renaud
+ * @author Nicolas Morel
  *
  */
 public class NewActionWizardPage extends NewTypeWizardPage {
@@ -794,7 +797,9 @@ public class NewActionWizardPage extends NewTypeWizardPage {
       boolean isHandlerModule = false;
       for (IType superclass : superclasses) {
         if (superclass.getFullyQualifiedName('.').equals(
-            "com.gwtplatform.dispatch.server.guice.HandlerModule")) {
+            GuiceHandlerModule.C_HANDLER_MODULE)
+            || superclass.getFullyQualifiedName('.').equals(
+            SpringHandlerModule.C_HANDLER_MODULE)) {
           isHandlerModule = true;
           break;
         }
@@ -935,7 +940,9 @@ public class NewActionWizardPage extends NewTypeWizardPage {
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(
-                  "com.gwtplatform.dispatch.server.guice.HandlerModule")) {
+                  GuiceHandlerModule.C_HANDLER_MODULE)
+                  || superclass.getFullyQualifiedName('.').equals(
+                  SpringHandlerModule.C_HANDLER_MODULE)) {
                 return true;
               }
             }

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.gwtplatform.plugin.projectfile.src.server.guice;
+package com.gwtplatform.plugin.projectfile.src.server;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -26,28 +25,28 @@ import com.gwtplatform.plugin.SourceWriterFactory;
 import com.gwtplatform.plugin.projectfile.ProjectClass;
 
 /**
- *
- * @author Michael Renaud
+ * 
+ * @author Nicolas Morel
  *
  */
-public class HandlerModule extends ProjectClass {
+public abstract class AbstractHandlerModule extends ProjectClass {
 
-  private static final String C_HANDLER_MODULE = "com.gwtplatform.dispatch.server.guice.HandlerModule";
-
-  public HandlerModule(IPackageFragmentRoot root, String fullyQualifiedName,
+  public AbstractHandlerModule(IPackageFragmentRoot root, String fullyQualifiedName,
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
     super(root, fullyQualifiedName, sourceWriterFactory);
   }
 
-  public HandlerModule(IPackageFragmentRoot root, String packageName, String elementName,
+  public AbstractHandlerModule(IPackageFragmentRoot root, String packageName, String elementName,
       SourceWriterFactory sourceWriterFactory) throws JavaModelException {
     super(root, packageName, elementName, sourceWriterFactory);
     init();
   }
 
+  protected abstract String getHandlerModuleClass();
+
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_HANDLER_MODULE, null, null);
+    workingCopy.createImport(getHandlerModuleClass(), null, null);
     return createClass("HandlerModule", null);
   }
 
@@ -62,8 +61,8 @@ public class HandlerModule extends ProjectClass {
   }
 
   public void createBinder(IType action, IType actionHandler) throws JavaModelException {
-    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(action.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "
@@ -73,9 +72,9 @@ public class HandlerModule extends ProjectClass {
 
   public void createBinder(IType action, IType actionHandler, IType actionValidator)
       throws JavaModelException {
-    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(actionValidator.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(action.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(actionValidator.getFullyQualifiedName(), null, null);
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "

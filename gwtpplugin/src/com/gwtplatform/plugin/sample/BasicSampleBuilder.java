@@ -34,7 +34,7 @@ import com.gwtplatform.plugin.projectfile.src.client.gin.PresenterModule;
 import com.gwtplatform.plugin.projectfile.src.client.place.PlaceAnnotation;
 import com.gwtplatform.plugin.projectfile.src.client.place.Tokens;
 import com.gwtplatform.plugin.projectfile.src.server.ActionHandler;
-import com.gwtplatform.plugin.projectfile.src.server.guice.HandlerModule;
+import com.gwtplatform.plugin.projectfile.src.server.guice.GuiceHandlerModule;
 import com.gwtplatform.plugin.projectfile.src.shared.Action;
 import com.gwtplatform.plugin.projectfile.src.shared.Result;
 
@@ -61,7 +61,7 @@ public class BasicSampleBuilder {
 		this.sourceWriterFactory = sourceWriterFactory;
 	}
 
-	public void createSample(Ginjector ginjector, PresenterModule presenterModule, Tokens tokens, PlaceAnnotation defaultPlace, HandlerModule handlerModule) {
+	public void createSample(Ginjector ginjector, PresenterModule presenterModule, Tokens tokens, PlaceAnnotation defaultPlace, GuiceHandlerModule handlerModule) {
 		Presenter mainPagePresenter = null;
 		Presenter responsePresenter = null;
 		View mainPageView = null;
