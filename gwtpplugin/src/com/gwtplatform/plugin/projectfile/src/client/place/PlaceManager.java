@@ -19,6 +19,7 @@ package com.gwtplatform.plugin.projectfile.src.client.place;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -55,12 +56,13 @@ public class PlaceManager extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_PLACE_MANAGER_IMPL, null, null);
-    return createClass("PlaceManagerImpl", null);
+	  IType result = createClass("PlaceManagerImpl", null); 
+	  workingCopy.createImport(C_PLACE_MANAGER_IMPL, null, new NullProgressMonitor());
+	  return result;
   }
 
   public IField createPlaceRequestField(IType annotation) throws JavaModelException {
-    workingCopy.createImport(C_PLACE_REQUEST, null, null);
+    workingCopy.createImport(C_PLACE_REQUEST, null, new NullProgressMonitor());
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final PlaceRequest " + fieldName(annotation) + "Request;");
     return createField(sw);
@@ -73,7 +75,7 @@ public class PlaceManager extends ProjectClass {
     String params = "";
     List<String> assignations = new ArrayList<String>(annotations.length);
     for (int i = 0; i < annotations.length; i++) {
-      workingCopy.createImport(annotations[i].getFullyQualifiedName(), null, null);
+      workingCopy.createImport(annotations[i].getFullyQualifiedName(), null, new NullProgressMonitor());
       params += ", @" + annotations[i].getElementName() + " final String "
           + fieldName(annotations[i]) + "NameToken";
       assignations.add("this." + placeRequests[i].getElementName() + " = new PlaceRequest("
@@ -82,9 +84,9 @@ public class PlaceManager extends ProjectClass {
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    workingCopy.createImport(A_INJECT, null, null);
-    workingCopy.createImport(I_EVENT_BUS, null, null);
-    workingCopy.createImport(I_TOKEN_FORMATTER, null, null);
+    workingCopy.createImport(A_INJECT, null, new NullProgressMonitor());
+    workingCopy.createImport(I_EVENT_BUS, null, new NullProgressMonitor());
+    workingCopy.createImport(I_TOKEN_FORMATTER, null, new NullProgressMonitor());
     sw.writeLines(
         "@Inject",
         "public " + workingCopyType.getElementName() + "(final EventBus eventBus, "

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -373,12 +374,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browseContentSlot.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        contentSlot.setText(chooseContentSlot().getFullyQualifiedName('.') + "#" + selectedSlot);
+    	  IType contentSlotType = chooseContentSlot();
+    	  if (contentSlotType != null) {
+    		  contentSlot.setText(contentSlotType.getFullyQualifiedName('.') + "#" + selectedSlot);
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        contentSlot.setText(chooseContentSlot().getFullyQualifiedName('.') + "#" + selectedSlot);
+    	  IType contentSlotType = chooseContentSlot();
+    	  if (contentSlotType != null) {
+    		  contentSlot.setText(contentSlotType.getFullyQualifiedName('.') + "#" + selectedSlot);
+    	  }
       }
     });
 
@@ -428,7 +435,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
           status.setError(slotParent + " doesn't exist");
           return status;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] interfaces = hierarchy.getAllInterfaces();
         boolean hasSlots = false;
         for (IType inter : interfaces) {
@@ -568,12 +575,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browseTokenName.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        tokenName.setText(chooseTokenName().getFullyQualifiedName('.') + "#" + selectedTokenName);
+    	  IType selection = chooseTokenName();
+    	  if (selection != null) {
+    		  tokenName.setText(selection.getFullyQualifiedName('.') + "#" + selectedTokenName);
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        tokenName.setText(chooseTokenName().getFullyQualifiedName('.') + "#" + selectedTokenName);
+    	  IType selection = chooseTokenName();
+    	  if (selection != null) {
+    		  tokenName.setText(selection.getFullyQualifiedName('.') + "#" + selectedTokenName);
+    	  }
       }
     });
 
@@ -597,12 +610,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browseAnnotation.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        annotation.setText(chooseAnnotation().getFullyQualifiedName('.'));
+    	  IType selection = chooseAnnotation();
+    	  if (selection != null) {
+    		  contentSlot.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        annotation.setText(chooseAnnotation().getFullyQualifiedName('.'));
+    	  IType selection = chooseAnnotation();
+    	  if (selection != null) {
+    		  contentSlot.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -625,12 +644,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browseGatekeeper.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        gatekeeper.setText(chooseGatekeeper().getFullyQualifiedName('.'));
+    	  IType selection = chooseGatekeeper();
+    	  if (selection != null) {
+    		  gatekeeper.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        gatekeeper.setText(chooseGatekeeper().getFullyQualifiedName('.'));
+    	  IType selection = chooseGatekeeper();
+    	  if (selection != null) {
+    		  gatekeeper.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -728,7 +753,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
             status.setError(gatekeeper.getText() + " doesn't exist");
             return status;
           }
-          ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+          ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
           IType[] interfaces = hierarchy.getAllInterfaces();
           boolean isGateKeeper = false;
           for (IType inter : interfaces) {
@@ -896,12 +921,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browseGinjector.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        ginjector.setText(chooseGinjector().getFullyQualifiedName('.'));
+    	  IType selection = chooseGinjector();
+    	  if (selection != null) {
+    		  ginjector.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        ginjector.setText(chooseGinjector().getFullyQualifiedName('.'));
+    	  IType selection = chooseGinjector();
+    	  if (selection != null) {
+    		  ginjector.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -924,12 +955,18 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
     browsePresenterModule.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        presenterModule.setText(choosePresenterModule().getFullyQualifiedName('.'));
+    	  IType selection = choosePresenterModule();
+    	  if (selection != null) {
+    		  presenterModule.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        presenterModule.setText(choosePresenterModule().getFullyQualifiedName('.'));
+    	  IType selection = choosePresenterModule();
+    	  if (selection != null) {
+    		  presenterModule.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -955,7 +992,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
           status.setError(ginjector.getText() + " is a Binary class");
           return status;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] interfaces = hierarchy.getAllInterfaces();
         boolean isGinjector = false;
         for (IType inter : interfaces) {
@@ -988,7 +1025,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
         status.setError(ginjector.getText() + " is a Binary class");
         return status;
       }
-      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
       IType[] superclasses = hierarchy.getAllClasses();
       boolean isPresenterModule = false;
       for (IType superclass : superclasses) {
@@ -1177,7 +1214,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals(
@@ -1213,7 +1250,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals("com.gwtplatform.mvp.client.HasSlots")) {
@@ -1381,7 +1418,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists() || type.isBinary()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals("com.google.gwt.inject.client.Ginjector")) {
@@ -1415,7 +1452,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists() || type.isBinary()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(

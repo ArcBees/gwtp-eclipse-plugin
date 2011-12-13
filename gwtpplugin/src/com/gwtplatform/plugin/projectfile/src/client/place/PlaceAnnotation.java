@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.place;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -56,25 +57,26 @@ public class PlaceAnnotation extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(A_BINDING_ANNOTATION, null, null);
+	  SourceWriter sw = sourceWriterFactory.createForNewClass();
 
-    workingCopy.createImport(A_TARGET, null, null);
-    workingCopy.createImport(E_FIELD, null, Flags.AccStatic, null);
-    workingCopy.createImport(E_PARAMETER, null, Flags.AccStatic, null);
-    workingCopy.createImport(E_METHOD, null, Flags.AccStatic, null);
-    workingCopy.createImport(A_RETENTION, null, null);
-    workingCopy.createImport(E_RUNTIME, null, Flags.AccStatic, null);
+	  sw.writeLines(
+			  "@BindingAnnotation",
+			  "@Target({ FIELD, PARAMETER, METHOD })",
+			  "@Retention(RUNTIME)",
+			  "public @interface " + elementName + " {",
+			  "}");
 
-    SourceWriter sw = sourceWriterFactory.createForNewClass();
+	  IType result = workingCopy.createType(sw.toString(), null, false, new NullProgressMonitor());
+	  workingCopy.createImport(A_BINDING_ANNOTATION, null, new NullProgressMonitor());
 
-    sw.writeLines(
-        "@BindingAnnotation",
-        "@Target({ FIELD, PARAMETER, METHOD })",
-        "@Retention(RUNTIME)",
-        "public @interface " + elementName + " {",
-        "}");
+	  workingCopy.createImport(A_TARGET, null, new NullProgressMonitor());
+	  workingCopy.createImport(E_FIELD, null, Flags.AccStatic, new NullProgressMonitor());
+	  workingCopy.createImport(E_PARAMETER, null, Flags.AccStatic, new NullProgressMonitor());
+	  workingCopy.createImport(E_METHOD, null, Flags.AccStatic, new NullProgressMonitor());
+	  workingCopy.createImport(A_RETENTION, null, new NullProgressMonitor());
+	  workingCopy.createImport(E_RUNTIME, null, Flags.AccStatic, new NullProgressMonitor());
 
-    return workingCopy.createType(sw.toString(), null, false, null);
+	  return result;
   }
 
 }

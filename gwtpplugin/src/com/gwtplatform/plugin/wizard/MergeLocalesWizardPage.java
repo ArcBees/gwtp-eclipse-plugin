@@ -100,13 +100,19 @@ public class MergeLocalesWizardPage extends WizardPage {
 		browse.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
+		    	  IContainer selectedDir = chooseExtraDir();
+		    	  if (selectedDir != null) {
+		    		  extraDir.setText(selectedDir.getProjectRelativePath().toOSString());
+		    	  }
 				dialogChanged();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				extraDir.setText(chooseExtraDir().getProjectRelativePath().toOSString());
+		    	  IContainer selectedDir = chooseExtraDir();
+		    	  if (selectedDir != null) {
+		    		  extraDir.setText(selectedDir.getProjectRelativePath().toOSString());
+		    	  }
 				dialogChanged();
 			}
 		});

@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -84,7 +85,7 @@ public class GwtXmlModule {
 
     contents += "</module>";
 
-    file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+    file.create(new ByteArrayInputStream(contents.getBytes()), false, new NullProgressMonitor());
 
     return file;
   }

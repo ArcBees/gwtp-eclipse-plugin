@@ -22,6 +22,7 @@ import java.util.Date;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -37,7 +38,7 @@ public class Settings {
   public Settings(IPackageFragmentRoot root, String packageName,
       String elementName) throws CoreException {
     IContainer container = (IContainer) root.createPackageFragment(packageName,
-        false, null).getResource();
+        false, new NullProgressMonitor()).getResource();
 
     file = container.getFile(new Path(elementName + ".prefs"));
   }
@@ -51,7 +52,7 @@ public class Settings {
     contents += "eclipse.preferences.version=1\n";
     contents += "encoding/<project>=ISO-8859-1\n";
 
-    file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+    file.create(new ByteArrayInputStream(contents.getBytes()), false, new NullProgressMonitor());
 
     return file;
   }

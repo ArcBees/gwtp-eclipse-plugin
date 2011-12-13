@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -34,7 +35,7 @@ public class Ui {
   private IFile file;
 
   public Ui(IPackageFragmentRoot root, String packageName, String elementName) throws CoreException {
-    IContainer container = (IContainer) root.createPackageFragment(packageName, false, null)
+    IContainer container = (IContainer) root.createPackageFragment(packageName, false, new NullProgressMonitor())
         .getResource();
 
     file = container.getFile(new Path(elementName + ".ui.xml"));
@@ -63,7 +64,7 @@ public class Ui {
 
     contents += "</ui:UiBinder>\n";
 
-    file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+    file.create(new ByteArrayInputStream(contents.getBytes()), false, new NullProgressMonitor());
 
     return file;
   }

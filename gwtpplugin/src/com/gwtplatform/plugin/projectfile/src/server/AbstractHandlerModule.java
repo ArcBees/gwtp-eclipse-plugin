@@ -15,6 +15,7 @@
  */
 package com.gwtplatform.plugin.projectfile.src.server;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -46,8 +47,9 @@ public abstract class AbstractHandlerModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(getHandlerModuleClass(), null, null);
-    return createClass("HandlerModule", null);
+	  IType result = createClass("HandlerModule", null);
+	  workingCopy.createImport(getHandlerModuleClass(), null, new NullProgressMonitor());
+	  return result;
   }
 
   public IMethod createConfigureHandlersMethod() throws JavaModelException {
@@ -61,8 +63,8 @@ public abstract class AbstractHandlerModule extends ProjectClass {
   }
 
   public void createBinder(IType action, IType actionHandler) throws JavaModelException {
-	workingCopy.createImport(action.getFullyQualifiedName(), null, null);
-	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(action.getFullyQualifiedName(), null, new NullProgressMonitor());
+	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "
@@ -72,9 +74,9 @@ public abstract class AbstractHandlerModule extends ProjectClass {
 
   public void createBinder(IType action, IType actionHandler, IType actionValidator)
       throws JavaModelException {
-	workingCopy.createImport(action.getFullyQualifiedName(), null, null);
-	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, null);
-	workingCopy.createImport(actionValidator.getFullyQualifiedName(), null, null);
+	workingCopy.createImport(action.getFullyQualifiedName(), null, new NullProgressMonitor());
+	workingCopy.createImport(actionHandler.getFullyQualifiedName(), null, new NullProgressMonitor());
+	workingCopy.createImport(actionValidator.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     SourceWriter sw = createSourceWriterFor("configureHandlers");
     sw.writeLine("bindHandler(" + action.getElementName() + ".class, "

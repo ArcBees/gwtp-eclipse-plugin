@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.gin;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -49,8 +50,9 @@ public class PresenterModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_ABSTRACT_PRESENTER_MODULE, null, null);
-    return createClass("AbstractPresenterModule", null);
+	  IType result = createClass("AbstractPresenterModule", null); 
+    workingCopy.createImport(C_ABSTRACT_PRESENTER_MODULE, null, new NullProgressMonitor());
+    return result;
   }
 
   // TODO RequestStaticInjection
@@ -61,8 +63,8 @@ public class PresenterModule extends ProjectClass {
     sw.writeLines(
         "@Override",
         "protected void configure() {");
-    workingCopy.createImport(C_DEFAULT_MODULE, null, null);
-    workingCopy.createImport(placeManager.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(C_DEFAULT_MODULE, null, new NullProgressMonitor());
+    workingCopy.createImport(placeManager.getFullyQualifiedName(), null, new NullProgressMonitor());
     sw.writeLine(
         "install(new DefaultModule(" + placeManager.getElementName() + ".class));");
     sw.writeLine("}");
@@ -91,8 +93,8 @@ public class PresenterModule extends ProjectClass {
 
   private void appendBindPresenterCode(IType presenter, IType view, String code)
       throws JavaModelException {
-    workingCopy.createImport(presenter.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(view.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(presenter.getFullyQualifiedName(), null, new NullProgressMonitor());
+    workingCopy.createImport(view.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     SourceWriter sw = createSourceWriterFor("configure");
     sw.writeLine(code);
@@ -102,8 +104,8 @@ public class PresenterModule extends ProjectClass {
 
   public void createConstantBinder(IType annotation, IType nameTokens, IField tokenField)
       throws JavaModelException {
-    workingCopy.createImport(annotation.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(nameTokens.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(annotation.getFullyQualifiedName(), null, new NullProgressMonitor());
+    workingCopy.createImport(nameTokens.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     SourceWriter sw = createSourceWriterFor("configure");
 

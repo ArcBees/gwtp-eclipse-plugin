@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.core;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -63,18 +64,20 @@ public class Presenter extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    if (isPresenterWidget) {
-      workingCopy.createImport(C_PRESENTER_WIDGET, null, null);
-      return createClass("PresenterWidget<" + elementName + ".MyView>", null);
-    } else {
-      workingCopy.createImport(C_PRESENTER, null, null);
-      return createClass("Presenter<" + elementName + ".MyView, " + elementName + ".MyProxy>",
-          null);
-    }
+	  IType result = null;
+	  if (isPresenterWidget) {
+		  result = createClass("PresenterWidget<" + elementName + ".MyView>", null);
+		  workingCopy.createImport(C_PRESENTER_WIDGET, null, new NullProgressMonitor());
+	  } else {
+		  result = createClass("Presenter<" + elementName + ".MyView, " + elementName + ".MyProxy>",
+				  null);
+		  workingCopy.createImport(C_PRESENTER, null, new NullProgressMonitor()); 
+	  }
+	  return result;
   }
 
   public IType createPopupViewInterface() throws JavaModelException {
-    workingCopy.createImport(I_POPUP_VIEW, null, null);
+    workingCopy.createImport(I_POPUP_VIEW, null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
@@ -82,28 +85,28 @@ public class Presenter extends ProjectClass {
         "  // TODO Put your view methods here",
         "}");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IType createViewInterface() throws JavaModelException {
-    workingCopy.createImport(I_VIEW, null, null);
+    workingCopy.createImport(I_VIEW, null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
         "public interface MyView extends View {",
         "}");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IType createProxyInterface(boolean isStandard) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     outputProxyAnnotation(isStandard, sw);
 
-    workingCopy.createImport(I_PROXY, null, null);
+    workingCopy.createImport(I_PROXY, null, new NullProgressMonitor());
     sw.writeLine("public interface MyProxy extends Proxy<" + workingCopyType.getElementName() + "> {}");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IType createProxyPlaceInterface(boolean isStandard, IType tokens, String tokenName)
@@ -118,27 +121,27 @@ public class Presenter extends ProjectClass {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     outputProxyAnnotation(isStandard, sw);
 
-    workingCopy.createImport(A_NAME_TOKEN, null, null);
-    workingCopy.createImport(tokens.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(A_NAME_TOKEN, null, new NullProgressMonitor());
+    workingCopy.createImport(tokens.getFullyQualifiedName(), null, new NullProgressMonitor());
     sw.writeLine("@NameToken(" + tokens.getElementName() + "." + tokenNameWithoutBang + ")");
 
     if (gatekeeper != null) {
-      workingCopy.createImport(A_USE_GATEKEEPER, null, null);
-      workingCopy.createImport(gatekeeper.getFullyQualifiedName(), null, null);
+      workingCopy.createImport(A_USE_GATEKEEPER, null, new NullProgressMonitor());
+      workingCopy.createImport(gatekeeper.getFullyQualifiedName(), null, new NullProgressMonitor());
       sw.writeLine("@UseGatekeeper(" + gatekeeper.getElementName() + ".class)");
     }
 
-    workingCopy.createImport(I_PROXY_PLACE, null, null);
+    workingCopy.createImport(I_PROXY_PLACE, null, new NullProgressMonitor());
     sw.writeLine("public interface MyProxy extends ProxyPlace<" + workingCopyType.getElementName() + "> {}");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IMethod createConstructor() throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    workingCopy.createImport(A_INJECT, null, null);
-    workingCopy.createImport(C_EVENT_BUS, null, null);
+    workingCopy.createImport(A_INJECT, null, new NullProgressMonitor());
+    workingCopy.createImport(C_EVENT_BUS, null, new NullProgressMonitor());
     sw.writeLines(
         "@Inject",
         "public " + workingCopyType.getElementName() + "(");
@@ -172,10 +175,10 @@ public class Presenter extends ProjectClass {
         "@Override",
         "protected void revealInParent() {");
 
-    workingCopy.createImport(revealEvent.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(revealEvent.getFullyQualifiedName(), null, new NullProgressMonitor());
     String slotConstant = "";
     if (revealEvent.getElementName().equals("RevealContentEvent")) {
-      workingCopy.createImport(parent.getFullyQualifiedName(), null, null);
+      workingCopy.createImport(parent.getFullyQualifiedName(), null, new NullProgressMonitor());
       slotConstant = parent.getElementName() + "." + contentSlot + ", ";
     }
     sw.writeLines(
@@ -199,10 +202,10 @@ public class Presenter extends ProjectClass {
 
   private void outputProxyAnnotation(boolean isStandard, SourceWriter sw) throws JavaModelException {
     if (isStandard) {
-      workingCopy.createImport(A_PROXY_STANDARD, null, null);
+      workingCopy.createImport(A_PROXY_STANDARD, null, new NullProgressMonitor());
       sw.writeLine("@ProxyStandard");
     } else {
-      workingCopy.createImport(A_PROXY_CODESPLIT, null, null);
+      workingCopy.createImport(A_PROXY_CODESPLIT, null, new NullProgressMonitor());
       sw.writeLine("@ProxyCodeSplit");
     }
   }

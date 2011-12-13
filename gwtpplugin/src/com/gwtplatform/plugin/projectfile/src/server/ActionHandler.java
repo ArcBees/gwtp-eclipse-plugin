@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.server;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -56,15 +57,16 @@ public class ActionHandler extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(I_ACTION_HANDLER, null, null);
-    workingCopy.createImport(action.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(result.getFullyQualifiedName(), null, null);
-    return createClass(null,
-        "ActionHandler<" + action.getElementName() + ", " + result.getElementName() + ">");
+	  IType resultType = createClass(null,
+			  "ActionHandler<" + action.getElementName() + ", " + result.getElementName() + ">");
+	  workingCopy.createImport(I_ACTION_HANDLER, null, new NullProgressMonitor());
+	  workingCopy.createImport(action.getFullyQualifiedName(), null, new NullProgressMonitor());
+	  workingCopy.createImport(result.getFullyQualifiedName(), null, new NullProgressMonitor());
+	  return resultType;
   }
 
   public IMethod createConstructor() throws JavaModelException {
-    workingCopy.createImport(A_INJECT, null, null);
+    workingCopy.createImport(A_INJECT, null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(
@@ -76,8 +78,8 @@ public class ActionHandler extends ProjectClass {
   }
 
   public IMethod createExecuteMethod(IType action, IType result) throws JavaModelException {
-    workingCopy.createImport(I_EXECUTION_CONTEXT, null, null);
-    workingCopy.createImport(C_ACTION_EXCEPTION, null, null);
+    workingCopy.createImport(I_EXECUTION_CONTEXT, null, new NullProgressMonitor());
+    workingCopy.createImport(C_ACTION_EXCEPTION, null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLines(

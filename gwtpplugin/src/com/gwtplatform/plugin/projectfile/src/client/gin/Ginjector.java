@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.gin;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -58,30 +59,31 @@ public class Ginjector extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(A_GIN_MODULES, null, null);
-    workingCopy.createImport(C_DISPATCH_ASYNC_MODULE, null, null);
-    workingCopy.createImport(presenterModule.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(I_GINJECTOR, null, null);
+	  SourceWriter sw = sourceWriterFactory.createForNewClass();
 
-    SourceWriter sw = sourceWriterFactory.createForNewClass();
+	  sw.writeLines(
+			  "@GinModules({ DispatchAsyncModule.class, " + presenterModule.getElementName()
+			  + ".class })",
+			  "public interface " + elementName + " extends Ginjector {",
+			  "}");
 
-    sw.writeLines(
-        "@GinModules({ DispatchAsyncModule.class, " + presenterModule.getElementName()
-        + ".class })",
-        "public interface " + elementName + " extends Ginjector {",
-        "}");
+	  IType result = workingCopy.createType(sw.toString(), null, false, new NullProgressMonitor());
+	  workingCopy.createImport(A_GIN_MODULES, null, new NullProgressMonitor());
+	  workingCopy.createImport(C_DISPATCH_ASYNC_MODULE, null, new NullProgressMonitor());
+	  workingCopy.createImport(presenterModule.getFullyQualifiedName(), null, new NullProgressMonitor());
+	  workingCopy.createImport(I_GINJECTOR, null, new NullProgressMonitor());
 
-    return workingCopy.createType(sw.toString(), null, false, null);
+	  return result;
   }
 
   public IMethod[] createDefaultGetterMethods() throws JavaModelException {
     IMethod[] methods = new IMethod[3];
 
-    workingCopy.createImport(I_EVENT_BUS, null, null);
-    methods[0] = workingCopyType.createMethod("EventBus getEventBus();", null, false, null);
+    workingCopy.createImport(I_EVENT_BUS, null, new NullProgressMonitor());
+    methods[0] = workingCopyType.createMethod("EventBus getEventBus();", null, false, new NullProgressMonitor());
 
-    workingCopy.createImport(I_PLACE_MANAGER, null, null);
-    methods[1] = workingCopyType.createMethod("PlaceManager getPlaceManager();", null, false, null);
+    workingCopy.createImport(I_PLACE_MANAGER, null, new NullProgressMonitor());
+    methods[1] = workingCopyType.createMethod("PlaceManager getPlaceManager();", null, false, new NullProgressMonitor());
 
     return methods;
   }
@@ -96,8 +98,8 @@ public class Ginjector extends ProjectClass {
       }
     }
 
-    workingCopy.createImport(annotation.exists() ? C_PROVIDER : I_ASYNC_PROVIDER, null, null);
-    workingCopy.createImport(presenter.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(annotation.exists() ? C_PROVIDER : I_ASYNC_PROVIDER, null, new NullProgressMonitor());
+    workingCopy.createImport(presenter.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine(

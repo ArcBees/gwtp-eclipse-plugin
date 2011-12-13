@@ -15,6 +15,7 @@
  */
 package com.gwtplatform.plugin.projectfile.src.server.spring;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -62,7 +63,7 @@ public class SpringHandlerModule extends AbstractHandlerModule {
   }
 
   private void writeBeanConfiguration(IType bean) throws JavaModelException {
-     workingCopy.createImport(A_BEAN, null, null);
+     workingCopy.createImport(A_BEAN, null, new NullProgressMonitor());
      SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
      sw.writeLine("@Bean");
      sw.writeLine("public " + bean.getElementName() + " get" + bean.getElementName() + "(){");

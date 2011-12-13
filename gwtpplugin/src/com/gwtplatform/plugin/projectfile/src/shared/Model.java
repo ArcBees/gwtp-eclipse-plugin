@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.shared;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -47,8 +48,9 @@ public class Model extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(I_SERIALIZABLE, null, null);
-    return createClass(null, "Serializable");
+	  IType result = createClass(null, "Serializable");
+    workingCopy.createImport(I_SERIALIZABLE, null, new NullProgressMonitor());
+    return result;
   }
 
   public IMethod createConstructor() throws JavaModelException {

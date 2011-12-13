@@ -22,6 +22,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -227,12 +228,18 @@ public class NewActionWizardPage extends NewTypeWizardPage {
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        actionSuperclass.setText(chooseActionSuperclass().getFullyQualifiedName('.'));
+    	  IType selection = chooseActionSuperclass();
+    	  if (selection != null) {
+    		  actionSuperclass.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        actionSuperclass.setText(chooseActionSuperclass().getFullyQualifiedName('.'));
+    	  IType selection = chooseActionSuperclass();
+    	  if (selection != null) {
+    		  actionSuperclass.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
   }
@@ -273,7 +280,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
         status.setError(actionSuperclass.getText() + " doesn't exist");
         return status;
       }
-      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
       IType[] interfaces = hierarchy.getAllInterfaces();
       boolean isAction = false;
       for (IType inter : interfaces) {
@@ -525,12 +532,18 @@ public class NewActionWizardPage extends NewTypeWizardPage {
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        actionHandlerPackage.setText(chooseActionHandler().getElementName());
+    	  IPackageFragment selection = chooseActionHandler();
+    	  if (selection != null) {
+    		  actionHandlerPackage.setText(selection.getElementName());
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        actionHandlerPackage.setText(chooseActionHandler().getElementName());
+    	  IPackageFragment selection = chooseActionHandler();
+    	  if (selection != null) {
+    		  actionHandlerPackage.setText(selection.getElementName());
+    	  }
       }
     });
 
@@ -650,12 +663,18 @@ public class NewActionWizardPage extends NewTypeWizardPage {
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        actionValidator.setText(chooseActionValidator().getFullyQualifiedName('.'));
+    	  IType selection = chooseActionValidator();
+    	  if (selection != null) {
+    		  actionValidator.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        actionValidator.setText(chooseActionValidator().getFullyQualifiedName('.'));
+    	  IType selection = chooseActionValidator();
+    	  if (selection != null) {
+    		  actionValidator.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -699,7 +718,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
         status.setError(actionValidator.getText() + " doesn't exist");
         return status;
       }
-      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
       IType[] interfaces = hierarchy.getAllInterfaces();
       boolean isActionValidator = false;
       for (IType inter : interfaces) {
@@ -743,12 +762,18 @@ public class NewActionWizardPage extends NewTypeWizardPage {
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        handlerModule.setText(chooseHandlerModule().getFullyQualifiedName('.'));
+    	  IType selection = chooseHandlerModule();
+    	  if (selection != null) {
+    		  handlerModule.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        handlerModule.setText(chooseHandlerModule().getFullyQualifiedName('.'));
+    	  IType selection = chooseHandlerModule();
+    	  if (selection != null) {
+    		  handlerModule.setText(selection.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -792,7 +817,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
         status.setError(handlerModule.getText() + " doesn't exist");
         return status;
       }
-      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+      ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
       IType[] superclasses = hierarchy.getAllClasses();
       boolean isHandlerModule = false;
       for (IType superclass : superclasses) {
@@ -867,7 +892,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.shared.Action")) {
@@ -901,7 +926,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals(
@@ -936,7 +961,7 @@ public class NewActionWizardPage extends NewTypeWizardPage {
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(

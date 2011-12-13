@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.server.guice;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -50,8 +51,9 @@ public class ServletModule extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_SERVLET_MODULE, null, null);
-    return createClass("ServletModule", null);
+	  IType result = createClass("ServletModule", null); 
+	  workingCopy.createImport(C_SERVLET_MODULE, null, new NullProgressMonitor());
+	  return result;
   }
 
   public IMethod createConfigureServletsMethod(String gwtVersion) throws JavaModelException {
@@ -63,14 +65,14 @@ public class ServletModule extends ProjectClass {
     if (VersionTool.compare(gwtVersion, "2.1") == -1) {
       // GWT < 2.1
       String projectName = workingCopy.getJavaProject().getElementName();
-      workingCopy.createImport(C_ACTION_IMPL, null, null);
-      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+      workingCopy.createImport(C_ACTION_IMPL, null, new NullProgressMonitor());
+      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, new NullProgressMonitor());
       sw.writeLine("  serve(\"/" + projectName.toLowerCase()
           + "/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);");
     } else {
       // GWT >= 2.1
-      workingCopy.createImport(C_ACTION_IMPL, null, null);
-      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, null);
+      workingCopy.createImport(C_ACTION_IMPL, null, new NullProgressMonitor());
+      workingCopy.createImport(C_DISPATCH_SERVICE_IMPL, null, new NullProgressMonitor());
       sw.writeLine(
           "  serve(\"/\" + ActionImpl.DEFAULT_SERVICE_NAME).with(DispatchServiceImpl.class);");
     }

@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.server.guice;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -49,17 +50,18 @@ public class GuiceServletContextListener extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_GUICE_SERVLET_CONTEXT_LISTENER, null, null);
-    return createClass("GuiceServletContextListener", null);
+	  IType result = createClass("GuiceServletContextListener", null);
+	  workingCopy.createImport(C_GUICE_SERVLET_CONTEXT_LISTENER, null, new NullProgressMonitor());
+	  return result;
   }
 
   public IMethod createInjectorGetterMethod(IType handlerModule, IType servletModule)
       throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
-    workingCopy.createImport(I_INJECTOR, null, null);
-    workingCopy.createImport(C_GUICE, null, null);
-    workingCopy.createImport(handlerModule.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(servletModule.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(I_INJECTOR, null, new NullProgressMonitor());
+    workingCopy.createImport(C_GUICE, null, new NullProgressMonitor());
+    workingCopy.createImport(handlerModule.getFullyQualifiedName(), null, new NullProgressMonitor());
+    workingCopy.createImport(servletModule.getFullyQualifiedName(), null, new NullProgressMonitor());
 
     sw.writeLines(
         "@Override",

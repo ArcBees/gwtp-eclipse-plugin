@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.shared;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,8 +51,9 @@ public class Action extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(superclass.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(result.getFullyQualifiedName(), null, null);
-    return createClass(superclass.getElementName() + "<" + result.getElementName() + ">", null);
+	  IType resultType = createClass(superclass.getElementName() + "<" + result.getElementName() + ">", null);
+	  workingCopy.createImport(superclass.getFullyQualifiedName(), null, new NullProgressMonitor());
+	  workingCopy.createImport(result.getFullyQualifiedName(), null, new NullProgressMonitor());
+	  return resultType;
   }
 }

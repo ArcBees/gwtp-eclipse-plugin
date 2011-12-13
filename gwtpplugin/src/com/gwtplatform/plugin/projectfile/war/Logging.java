@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import com.gwtplatform.plugin.projectfile.ProjectFile;
 
@@ -51,7 +52,7 @@ public class Logging extends ProjectFile {
     contents += "# Set the default logging level for all loggers to WARNING\n";
     contents += ".level = WARNING\n";
 
-    file.create(new ByteArrayInputStream(contents.getBytes()), false, null);
+    file.create(new ByteArrayInputStream(contents.getBytes()), false, new NullProgressMonitor());
 
     return file;
   }

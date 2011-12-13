@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.event;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -51,13 +52,14 @@ public class Event extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(C_GWT_EVENT, null, null);
-    String eventName = elementName.substring(0, elementName.length() - 5);
-    return createClass("GwtEvent<" + elementName + "." + eventName + "Handler>", null);
+	  String eventName = elementName.substring(0, elementName.length() - 5);
+	  IType result = createClass("GwtEvent<" + elementName + "." + eventName + "Handler>", null);
+	  workingCopy.createImport(C_GWT_EVENT, null, new NullProgressMonitor());
+	  return result;
   }
 
   public IType createHandlerInterface() throws JavaModelException {
-    workingCopy.createImport(I_EVENT_HANDLER, null, null);
+    workingCopy.createImport(I_EVENT_HANDLER, null, new NullProgressMonitor());
 
     String eventName = workingCopyType.getElementName().substring(0, workingCopyType.getElementName().length() - 5);
 
@@ -65,13 +67,13 @@ public class Event extends ProjectClass {
     sw.writeLines("public interface " + eventName + "Handler extends EventHandler {",
         "  void on" + eventName + "(" + workingCopyType.getElementName() + " event);", "}");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IType createHasHandlersInterface(IType handler, IMethod constructor)
       throws JavaModelException {
-    workingCopy.createImport(I_HAS_HANDLERS, null, null);
-    workingCopy.createImport(I_HANDLER_REGISTRATION, null, null);
+    workingCopy.createImport(I_HAS_HANDLERS, null, new NullProgressMonitor());
+    workingCopy.createImport(I_HANDLER_REGISTRATION, null, new NullProgressMonitor());
 
     String eventName = workingCopyType.getElementName().substring(0, workingCopyType.getElementName().length() - 5);
 
@@ -82,7 +84,7 @@ public class Event extends ProjectClass {
             + handler.getElementName() + " handler);",
         "}");
 
-    return workingCopyType.createType(sw.toString(), constructor, false, null);
+    return workingCopyType.createType(sw.toString(), constructor, false, new NullProgressMonitor());
   }
 
   public IField createTypeField(IType handler) throws JavaModelException {
@@ -127,7 +129,7 @@ public class Event extends ProjectClass {
   }
 
   public IMethod createFireMethod(IField[] fields) throws JavaModelException {
-    workingCopy.createImport(I_HAS_HANDLERS, null, null);
+    workingCopy.createImport(I_HAS_HANDLERS, null, new NullProgressMonitor());
 
     String params = getParamsString(fields, true, true);
     String paramVars = getParamsString(fields, false, false);

@@ -18,6 +18,7 @@ package com.gwtplatform.plugin.view;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -103,12 +104,18 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        nameTokens.setText(chooseTokenName().getFullyQualifiedName('.'));
+    	  IType selectedTokenName = chooseTokenName();
+    	  if (selectedTokenName != null) {
+    		  nameTokens.setText(selectedTokenName.getFullyQualifiedName('.'));
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        nameTokens.setText(chooseTokenName().getFullyQualifiedName('.'));
+    	  IType selectedTokenName = chooseTokenName();
+    	  if (selectedTokenName != null) {
+    		  nameTokens.setText(selectedTokenName.getFullyQualifiedName('.'));
+    	  }
       }
     });
 
@@ -252,7 +259,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
           setErrorMessage(ginjector.getText() + " is a Binary class");
           return;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] interfaces = hierarchy.getAllInterfaces();
         boolean isGinjector = false;
         for (IType inter : interfaces) {
@@ -283,7 +290,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
           setErrorMessage(ginjector.getText() + " is a Binary class");
           return;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] superclasses = hierarchy.getAllClasses();
         boolean isPresenterModule = false;
         for (IType superclass : superclasses) {
@@ -311,7 +318,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
           setErrorMessage(handlerModule.getText() + " doesn't exist");
           return;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] superclasses = hierarchy.getAllClasses();
         boolean isHandlerModule = false;
         for (IType superclass : superclasses) {
@@ -341,7 +348,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
           setErrorMessage(action.getText() + " doesn't exist");
           return;
         }
-        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
         IType[] interfaces = hierarchy.getAllInterfaces();
         boolean isAction = false;
         for (IType inter : interfaces) {
@@ -557,7 +564,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
             if (type == null || !type.exists() || type.isBinary()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals("com.google.gwt.inject.client.Ginjector")) {
@@ -591,7 +598,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
             if (type == null || !type.exists() || type.isBinary()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(
@@ -623,7 +630,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] superclasses = hierarchy.getAllClasses();
             for (IType superclass : superclasses) {
               if (superclass.getFullyQualifiedName('.').equals(
@@ -660,7 +667,7 @@ public class GwtPropertyPage extends PropertyPage implements IWorkbenchPropertyP
             if (type == null || !type.exists()) {
               return false;
             }
-            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(null);
+            ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
             IType[] interfaces = hierarchy.getAllInterfaces();
             for (IType inter : interfaces) {
               if (inter.getFullyQualifiedName('.').equals("com.gwtplatform.dispatch.shared.Action")) {

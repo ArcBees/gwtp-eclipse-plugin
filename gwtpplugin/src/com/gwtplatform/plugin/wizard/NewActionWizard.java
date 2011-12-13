@@ -250,7 +250,7 @@ public class NewActionWizard extends Wizard implements INewWizard {
   private boolean isSpringHandlerModule(IPackageFragmentRoot root) throws JavaModelException {
     String handlerModuleString = page.getHandlerModule();
     IType handlerModuleType = root.getJavaProject().findType(handlerModuleString);
-    ITypeHierarchy hierarchy = handlerModuleType.newSupertypeHierarchy(null);
+    ITypeHierarchy hierarchy = handlerModuleType.newSupertypeHierarchy(new NullProgressMonitor());
     IType[] superclasses = hierarchy.getAllClasses();
     for (IType superclass : superclasses) {
       if (superclass.getFullyQualifiedName('.').equals(GuiceHandlerModule.C_HANDLER_MODULE)) {

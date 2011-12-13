@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.sample;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -77,7 +78,7 @@ public class BasicSampleBuilder {
 			handlerModule.becomeWorkingCopy();
 
 			IType revealEvent = javaProject.findType("com.gwtplatform.mvp.client.proxy.RevealRootContentEvent");
-			IPackageFragment corePackage = root.createPackageFragment(clientPackage.getElementName() + ".core", false, null);
+			IPackageFragment corePackage = root.createPackageFragment(clientPackage.getElementName() + ".core", false, new NullProgressMonitor());
 
 			// MainPage
 			mainPagePresenter = new Presenter(root, corePackage.getElementName(), "MainPagePresenter", sourceWriterFactory, false);
@@ -93,10 +94,10 @@ public class BasicSampleBuilder {
 			mainPagePresenter.createImport("com.gwtplatform.mvp.client.proxy.PlaceRequest");
 			mainPagePresenter.createImport(sharedPackage.getElementName() + ".FieldVerifier");
 
-			viewInterface.createMethod("HasValue<String> getNameValue();", null, false, null);
-			viewInterface.createMethod("HasClickHandlers getSendClickHandlers();", null, false, null);
-			viewInterface.createMethod("void resetAndFocus();", null, false, null);
-			viewInterface.createMethod("void setError(String errorText);", null, false, null);
+			viewInterface.createMethod("HasValue<String> getNameValue();", null, false, new NullProgressMonitor());
+			viewInterface.createMethod("HasClickHandlers getSendClickHandlers();", null, false, new NullProgressMonitor());
+			viewInterface.createMethod("void resetAndFocus();", null, false, new NullProgressMonitor());
+			viewInterface.createMethod("void setError(String errorText);", null, false, new NullProgressMonitor());
 
 			mainPagePresenter.getType().createField("private final PlaceManager placeManager;", constructor, false, null);
 
@@ -273,14 +274,14 @@ public class BasicSampleBuilder {
 			responsePresenter.createImport(sharedPackage.getElementName() + ".SendTextToServer");
 			responsePresenter.createImport(sharedPackage.getElementName() + ".SendTextToServerResult");
 
-			viewInterface.createMethod("HasClickHandlers getCloseClickHandlers();", null, false, null);
-			viewInterface.createMethod("void setServerResponse(String serverResponse);", null, false, null);
-			viewInterface.createMethod("void setTextToServer(String textToServer);", null, false, null);
+			viewInterface.createMethod("HasClickHandlers getCloseClickHandlers();", null, false, new NullProgressMonitor());
+			viewInterface.createMethod("void setServerResponse(String serverResponse);", null, false, new NullProgressMonitor());
+			viewInterface.createMethod("void setTextToServer(String textToServer);", null, false, new NullProgressMonitor());
 
-			responsePresenter.getType().createField("public static final String textToServerParam = \"textToServer\";", constructor, false, null);
-			responsePresenter.getType().createField("private final DispatchAsync dispatcher;", constructor, false, null);
-			responsePresenter.getType().createField("private final PlaceManager placeManager;", constructor, false, null);
-			responsePresenter.getType().createField("private String textToServer;", constructor, false, null);
+			responsePresenter.getType().createField("public static final String textToServerParam = \"textToServer\";", constructor, false, new NullProgressMonitor());
+			responsePresenter.getType().createField("private final DispatchAsync dispatcher;", constructor, false, new NullProgressMonitor());
+			responsePresenter.getType().createField("private final PlaceManager placeManager;", constructor, false, new NullProgressMonitor());
+			responsePresenter.getType().createField("private String textToServer;", constructor, false, new NullProgressMonitor());
 
 			sw = sourceWriterFactory.createForMethod(constructor);
 			sw.appendParameter("final DispatchAsync dispatcher");
@@ -460,8 +461,8 @@ public class BasicSampleBuilder {
 			sendTextToServerActionHandler.createImport("com.gwtplatform.dispatch.shared.ActionException");
 			sendTextToServerActionHandler.createImport(sharedPackage.getElementName() + ".FieldVerifier");
 
-			sendTextToServerActionHandler.getType().createField("private final ServletContext servletContext;", constructor, false, null);
-			sendTextToServerActionHandler.getType().createField("private final Provider<HttpServletRequest> requestProvider;", constructor, false, null);
+			sendTextToServerActionHandler.getType().createField("private final ServletContext servletContext;", constructor, false, new NullProgressMonitor());
+			sendTextToServerActionHandler.getType().createField("private final Provider<HttpServletRequest> requestProvider;", constructor, false, new NullProgressMonitor());
 
 			sw = sourceWriterFactory.createForMethod(constructor);
 			sw.appendParameter("final ServletContext servletContext");
@@ -596,7 +597,7 @@ public class BasicSampleBuilder {
 					"  }", 
 					"}");
 
-			return workingCopy.createType(sw.toString(), null, false, null);
+			return workingCopy.createType(sw.toString(), null, false, new NullProgressMonitor());
 		}
 
 	}

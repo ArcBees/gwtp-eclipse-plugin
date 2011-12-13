@@ -145,6 +145,14 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     }
 
     try {
+      if (GWTPreferences.getDefaultRuntime().getVersion().isEmpty()) {
+        IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No default GWT SDK.");
+          
+        ErrorDialog.openError(getShell(), null, null, status);
+          
+        return false;
+      }
+      
       monitor.beginTask("GWT-Platform project creation", 4);
 
       // Project base creation
@@ -192,9 +200,9 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID });
       }
 
-      project.create(description, null);
+      project.create(description, monitor);
       if (!project.isOpen()) {
-        project.open(null);
+        project.open(monitor);
       }
       monitor.worked(1);
 
@@ -204,13 +212,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // war/WEB-INF/lib folder creation
       IPath warPath = new Path("war");
-      project.getFolder(warPath).create(false, true, null);
+      project.getFolder(warPath).create(false, true, monitor);
 
       IPath webInfPath = warPath.append("WEB-INF");
-      project.getFolder(webInfPath).create(false, true, null);
+      project.getFolder(webInfPath).create(false, true, monitor);
 
       IPath libPath = webInfPath.append("lib");
-      project.getFolder(libPath).create(false, true, null);
+      project.getFolder(libPath).create(false, true, monitor);
 
       Thread.sleep(1000);
 
@@ -221,11 +229,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Default output location
       IPath outputPath = new Path("/" + page.getProjectName()).append(webInfPath).append("classes");
-      javaProject.setOutputLocation(outputPath, null);
+      javaProject.setOutputLocation(outputPath, monitor);
 
       // Source folder
       IPath srcPath = new Path("src");
-      project.getFolder(srcPath).create(false, true, null);
+      project.getFolder(srcPath).create(false, true, monitor);
 
       entries.add(JavaCore.newSourceEntry(javaProject.getPath().append("src")));
 
@@ -253,7 +261,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         entries.add(JavaCore.newLibraryEntry(lib.getFile().getFullPath(), null, null));
       }
 
-      javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), null);
+      javaProject.setRawClasspath(entries.toArray(new IClasspathEntry[entries.size()]), monitor);
       monitor.worked(1);
 
       monitor.subTask("Default classes creation");
@@ -266,22 +274,22 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         log4j.createFile();
 
         IPath metaInfPath = srcPath.append("META-INF");
-        project.getFolder(metaInfPath).create(false, true, null);
+        project.getFolder(metaInfPath).create(false, true, monitor);
 
         Jdoconfig jdoconfig = new Jdoconfig(project, metaInfPath);
         jdoconfig.createFile();
       }
 
       IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false,
-          null);
+          monitor);
 
       // Client package
       IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".client", false, null);
+          + ".client", false, monitor);
 
       // Place package
       IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".place", false, null);
+          + ".place", false, monitor);
 
       PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(),
           "DefaultPlace", sourceWriterFactory);
@@ -298,7 +306,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Gin package
       IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".gin", false, null);
+          + ".gin", false, monitor);
 
       PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(),
           "ClientModule", sourceWriterFactory);
@@ -321,11 +329,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // Server package
       IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".server", false, null);
+          + ".server", false, monitor);
 
       // Guice package
       IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName()
-          + ".guice", false, null);
+          + ".guice", false, monitor);
 
       String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
 
@@ -343,7 +351,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
           servletModule.getType());
 
       // Shared package
-      root.createPackageFragment(projectPackage.getElementName() + ".shared", false, null);
+      root.createPackageFragment(projectPackage.getElementName() + ".shared", false, monitor);
 
       // Basic sample creation
       if (page.isSample()) {
@@ -421,7 +429,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       // Remove bin folder
       IFolder binFolder = project.getFolder(new Path("/bin"));
       if (binFolder.exists()) {
-        binFolder.delete(true, null);
+        binFolder.delete(true, monitor);
       }
 
       monitor.worked(1);

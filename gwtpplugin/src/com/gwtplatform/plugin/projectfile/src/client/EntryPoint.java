@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -51,13 +52,14 @@ public class EntryPoint extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    workingCopy.createImport(I_ENTRY_POINT, null, null);
-    return createClass(null, "EntryPoint");
+	  IType result = createClass(null, "EntryPoint");
+	  workingCopy.createImport(I_ENTRY_POINT, null, new NullProgressMonitor());
+	  return result;
   }
 
   public IField createGinjectorField(IType ginjector) throws JavaModelException {
-    workingCopy.createImport(ginjector.getFullyQualifiedName(), null, null);
-    workingCopy.createImport(C_GWT, null, null);
+    workingCopy.createImport(ginjector.getFullyQualifiedName(), null, new NullProgressMonitor());
+    workingCopy.createImport(C_GWT, null, new NullProgressMonitor());
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final " + ginjector.getElementName() + " ginjector = GWT.create("
         + ginjector.getElementName() + ".class);");
@@ -69,7 +71,7 @@ public class EntryPoint extends ProjectClass {
     sw.writeLines(
         "@Override",
         "public void onModuleLoad() {");
-    workingCopy.createImport(C_DELAYED_BIND_REGISTRY, null, null);
+    workingCopy.createImport(C_DELAYED_BIND_REGISTRY, null, new NullProgressMonitor());
     sw.writeLines(
         "  // This is required for Gwt-Platform proxy's generator",
         "  DelayedBindRegistry.bind(ginjector);",

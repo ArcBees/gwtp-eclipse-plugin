@@ -16,6 +16,7 @@
 
 package com.gwtplatform.plugin.projectfile.src.client.core;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -61,27 +62,29 @@ public class View extends ProjectClass {
 
   @Override
   protected IType createType() throws JavaModelException {
-    if (isPopupView) {
-      workingCopy.createImport(C_POPUP_VIEW_IMPL, null, null);
-      return createClass("PopupViewImpl", presenter.getElementName() + ".MyView");
-    } else {
-      workingCopy.createImport(C_VIEW_IMPL, null, null);
-      return createClass("ViewImpl", presenter.getElementName() + ".MyView");
-    }
+	  IType result = null;
+	  if (isPopupView) {
+		  result = createClass("PopupViewImpl", presenter.getElementName() + ".MyView");
+		  workingCopy.createImport(C_POPUP_VIEW_IMPL, null, new NullProgressMonitor());
+	  } else {
+		  result = createClass("ViewImpl", presenter.getElementName() + ".MyView");
+		  workingCopy.createImport(C_VIEW_IMPL, null, new NullProgressMonitor());
+	  }
+	  return result;
   }
 
   public IType createBinderInterface() throws JavaModelException {
-    workingCopy.createImport(I_UI_BINDER, null, null);
+    workingCopy.createImport(I_UI_BINDER, null, new NullProgressMonitor());
 
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine(
         "public interface Binder extends UiBinder<Widget, " + workingCopyType.getElementName() + "> { }");
 
-    return workingCopyType.createType(sw.toString(), null, false, null);
+    return workingCopyType.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IField createWidgetField() throws JavaModelException {
-    workingCopy.createImport(C_WIDGET, null, null);
+    workingCopy.createImport(C_WIDGET, null, new NullProgressMonitor());
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private final Widget widget;");
     return createField(sw);
@@ -92,7 +95,7 @@ public class View extends ProjectClass {
 
     String parameters = "";
     if (isPopupView) {
-      workingCopy.createImport(C_EVENT_BUS, null, null);
+      workingCopy.createImport(C_EVENT_BUS, null, new NullProgressMonitor());
       parameters += "final EventBus eventBus";
       if (useUiBinder) {
         parameters += ", ";
@@ -102,7 +105,7 @@ public class View extends ProjectClass {
       parameters += "final Binder binder";
     }
 
-    workingCopy.createImport(A_INJECT, null, null);
+    workingCopy.createImport(A_INJECT, null, new NullProgressMonitor());
     sw.writeLines(
         "@Inject",
         "public " + workingCopyType.getElementName() + "(" + parameters + ") {");
@@ -121,7 +124,7 @@ public class View extends ProjectClass {
   public IMethod createAsWidgetMethod(boolean useUiBinder) throws JavaModelException {
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
 
-    workingCopy.createImport(C_WIDGET, null, null);
+    workingCopy.createImport(C_WIDGET, null, new NullProgressMonitor());
     sw.writeLines(
         "@Override",
         "public Widget asWidget() {",

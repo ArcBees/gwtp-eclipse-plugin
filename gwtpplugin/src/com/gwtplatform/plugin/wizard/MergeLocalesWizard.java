@@ -139,8 +139,8 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
       
       if(defaultLocaleFile == null) {
     	  IFile localeFile = resourcesDir.getFile(new Path("LocalizableResource.properties"));
-    	  localeFile.create(new ByteArrayInputStream("".getBytes()), false, null);
-    	  localeFile.setCharset(localeFile.getProject().getDefaultCharset(), null);
+    	  localeFile.create(new ByteArrayInputStream("".getBytes()), false, new NullProgressMonitor());
+    	  localeFile.setCharset(localeFile.getProject().getDefaultCharset(), new NullProgressMonitor());
     	  
     	  defaultLocaleResource = localeFile;
     	  defaultLocaleFile = new File(localeFile.getLocationURI());
@@ -152,7 +152,7 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
 
       IFile file = (IFile) defaultLocaleResource.getAdapter(IFile.class);
       file.setContents(new ByteArrayInputStream(defaultLocaleProperties.toString().getBytes()),
-          false, true, null);
+          false, true, new NullProgressMonitor());
 
       for (IResource resourceResource : resourceResources) {
         File resourceFile = new File(resourceResource.getLocationURI());
@@ -163,7 +163,7 @@ public class MergeLocalesWizard extends Wizard implements INewWizard {
 
           file = (IFile) resourceResource.getAdapter(IFile.class);
           file.setContents(new ByteArrayInputStream(otherLocaleProperties.toString().getBytes()),
-              false, true, null);
+              false, true, new NullProgressMonitor());
         }
       }
 

@@ -106,12 +106,18 @@ public class AddFieldDialog extends TitleAreaDialog {
     browse.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        type.setText(chooseType().getFullyQualifiedName());
+    	  IType selectedType = chooseType();
+    	  if (type != null) {
+    		  type.setText(selectedType.getFullyQualifiedName());
+    	  }
       }
 
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        type.setText(chooseType().getFullyQualifiedName());
+    	  IType selectedType = chooseType();
+    	  if (type != null) {
+    		  type.setText(selectedType.getFullyQualifiedName());
+    	  }
       }
     });
 

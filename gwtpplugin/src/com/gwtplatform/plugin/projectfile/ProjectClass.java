@@ -18,6 +18,7 @@ package com.gwtplatform.plugin.projectfile;
 
 import java.util.Random;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -63,7 +64,7 @@ public abstract class ProjectClass {
     this.sourceWriterFactory = sourceWriterFactory;
     type = root.getJavaProject().findType(fullyQualifiedName);
     originalUnit = createCompilationUnitIfNeeded();
-    workingCopy = originalUnit.getWorkingCopy(null);
+    workingCopy = originalUnit.getWorkingCopy(new NullProgressMonitor());
     workingCopyType = workingCopy.getType(type.getElementName());
   }
 
@@ -75,16 +76,16 @@ public abstract class ProjectClass {
     this.sourceWriterFactory = sourceWriterFactory;
     type = root.getJavaProject().findType(packageName + "." + elementName);
     originalUnit = createCompilationUnitIfNeeded();
-    workingCopy = originalUnit.getWorkingCopy(null);
+    workingCopy = originalUnit.getWorkingCopy(new NullProgressMonitor());
   }
 
   private ICompilationUnit createCompilationUnitIfNeeded() throws JavaModelException {
     ICompilationUnit compilationUnit;
     if (type == null) {
       String cuName = elementName + ".java";
-      IPackageFragment pack = root.createPackageFragment(packageName, false, null);
-      compilationUnit = pack.createCompilationUnit(cuName, "", false, null);
-      compilationUnit.createPackageDeclaration(packageName, null);
+      IPackageFragment pack = root.createPackageFragment(packageName, false, new NullProgressMonitor());
+      compilationUnit = pack.createCompilationUnit(cuName, "", false, new NullProgressMonitor());
+      compilationUnit.createPackageDeclaration(packageName, new NullProgressMonitor());
     } else {
       compilationUnit = type.getCompilationUnit();
     }
@@ -101,20 +102,20 @@ public abstract class ProjectClass {
   protected abstract IType createType() throws JavaModelException;
 
   public void commit() throws JavaModelException {
-	workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-    workingCopy.commitWorkingCopy(true, null);
+	workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, new NullProgressMonitor());
+    workingCopy.commitWorkingCopy(true, new NullProgressMonitor());
     workingCopy.discardWorkingCopy();
   }
 
   public void discard(boolean andDelete) throws JavaModelException {
     workingCopy.discardWorkingCopy();
     if (andDelete) {
-    	originalUnit.delete(true, null);
+    	originalUnit.delete(true, new NullProgressMonitor());
     }
   }
   
   public void becomeWorkingCopy() throws JavaModelException {
-	  workingCopy.becomeWorkingCopy(null);
+	  workingCopy.becomeWorkingCopy(new NullProgressMonitor());
   }
 
   public IType getType() {
@@ -129,7 +130,7 @@ public abstract class ProjectClass {
   }
 
   public IField createField(IType fieldType, String fieldName) throws JavaModelException {
-    workingCopy.createImport(fieldType.getFullyQualifiedName(), null, null);
+    workingCopy.createImport(fieldType.getFullyQualifiedName(), null, new NullProgressMonitor());
     SourceWriter sw = sourceWriterFactory.createForNewClassBodyComponent();
     sw.writeLine("private " + fieldType.getElementName() + " " + fieldName + ";");
     return createField(sw);
@@ -213,19 +214,19 @@ public abstract class ProjectClass {
 
     sw.writeLines("public class " + elementName + extendsString + implementsString + " {", "}");
 
-    return workingCopy.createType(sw.toString(), null, false, null);
+    return workingCopy.createType(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IMethod createMethod(SourceWriter sw) throws JavaModelException {
-    return workingCopyType.createMethod(sw.toString(), null, false, null);
+    return workingCopyType.createMethod(sw.toString(), null, false, new NullProgressMonitor());
   }
 
   public IField createField(SourceWriter sw) throws JavaModelException {
-    return workingCopyType.createField(sw.toString(), null, false, null);
+    return workingCopyType.createField(sw.toString(), null, false, new NullProgressMonitor());
   }
   
   public IImportDeclaration createImport(String name) throws JavaModelException {
-	  return workingCopy.createImport(name, null, null);
+	  return workingCopy.createImport(name, null, new NullProgressMonitor());
   }
 
   protected String getParamsString(IField[] fields, boolean leadingComma, boolean includeType)

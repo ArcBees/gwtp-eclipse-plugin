@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
 import com.gwtplatform.plugin.Activator;
@@ -43,7 +44,7 @@ public class Jar extends ProjectFile {
     InputStream inputStream = Platform.getBundle(Activator.PLUGIN_ID)
         .getEntry("/file/" + file.getName()).openStream();
 
-    file.create(inputStream, false, null);
+    file.create(inputStream, false, new NullProgressMonitor());
 
     return file;
   }
