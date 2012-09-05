@@ -43,6 +43,8 @@ public class AppengineWebXml extends ProjectFile {
     contents += "\t<application></application>\n";
     contents += "\t<version>1</version>\n\n";
 
+    contents += "\t<threadsafe>true</threadsafe>\n\n";
+    
     contents += "\t<!-- Configure serving/caching of GWT files -->\n";
     contents += "\t<static-files>\n";
     contents += "\t\t<include path=\"**\" />\n\n";
