@@ -19,7 +19,7 @@ The GWTP Eclipse plugin requires Eclipse Helios (3.6) or later, as well as the G
 
 ##Creating your first GWTP project
 The following screencast shows you how to create your first GWTP project using the GWTP Plugin for Eclipse. 
-It is best viewed in full screen. (Or watch it on YouTube.)
+It is best viewed in full screen. (Or watch it on [YouTube](http://www.youtube.com/watch?v=cC-Qh4q1lCI).)
 
 ##Acknowledgements
 The initial version of the GWTP Eclipse Plugin was contributed by Michael Renaud and Imagem Solutions.
