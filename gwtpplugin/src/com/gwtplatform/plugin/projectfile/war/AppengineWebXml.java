@@ -42,6 +42,8 @@ public class AppengineWebXml extends ProjectFile {
     contents += "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">\n\n";
     contents += "\t<application></application>\n";
     contents += "\t<version>1</version>\n\n";
+    
+    contents += "\t<threadsafe>true</threadsafe>\n\n";
 
     contents += "\t<!-- Configure serving/caching of GWT files -->\n";
     contents += "\t<static-files>\n";
