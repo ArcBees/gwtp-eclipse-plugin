@@ -88,9 +88,9 @@ import com.gwtplatform.plugin.sample.BasicSampleBuilder;
 import com.gwtplatform.plugin.tool.VersionTool;
 
 /**
- *
+ * 
  * @author Michael Renaud
- *
+ * 
  */
 public class NewProjectWizard extends Wizard implements INewWizard {
 
@@ -126,8 +126,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     try {
       super.getContainer().run(false, false, new IRunnableWithProgress() {
         @Override
-        public void run(IProgressMonitor monitor) throws InvocationTargetException,
-            InterruptedException {
+        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
           isDone = finish(monitor);
         }
       });
@@ -137,6 +136,10 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     return isDone;
   }
 
+  /**
+   * TODO extract this method into several smaller methods
+   * TODo during debugging markers are thrown for some reason, get rid of these while debugging
+   */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected boolean finish(IProgressMonitor desiredMonitor) {
     IProgressMonitor monitor = desiredMonitor;
@@ -147,12 +150,12 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     try {
       if (GWTPreferences.getDefaultRuntime().getVersion().isEmpty()) {
         IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "No default GWT SDK.");
-          
+
         ErrorDialog.openError(getShell(), null, null, status);
-          
+
         return false;
       }
-      
+
       monitor.beginTask("GWT-Platform project creation", 4);
 
       // Project base creation
@@ -163,12 +166,10 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       // Project location
       URI location = null;
       String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocationURI().toString() + "/";
-      if (page.getProjectLocation() != null
-          && !workspace.equals(page.getProjectLocation().toString())) {
+      if (page.getProjectLocation() != null && !workspace.equals(page.getProjectLocation().toString())) {
         location = page.getProjectLocation();
       }
-      IProjectDescription description = project.getWorkspace().newProjectDescription(
-          project.getName());
+      IProjectDescription description = project.getWorkspace().newProjectDescription(project.getName());
       description.setLocationURI(location);
 
       // Project natures and builders
@@ -191,10 +192,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         // TODO use the BUILDER_UI field
         enhancer.setBuilderName("com.google.appengine.eclipse.core.enhancerbuilder");
 
-        description.setBuildSpec(new ICommand[] { javaBuilder, webAppBuilder, gwtBuilder,
-            gaeBuilder, enhancer });
-        description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID,
-            GaeNature.NATURE_ID });
+        description.setBuildSpec(new ICommand[] { javaBuilder, webAppBuilder, gwtBuilder, gaeBuilder, enhancer });
+        description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID, GaeNature.NATURE_ID });
       } else {
         description.setBuildSpec(new ICommand[] { javaBuilder, webAppBuilder, gwtBuilder });
         description.setNatureIds(new String[] { JavaCore.NATURE_ID, GWTNature.NATURE_ID });
@@ -239,16 +238,15 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       // GWT SDK container
       IPath gwtContainer = GWTRuntimeContainer.CONTAINER_PATH;
-      ClasspathContainerInitializer gwtInitializer = JavaCore
-          .getClasspathContainerInitializer(gwtContainer.segment(0));
+      ClasspathContainerInitializer gwtInitializer = JavaCore.getClasspathContainerInitializer(gwtContainer.segment(0));
       gwtInitializer.initialize(gwtContainer, javaProject);
       entries.add(JavaCore.newContainerEntry(gwtContainer));
 
       // GAE SDK container
       if (page.useGAE()) {
         IPath gaeContainer = GaeSdkContainer.CONTAINER_PATH;
-        ClasspathContainerInitializer gaeInitializer = JavaCore
-            .getClasspathContainerInitializer(gaeContainer.segment(0));
+        ClasspathContainerInitializer gaeInitializer = JavaCore.getClasspathContainerInitializer(gaeContainer
+            .segment(0));
         gaeInitializer.initialize(gaeContainer, javaProject);
         entries.add(JavaCore.newContainerEntry(gaeContainer));
       }
@@ -265,8 +263,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       monitor.worked(1);
 
       monitor.subTask("Default classes creation");
-      IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append(
-          "src"));
+      IPackageFragmentRoot root = javaProject.findPackageFragmentRoot(javaProject.getPath().append("src"));
 
       // Create sources
       if (page.useGAE()) {
@@ -280,36 +277,32 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         jdoconfig.createFile();
       }
 
-      IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false,
-          monitor);
+      IPackageFragment projectPackage = root.createPackageFragment(page.getProjectPackage(), false, monitor);
 
       // Client package
-      IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".client", false, monitor);
+      IPackageFragment clientPackage = root.createPackageFragment(projectPackage.getElementName() + ".client", false,
+          monitor);
 
       // Place package
-      IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".place", false, monitor);
+      IPackageFragment placePackage = root.createPackageFragment(clientPackage.getElementName() + ".place", false,
+          monitor);
 
-      PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(),
-          "DefaultPlace", sourceWriterFactory);
-
-      PlaceManager placeManager = new PlaceManager(root, placePackage.getElementName(),
-          "ClientPlaceManager", sourceWriterFactory);
-      IField defaultPlaceField = placeManager.createPlaceRequestField(defaultPlace.getType());
-      placeManager.createConstructor(new IType[] { defaultPlace.getType() },
-          new IField[] { defaultPlaceField });
-      placeManager.createRevealDefaultPlaceMethod(defaultPlaceField);
-
-      Tokens tokens = new Tokens(root, placePackage.getElementName(), "NameTokens",
+      PlaceAnnotation defaultPlace = new PlaceAnnotation(root, placePackage.getElementName(), "DefaultPlace",
           sourceWriterFactory);
 
-      // Gin package
-      IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName()
-          + ".gin", false, monitor);
+      PlaceManager placeManager = new PlaceManager(root, placePackage.getElementName(), "ClientPlaceManager",
+          sourceWriterFactory);
+      IField defaultPlaceField = placeManager.createPlaceRequestField(defaultPlace.getType());
+      placeManager.createConstructor(new IType[] { defaultPlace.getType() }, new IField[] { defaultPlaceField });
+      placeManager.createRevealDefaultPlaceMethod(defaultPlaceField);
 
-      PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(),
-          "ClientModule", sourceWriterFactory);
+      Tokens tokens = new Tokens(root, placePackage.getElementName(), "NameTokens", sourceWriterFactory);
+
+      // Gin package
+      IPackageFragment ginPackage = root.createPackageFragment(clientPackage.getElementName() + ".gin", false, monitor);
+
+      PresenterModule presenterModule = new PresenterModule(root, ginPackage.getElementName(), "ClientModule",
+          sourceWriterFactory);
       presenterModule.createConfigureMethod(placeManager.getType());
 
       Ginjector ginjector = new Ginjector(root, ginPackage.getElementName(), "ClientGinjector",
@@ -317,48 +310,45 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       ginjector.createDefaultGetterMethods();
 
       // Client package contents
-      EntryPoint entryPoint = new EntryPoint(root, clientPackage.getElementName(),
-    		  formattedName, sourceWriterFactory);
+      EntryPoint entryPoint = new EntryPoint(root, clientPackage.getElementName(), formattedName, sourceWriterFactory);
       entryPoint.createGinjectorField(ginjector.getType());
       entryPoint.createOnModuleLoadMethod();
 
       // Project package contents
-      GwtXmlModule gwtXmlModule = new GwtXmlModule(root, projectPackage.getElementName(),
-    		  formattedName);
+      GwtXmlModule gwtXmlModule = new GwtXmlModule(root, projectPackage.getElementName(), formattedName);
       gwtXmlModule.createFile(entryPoint.getType(), ginjector.getType());
 
       // Server package
-      IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName()
-          + ".server", false, monitor);
+      IPackageFragment serverPackage = root.createPackageFragment(projectPackage.getElementName() + ".server", false,
+          monitor);
 
       // Guice package
-      IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName()
-          + ".guice", false, monitor);
+      IPackageFragment guicePackage = root.createPackageFragment(serverPackage.getElementName() + ".guice", false,
+          monitor);
 
       String gwtVersion = GWTPreferences.getDefaultRuntime().getVersion();
 
-      ServletModule servletModule = new ServletModule(root, guicePackage.getElementName(),
-          "DispatchServletModule", sourceWriterFactory);
+      ServletModule servletModule = new ServletModule(root, guicePackage.getElementName(), "DispatchServletModule",
+          sourceWriterFactory);
       servletModule.createConfigureServletsMethod(gwtVersion);
 
-      GuiceHandlerModule handlerModule = new GuiceHandlerModule(root, guicePackage.getElementName(),
-          "ServerModule", sourceWriterFactory);
+      GuiceHandlerModule handlerModule = new GuiceHandlerModule(root, guicePackage.getElementName(), "ServerModule",
+          sourceWriterFactory);
       handlerModule.createConfigureHandlersMethod();
 
-      GuiceServletContextListener guiceServletContextListener = new GuiceServletContextListener(
-          root, guicePackage.getElementName(), "GuiceServletConfig", sourceWriterFactory);
-      guiceServletContextListener.createInjectorGetterMethod(handlerModule.getType(),
-          servletModule.getType());
+      GuiceServletContextListener guiceServletContextListener = new GuiceServletContextListener(root,
+          guicePackage.getElementName(), "GuiceServletConfig", sourceWriterFactory);
+      guiceServletContextListener.createInjectorGetterMethod(handlerModule.getType(), servletModule.getType());
 
       // Shared package
       root.createPackageFragment(projectPackage.getElementName() + ".shared", false, monitor);
 
       // Basic sample creation
       if (page.isSample()) {
-          BasicSampleBuilder sampleBuilder = new BasicSampleBuilder(root, projectPackage, sourceWriterFactory);
-          sampleBuilder.createSample(ginjector, presenterModule, tokens, defaultPlace, handlerModule);
+        BasicSampleBuilder sampleBuilder = new BasicSampleBuilder(root, projectPackage, sourceWriterFactory);
+        sampleBuilder.createSample(ginjector, presenterModule, tokens, defaultPlace, handlerModule);
       }
-      
+
       // Commit
       presenterModule.commit();
       ginjector.commit();
@@ -394,9 +384,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       // Launch Config
       monitor.subTask("Launch config creation");
 
-      ILaunchConfigurationWorkingCopy launchConfig = WebAppLaunchUtil
-          .createLaunchConfigWorkingCopy(project.getName(), project,
-              WebAppLaunchUtil.determineStartupURL(project, false), false);
+      ILaunchConfigurationWorkingCopy launchConfig = WebAppLaunchUtil.createLaunchConfigWorkingCopy(project.getName(),
+          project, WebAppLaunchUtil.determineStartupURL(project, false), false);
       ILaunchGroup[] groups = DebugUITools.getLaunchGroups();
 
       ArrayList groupsNames = new ArrayList();
@@ -411,17 +400,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       launchConfig.setAttribute("org.eclipse.debug.ui.favoriteGroups", groupsNames);
       launchConfig.doSave();
 
-      project.getProject().setPersistentProperty(
-          new QualifiedName(Activator.PLUGIN_ID, "nametokens"),
+      project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "nametokens"),
           tokens.getType().getFullyQualifiedName());
-      project.getProject().setPersistentProperty(
-          new QualifiedName(Activator.PLUGIN_ID, "ginjector"),
+      project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "ginjector"),
           ginjector.getType().getFullyQualifiedName());
-      project.getProject().setPersistentProperty(
-          new QualifiedName(Activator.PLUGIN_ID, "presentermodule"),
+      project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "presentermodule"),
           presenterModule.getType().getFullyQualifiedName());
-      project.getProject().setPersistentProperty(
-          new QualifiedName(Activator.PLUGIN_ID, "handlermodule"),
+      project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "handlermodule"),
           handlerModule.getType().getFullyQualifiedName());
       project.getProject().setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "action"),
           "com.gwtplatform.dispatch.shared.ActionImpl");
@@ -434,10 +419,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
       monitor.worked(1);
     } catch (Exception e) {
-      IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "An unexpected error has happened. Close the wizard and retry.", e);
-        
+      IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+          "An unexpected error has happened. Close the wizard and retry.", e);
+
       ErrorDialog.openError(getShell(), null, null, status);
-        
+
       return false;
     }
 
@@ -448,19 +434,23 @@ public class NewProjectWizard extends Wizard implements INewWizard {
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
-  
+
   /**
-   * Convert an Eclipse project name into a valid Java class name.  This method does not work with Unicode;
-   * the fix for this involves using <code>codePointAt</code> instead of <code>charAt</code> but I am going
-   * to leave this for somebody else to tackle.
-   *
-   * @param projectName the Eclipse project name to convert
-   * @param remove <code>true</code> remove invalid characters, <code>false</code> replace them by _
+   * Convert an Eclipse project name into a valid Java class name. This method
+   * does not work with Unicode; the fix for this involves using
+   * <code>codePointAt</code> instead of <code>charAt</code> but I am going to
+   * leave this for somebody else to tackle.
+   * 
+   * @param projectName
+   *          the Eclipse project name to convert
+   * @param remove
+   *          <code>true</code> remove invalid characters, <code>false</code>
+   *          replace them by _
    * @return a valid Java class name based on the given project name
    */
   private String projectNameToClassName(String projectName, boolean remove) {
     StringBuffer buffer = new StringBuffer(projectName);
-  
+
     while (!Character.isJavaIdentifierStart(buffer.charAt(0))) {
       // Java identifiers can't start with a non-letter
       if (remove) {
@@ -468,13 +458,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
       } else {
         buffer.setCharAt(0, '_');
       }
-    } 
-    
+    }
+
     if (Character.isLowerCase(buffer.charAt(0))) {
       // By convention, Java class names start with a capital letter.
       buffer.setCharAt(0, Character.toUpperCase(buffer.charAt(0)));
     }
-    
+
     for (int i = 1; i < buffer.length(); ++i) {
       if (!Character.isJavaIdentifierPart(buffer.charAt(i))) {
         // Delete or replace any invalid characters.
@@ -485,8 +475,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         }
       }
     }
-  
+
     return buffer.toString();
   }
-  
+
 }
