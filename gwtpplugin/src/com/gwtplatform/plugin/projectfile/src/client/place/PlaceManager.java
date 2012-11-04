@@ -39,7 +39,7 @@ public class PlaceManager extends ProjectClass {
 
   private static final String C_PLACE_MANAGER_IMPL = "com.gwtplatform.mvp.client.proxy.PlaceManagerImpl";
   private static final String C_PLACE_REQUEST = "com.gwtplatform.mvp.client.proxy.PlaceRequest";
-  private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+  private static final String I_EVENT_BUS = "com.google.web.bindery.event.shared.EventBus";
   private static final String I_TOKEN_FORMATTER = "com.gwtplatform.mvp.client.proxy.TokenFormatter";
   private static final String A_INJECT = "com.google.inject.Inject";
 

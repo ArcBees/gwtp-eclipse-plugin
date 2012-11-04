@@ -138,7 +138,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
   /**
    * TODO extract this method into several smaller methods
-   * TODo during debugging markers are thrown for some reason, get rid of these while debugging
+   * TODO during debugging markers are thrown for some reason, get rid of these while debugging
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected boolean finish(IProgressMonitor desiredMonitor) {
