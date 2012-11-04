@@ -32,7 +32,7 @@ public class VersionTool {
   public static final String AOPALLIANCE = "aopalliance";
 
   public static final String GIN_1_5_pre = "gin-1.5-post-gwt-2.2";
-  public static final String GIN_1_5 = "gin-1.5-post-gwt-2.2";
+  public static final String GIN_2_0 = "gin-2.0";
 
   public static final String GUICE_3 = "guice-3.0";
 
@@ -41,7 +41,7 @@ public class VersionTool {
   public static final String GUICE_SERVLET_3 = "guice-servlet-3.0";
 
   public static final String GWTP_5 = "gwtp-all-0.5";
-  public static final String GWTP_6 = "gwtp-all-0.6";
+  public static final String GWTP_7 = "gwtp-all-0.7";
 
   public static final String JAVAC_INJECT = "javax.inject";
 
@@ -60,10 +60,10 @@ public class VersionTool {
         libs[1] = new Jar(project, libPath, GWTP_5);
         libs[1].createFile();
       } else {
-        libs[0] = new Jar(project, libPath, GIN_1_5);
+        libs[0] = new Jar(project, libPath, GIN_2_0);
         libs[0].createFile();
 
-        libs[1] = new Jar(project, libPath, GWTP_6);
+        libs[1] = new Jar(project, libPath, GWTP_7);
         libs[1].createFile();
       }
 
