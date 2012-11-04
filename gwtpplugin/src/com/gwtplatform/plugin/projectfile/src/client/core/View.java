@@ -34,7 +34,7 @@ import com.gwtplatform.plugin.projectfile.ProjectClass;
  */
 public class View extends ProjectClass {
 
-  private static final String C_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+  private static final String C_EVENT_BUS = "com.google.web.bindery.event.shared.EventBus";
   private static final String C_VIEW_IMPL = "com.gwtplatform.mvp.client.ViewImpl";
   private static final String C_POPUP_VIEW_IMPL = "com.gwtplatform.mvp.client.PopupViewImpl";
   private static final String C_WIDGET = "com.google.gwt.user.client.ui.Widget";

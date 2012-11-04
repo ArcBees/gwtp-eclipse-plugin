@@ -44,7 +44,7 @@ public class SourceWriterFactory {
    * @return The new {@link SourceWriter}.
    */
   public SourceWriter createForNewClass() {
-    return new SourceWriter(CodeFormatter.K_COMPILATION_UNIT);
+    return new SourceWriter(CodeFormatter.K_CLASS_BODY_DECLARATIONS);
   }
 
   /**

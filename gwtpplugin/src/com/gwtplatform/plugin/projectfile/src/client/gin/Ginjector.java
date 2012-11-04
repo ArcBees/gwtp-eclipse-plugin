@@ -39,7 +39,7 @@ public class Ginjector extends ProjectClass {
   private static final String I_ASYNC_PROVIDER = "com.google.gwt.inject.client.AsyncProvider";
   private static final String I_PLACE_MANAGER = "com.gwtplatform.mvp.client.proxy.PlaceManager";
   private static final String A_GIN_MODULES = "com.google.gwt.inject.client.GinModules";
-  private static final String I_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+  private static final String I_EVENT_BUS = "com.google.web.bindery.event.shared.EventBus";
   private static final String I_GINJECTOR = "com.google.gwt.inject.client.Ginjector";
 
   private final IType presenterModule;

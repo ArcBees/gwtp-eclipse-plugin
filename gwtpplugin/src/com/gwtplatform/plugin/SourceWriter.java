@@ -146,8 +146,7 @@ public class SourceWriter {
   @Override
   public String toString() {
     String source = stringWriter.toString();
-    TextEdit textEdit = codeFormatter.format(formatKind, source, 0, source.length(),
-        indentationLevel, null);
+    TextEdit textEdit = codeFormatter.format(formatKind, source, 0, source.length(), indentationLevel, null);
     return prefix + applyTextEdit(source, textEdit) + suffix;
   }
 
