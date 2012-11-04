@@ -11,7 +11,7 @@ Eclipse Update Site: https://github.com/ArcBees/gwtp-eclipse-plugin/raw/master/u
 https://github.com/ArcBees/GWTP - A complete model-view-presenter framework to simplify your next GWT project. 
 
 ##News
-* .7 integration is in the works which will include the EventBus upgrade. Nov 2012
+11/2012 .7 integration is in the works which will include the EventBus upgrade.
 
 ##Introduction
 This page describes the GWTP Eclipse Plugin that provides simple wizard to create new GWTP project and 
