@@ -11,7 +11,7 @@ Eclipse Update Site: https://github.com/ArcBees/gwtp-eclipse-plugin/raw/master/u
 https://github.com/ArcBees/GWTP - A complete model-view-presenter framework to simplify your next GWT project. 
 
 ##News
-- 11/06/2012 Upgrade eclipse plugin so it default to use 0.7 GWTP. 
+- 11/06/2012 Upgraded eclipse plugin so uses 0.7 GWTP by default. 
 - 11/01/2012 .7 integration is in the works which will include the EventBus upgrade.
 
 ##Introduction
