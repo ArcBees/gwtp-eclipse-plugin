@@ -23,27 +23,22 @@ import com.google.gwt.eclipse.core.preferences.GWTPreferences;
 import com.gwtplatform.plugin.projectfile.war.Jar;
 
 /**
- *
  * @author Michael Renaud
- *
  */
 public class VersionTool {
-
-  public static final String AOPALLIANCE = "aopalliance";
-
+  @Deprecated
   public static final String GIN_1_5_pre = "gin-1.5-post-gwt-2.2";
-  public static final String GIN_1_5 = "gin-1.5-post-gwt-2.2";
+  public static final String GIN_2_0 = "gin-2.0";
 
   public static final String GUICE_3 = "guice-3.0";
-
   public static final String GUICE_ASSISTEDINJECT_3 = "guice-assistedinject-3.0";
-
   public static final String GUICE_SERVLET_3 = "guice-servlet-3.0";
-
-  public static final String GWTP_5 = "gwtp-all-0.5";
-  public static final String GWTP_6 = "gwtp-all-0.6";
-
   public static final String JAVAC_INJECT = "javax.inject";
+  public static final String AOPALLIANCE = "aopalliance";
+  
+  @Deprecated
+  public static final String GWTP_5 = "gwtp-all-0.5";
+  public static final String GWTP_7 = "gwtp-all-0.7";
 
   public static Jar[] getLibs(IProject project, IPath libPath) {
     Jar[] libs = null;
@@ -60,10 +55,10 @@ public class VersionTool {
         libs[1] = new Jar(project, libPath, GWTP_5);
         libs[1].createFile();
       } else {
-        libs[0] = new Jar(project, libPath, GIN_1_5);
+        libs[0] = new Jar(project, libPath, GIN_2_0);
         libs[0].createFile();
 
-        libs[1] = new Jar(project, libPath, GWTP_6);
+        libs[1] = new Jar(project, libPath, GWTP_7);
         libs[1].createFile();
       }
 
@@ -90,11 +85,8 @@ public class VersionTool {
   /**
    * Compare versions. Return -1 if v1 < v2, 0 if v1 == v2 and 1 if v1 > v2.
    *
-   * @param v1
-   *          Client version
-   * @param v2
-   *          Comparison
-   * @return
+   * @param v1 Client version
+   * @param v2 Comparison
    */
   public static int compare(String v1, String v2) {
     String[] split1 = v1.split("\\.");

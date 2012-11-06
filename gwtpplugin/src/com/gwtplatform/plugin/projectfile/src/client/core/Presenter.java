@@ -43,7 +43,7 @@ public class Presenter extends ProjectClass {
   private static final String A_USE_GATEKEEPER = "com.gwtplatform.mvp.client.annotations.UseGatekeeper";
   private static final String C_PRESENTER = "com.gwtplatform.mvp.client.Presenter";
   private static final String C_PRESENTER_WIDGET = "com.gwtplatform.mvp.client.PresenterWidget";
-  private static final String C_EVENT_BUS = "com.google.gwt.event.shared.EventBus";
+  private static final String C_EVENT_BUS = "com.google.web.bindery.event.shared.EventBus";
   private static final String A_INJECT = "com.google.inject.Inject";
 
   private final boolean isPresenterWidget;

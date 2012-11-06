@@ -60,8 +60,7 @@ public class WebXml extends ProjectFile {
     contents += "\t\tfilter(String).through(Class<? extends Filter)\n";
     contents += "\t-->\n";
     contents += "\t<listener>\n";
-    contents += "\t\t<listener-class>" + guiceServletContextListener.getFullyQualifiedName()
-        + "</listener-class>\n";
+    contents += "\t\t<listener-class>" + guiceServletContextListener.getFullyQualifiedName() + "</listener-class>\n";
     contents += "\t</listener>\n\n";
 
     contents += "\t<filter>\n";
