@@ -612,7 +612,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
       public void widgetSelected(SelectionEvent e) {
     	  IType selection = chooseAnnotation();
     	  if (selection != null) {
-    		  contentSlot.setText(selection.getFullyQualifiedName('.'));
+    		  annotation.setText(selection.getFullyQualifiedName('.'));
     	  }
       }
 
@@ -620,7 +620,7 @@ public class NewPresenterWizardPage extends NewTypeWizardPage {
       public void widgetDefaultSelected(SelectionEvent e) {
     	  IType selection = chooseAnnotation();
     	  if (selection != null) {
-    		  contentSlot.setText(selection.getFullyQualifiedName('.'));
+    		  annotation.setText(selection.getFullyQualifiedName('.'));
     	  }
       }
     });
