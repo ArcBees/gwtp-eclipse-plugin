@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 IMAGEM Solutions TI santé
+ * Copyright 2011 IMAGEM Solutions TI sant
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
-import com.gwtplatform.plugin.wizard.MergeLocalesWizard;
-import com.gwtplatform.plugin.wizard.NewActionWizard;
-import com.gwtplatform.plugin.wizard.NewEventWizard;
-import com.gwtplatform.plugin.wizard.NewModelWizard;
-import com.gwtplatform.plugin.wizard.NewPresenterWizard;
-import com.gwtplatform.plugin.wizard.NewProjectWizard;
+import com.gwtplatform.plugin.wizard.mergelocales.MergeLocalesWizard;
+import com.gwtplatform.plugin.wizard.newaction.NewActionWizard;
+import com.gwtplatform.plugin.wizard.newevent.NewEventWizard;
+import com.gwtplatform.plugin.wizard.newmodel.NewModelWizard;
+import com.gwtplatform.plugin.wizard.newpresenter.NewPresenterWizard;
+import com.gwtplatform.plugin.wizard.newproject.NewProjectWizard;
 
 /**
  * The entry point for defining the GWTP pull-down menu.
- *
+ * 
  * @author Michael Renaud
  */
 public class MenuAction implements IWorkbenchWindowPulldownDelegate {
