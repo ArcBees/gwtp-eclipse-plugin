@@ -27,3 +27,8 @@ It is best viewed in full screen. (Or watch it on [YouTube](http://www.youtube.c
 
 ##Acknowledgements
 The initial version of the GWTP Eclipse Plugin was contributed by Michael Renaud and Imagem Solutions.
+
+##Thanks to
+[![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
+
+[![IntelliJ](https://lh6.googleusercontent.com/--QIIJfKrjSk/UJJ6X-UohII/AAAAAAAAAVM/cOW7EjnH778/s800/banner_IDEA.png)](http://www.jetbrains.com/idea/index.html)
