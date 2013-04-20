@@ -74,7 +74,7 @@
       </category>
       <wizard
             category="com.gwtplatform.plugin"
-            class="com.gwtplatform.plugin.wizard.NewProjectWizard"
+            class="com.gwtplatform.plugin.wizard.newproject.NewProjectWizard"
             icon="icons/gwtp-plugin.png"
             id="com.gwtplatform.plugin.wizard.NewProjectWizard"
             name="%wizard.name"
@@ -82,7 +82,7 @@
       </wizard>
       <wizard
             category="com.gwtplatform.plugin"
-            class="com.gwtplatform.plugin.wizard.NewActionWizard"
+            class="com.gwtplatform.plugin.wizard.newaction.NewActionWizard"
             icon="icons/gwtp-plugin.png"
             id="com.gwtplatform.plugin.wizard.NewActionWizard"
             name="%wizard.name.0"
@@ -90,7 +90,7 @@
       </wizard>
       <wizard
             category="com.gwtplatform.plugin"
-            class="com.gwtplatform.plugin.wizard.NewEventWizard"
+            class="com.gwtplatform.plugin.wizard.newevent.NewEventWizard"
             icon="icons/gwtp-plugin.png"
             id="com.gwtplatform.plugin.wizard.NewEventWizard"
             name="%wizard.name.1"
@@ -98,7 +98,7 @@
       </wizard>
       <wizard
             category="com.gwtplatform.plugin"
-            class="com.gwtplatform.plugin.wizard.NewModelWizard"
+            class="com.gwtplatform.plugin.wizard.newmodel.NewModelWizard"
             icon="icons/gwtp-plugin.png"
             id="com.gwtplatform.plugin.wizard.NewModelWizard"
             name="%wizard.name.2"
@@ -106,7 +106,7 @@
       </wizard>
       <wizard
             category="com.gwtplatform.plugin"
-            class="com.gwtplatform.plugin.wizard.NewPresenterWizard"
+            class="com.gwtplatform.plugin.wizard.newpresenter.NewPresenterWizard"
             icon="icons/gwtp-plugin.png"
             id="com.gwtplatform.plugin.wizard.NewPresenterWizard"
             name="%wizard.name.3"
