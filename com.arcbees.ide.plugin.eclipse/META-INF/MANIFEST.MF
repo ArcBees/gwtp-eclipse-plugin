@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: GWTP Eclipse Plugin
+Bundle-SymbolicName: com.arcbees.ide.plugin.eclipse; singleton:=true
+Bundle-Version: 1.0.1.qualifier
+Bundle-Activator: com.arcbees.ide.plugin.eclipse.Activator
+Bundle-Vendor: ARCBEES
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
