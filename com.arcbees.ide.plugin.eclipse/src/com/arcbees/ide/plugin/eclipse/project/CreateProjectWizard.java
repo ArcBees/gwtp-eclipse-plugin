@@ -26,6 +26,7 @@ public class CreateProjectWizard extends Wizard {
     @Override
     public void addPages() {
         addPage(new CreateProjectPage());
+        addPage(new SelectArchetypePage());
     }
 
     @Override
