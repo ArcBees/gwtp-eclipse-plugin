@@ -8,6 +8,8 @@ import org.eclipse.wb.swt.ResourceManager;
 public class CreateProjectPage extends WizardPage {
     public CreateProjectPage() {
         super("wizardPageCreateProject");
+        setMessage("Create a GWT-Platform project.");
+        setPageComplete(false);
         
         setImageDescriptor(ResourceManager.getPluginImageDescriptor("com.arcbees.ide.plugin.eclipse", "icons/logo.png"));
         setTitle("GWTP Project Creation");
@@ -15,7 +17,9 @@ public class CreateProjectPage extends WizardPage {
     }
 
     public void createControl(Composite parent) {
+        parent.setTouchEnabled(true);
         Composite container = new Composite(parent, SWT.NULL);
+        container.setTouchEnabled(true);
 
         setControl(container);
     }
