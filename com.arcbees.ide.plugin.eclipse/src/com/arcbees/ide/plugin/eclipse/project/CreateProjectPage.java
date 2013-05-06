@@ -235,16 +235,14 @@ public class CreateProjectPage extends WizardPage {
             Binding b = (Binding) o;
             IObservableValue status = b.getValidationStatus();
             IStatus istatus = (IStatus) status.getValue();
-
+            System.out.println("isStatus=" + istatus);
             if (!istatus.isOK()) {
                 success = false;
             }
         }
 
         // All statuses passed, enable next button.
-        if (success) {
-            setPageComplete(true);
-        }
+        setPageComplete(success);
     }
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();

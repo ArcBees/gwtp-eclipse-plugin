@@ -5,9 +5,10 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * Name validator. 
+ * Name validator.
  * 
- * Validates: Start with capital letter and then letters, spaces and numbers can follow.
+ * Validates: Start with capital letter and then letters, spaces and numbers can
+ * follow.
  */
 public class NameValidator implements IValidator {
     @Override
@@ -19,13 +20,15 @@ public class NameValidator implements IValidator {
                 return ValidationStatus.ok();
             } else {
                 String message = "";
-                if (name.matches("[a-z].*")) {
+                if (name.isEmpty()) {
+                    message = "Name is empty.";
+                } else if (name.matches("[a-z].*")) {
                     message = "Name must start with a capital letter.";
                 } else {
-                    message = "Name must start with a capital letter. " +
-                    		"After the capital, it can contain letters, spaces and numbers.";
+                    message = "Name must start with a capital letter. "
+                            + "After the capital, it can contain letters, spaces and numbers.";
                 }
-                ValidationStatus.error(message);
+                return ValidationStatus.error(message);
             }
         }
         return ValidationStatus.error("Name is not a String.");
