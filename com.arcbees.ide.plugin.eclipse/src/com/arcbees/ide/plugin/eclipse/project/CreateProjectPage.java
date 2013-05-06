@@ -16,26 +16,44 @@
 
 package com.arcbees.ide.plugin.eclipse.project;
 
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
+import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+
 public class CreateProjectPage extends WizardPage {
+    private DataBindingContext m_bindingContext;
     private Text projectName;
     private Text packageName;
     private Text workspacePath;
     private Text moduleName;
     private Text groupId;
     private Text artifactId;
+    private ProjectConfigModel projectConfigModel;
+    private Button btnWorkspaceBrowse;
+    
     public CreateProjectPage() {
         super("wizardPageCreateProject");
         setMessage("Create a GWT-Platform project.");
@@ -46,7 +64,9 @@ public class CreateProjectPage extends WizardPage {
         setDescription("Create a GWT-Platform project.");
     }
 
-    public void createControl(Composite parent) {
+    public void createControl(final Composite parent) {
+        projectConfigModel = new ProjectConfigModel();
+        
         parent.setTouchEnabled(true);
         Composite container = new Composite(parent, SWT.NULL);
         container.setTouchEnabled(true);
@@ -58,6 +78,12 @@ public class CreateProjectPage extends WizardPage {
         lblProjectName.setText("Project Name: 'My Project'");
         
         projectName = new Text(container, SWT.BORDER);
+        projectName.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                checkProjectName();
+            }
+        });
         GridData gd_projectName = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
         gd_projectName.widthHint = 516;
         projectName.setLayoutData(gd_projectName);
@@ -104,13 +130,22 @@ public class CreateProjectPage extends WizardPage {
         grpLocation.setText("Location");
         grpLocation.setLayout(new GridLayout(2, false));
         
-        Button btnPutInCustom = new Button(grpLocation, SWT.CHECK);
-        btnPutInCustom.addSelectionListener(new SelectionAdapter() {
+        Button cbCustomLocation = new Button(grpLocation, SWT.CHECK);
+        cbCustomLocation.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                Button cb = (Button) e.getSource();
+                boolean selected = cb.getSelection();
+                workspacePath.setEnabled(selected);
+                btnWorkspaceBrowse.setEnabled(selected);
+                
+                // Reset workspace path when disabled
+                if (!selected) {
+                    checkProjectName();
+                }
             }
         });
-        btnPutInCustom.setText("Put project in custom location:");
+        cbCustomLocation.setText("Put project in custom location:");
         new Label(grpLocation, SWT.NONE);
         
         workspacePath = new Text(grpLocation, SWT.BORDER);
@@ -119,8 +154,77 @@ public class CreateProjectPage extends WizardPage {
         workspacePath.setLayoutData(gd_workspacePath);
         workspacePath.setEnabled(false);
         
-        Button btnWorkspaceBrowse = new Button(grpLocation, SWT.NONE);
+        btnWorkspaceBrowse = new Button(grpLocation, SWT.NONE);
+        btnWorkspaceBrowse.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                DirectoryDialog dirDialog = new DirectoryDialog(parent.getShell());
+                dirDialog.setText("Select a new project directory");
+                String selectedDir = dirDialog.open();
+                workspacePath.setText(selectedDir);
+            }
+        });
         btnWorkspaceBrowse.setEnabled(false);
         btnWorkspaceBrowse.setText("Browse");
+        m_bindingContext = initDataBindings();
+    }
+    
+    protected void checkProjectName() {
+        String name = projectName.getText().trim();
+        
+        // No zero length property names
+        if (name.trim().length() == 0) {
+            return;
+        }
+        
+        // Pre-setup the project for checking
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+        
+        if (project.exists()) {
+            setMessage("The '" + name + "' project name already exists.", IMessageProvider.ERROR);
+        } else {
+            setMessage(null);
+        }
+        
+        // Convert spaces to file friendly characters
+        name = name.replace(" ", "_");
+        
+        // Reflect the projects workspace path with the created project name
+        String basePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+        basePath += "/" + name;
+        workspacePath.setText(basePath);
+    }
+
+    /**
+     * Window builder generated...
+     */
+    protected DataBindingContext initDataBindings() {
+        DataBindingContext bindingContext = new DataBindingContext();
+        //
+        IObservableValue observeTextProjectNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(projectName);
+        IObservableValue bytesProjectConfigModelgetProjectNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getProjectName());
+        bindingContext.bindValue(observeTextProjectNameObserveWidget, bytesProjectConfigModelgetProjectNameObserveValue, null, null);
+        //
+        IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
+        IObservableValue bytesProjectConfigModelgetPackageNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getPackageName());
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesProjectConfigModelgetPackageNameObserveValue, null, null);
+        //
+        IObservableValue observeTextModuleNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(moduleName);
+        IObservableValue bytesProjectConfigModelgetModuleNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getModuleName());
+        bindingContext.bindValue(observeTextModuleNameObserveWidget, bytesProjectConfigModelgetModuleNameObserveValue, null, null);
+        //
+        IObservableValue observeTextGroupIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(groupId);
+        IObservableValue bytesProjectConfigModelgetGroupIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getGroupId());
+        bindingContext.bindValue(observeTextGroupIdObserveWidget, bytesProjectConfigModelgetGroupIdObserveValue, null, null);
+        //
+        IObservableValue observeTextArtifactIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(artifactId);
+        IObservableValue bytesProjectConfigModelgetArtifactIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getArtifactId());
+        bindingContext.bindValue(observeTextArtifactIdObserveWidget, bytesProjectConfigModelgetArtifactIdObserveValue, null, null);
+        //
+        IObservableValue observeTextWorkspacePathObserveWidget = WidgetProperties.text(SWT.Modify).observe(workspacePath);
+        IObservableValue bytesProjectConfigModelgetWorkspacePathObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getWorkspacePath());
+        bindingContext.bindValue(observeTextWorkspacePathObserveWidget, bytesProjectConfigModelgetWorkspacePathObserveValue, null, null);
+        //
+        return bindingContext;
     }
 }

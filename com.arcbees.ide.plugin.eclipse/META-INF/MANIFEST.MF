@@ -6,6 +6,13 @@ Bundle-Version: 1.0.1.qualifier
 Bundle-Activator: com.arcbees.ide.plugin.eclipse.Activator
 Bundle-Vendor: ARCBEES
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.property,
+ org.eclipse.jface.databinding,
+ com.ibm.icu,
+ org.eclipse.core.resources;bundle-version="3.8.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
