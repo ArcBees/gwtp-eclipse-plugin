@@ -25,10 +25,10 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,8 +40,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -180,6 +178,7 @@ public class CreateProjectPage extends WizardPage {
         // Pre-setup the project for checking
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
         
+        // Display error when project exists or remove error when it doesn't
         if (project.exists()) {
             setMessage("The '" + name + "' project name already exists.", IMessageProvider.ERROR);
         } else {
