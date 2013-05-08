@@ -18,18 +18,26 @@ package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import org.eclipse.jface.wizard.Wizard;
 
+import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
+
 public class CreateProjectWizard extends Wizard {
     private CreateProjectPage createProjectPage;
     private SelectArchetypePage selectArchetypePage;
+    private ProjectConfigModel projectConfigModel;
 
     public CreateProjectWizard() {
+        super();
+        
+        setNeedsProgressMonitor(true);
         setWindowTitle("Create GWTP Project");
     }
 
     @Override
     public void addPages() {
-        createProjectPage = new CreateProjectPage();
-        selectArchetypePage = new SelectArchetypePage();
+        projectConfigModel = new ProjectConfigModel();
+        
+        createProjectPage = new CreateProjectPage(projectConfigModel);
+        selectArchetypePage = new SelectArchetypePage(projectConfigModel);
         
         addPage(createProjectPage);
         addPage(selectArchetypePage);

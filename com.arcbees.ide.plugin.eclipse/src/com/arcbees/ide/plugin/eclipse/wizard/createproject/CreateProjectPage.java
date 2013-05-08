@@ -63,8 +63,11 @@ public class CreateProjectPage extends WizardPage {
     private ProjectConfigModel projectConfigModel;
     private Button btnWorkspaceBrowse;
 
-    public CreateProjectPage() {
+    public CreateProjectPage(ProjectConfigModel projectConfigModel) {
         super("wizardPageCreateProject");
+        
+        this.projectConfigModel = projectConfigModel;
+        
         setMessage("Create a GWT-Platform project.");
         setPageComplete(false);
 
@@ -74,8 +77,6 @@ public class CreateProjectPage extends WizardPage {
     }
 
     public void createControl(final Composite parent) {
-        projectConfigModel = new ProjectConfigModel();
-
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
