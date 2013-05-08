@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.arcbees.ide.plugin.eclipse.project;
+package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import org.eclipse.jface.wizard.Wizard;
 

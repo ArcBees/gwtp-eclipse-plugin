@@ -1,4 +1,4 @@
-package com.arcbees.ide.plugin.eclipse.project;
+package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
