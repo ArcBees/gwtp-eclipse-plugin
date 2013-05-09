@@ -1,5 +1,8 @@
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
@@ -12,8 +15,17 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import com.arcbees.ide.plugin.eclipse.domain.Archetype;
+import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.RestAssured;
 
 public class SelectArchetypePage extends WizardPage {
@@ -55,14 +67,52 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnTags = new TableColumn(table, SWT.NONE);
         tblclmnTags.setWidth(325);
         tblclmnTags.setText("Tags");
-
-        fetchArchetypes();
     }
 
-    private void fetchArchetypes() {
-        List<Archetype> archetypes = RestAssured.given().expect().when().get(DIRECTORY_URL)
-                .jsonPath().getList("items");
+    private void fetchArchetypes(List<Archetype> archetypes ) {
+        String json = RestAssured.given().expect().when().get(DIRECTORY_URL).asString();
+        
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+          public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+              throws JsonParseException {
+            return new Date(json.getAsJsonPrimitive().getAsLong());
+          }
+        });
+        gsonBuilder.registerTypeAdapter(ArchetypeCollection.class, new JsonDeserializer<ArchetypeCollection>() {
+          public ArchetypeCollection deserialize(JsonElement json, Type typeOft, JsonDeserializationContext context)
+              throws JsonParseException {
+            JsonObject parentJson = json.getAsJsonObject();
+            
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+              public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                  throws JsonParseException {
+                return new Date(json.getAsJsonPrimitive().getAsLong());
+              }
+            });
+            Gson gson = gsonBuilder.create();
+            
+            ArchetypeCollection parent = gson.fromJson(json, ArchetypeCollection.class);
+            List<Archetype> archetypes = null;
 
+            if (parentJson.get("items").isJsonArray()) {
+              JsonElement itemsJson = parentJson.get("items");
+              archetypes = gson.fromJson(itemsJson, new TypeToken<List<Archetype>>() {
+              }.getType());
+            } else {
+              Archetype single = gson.fromJson(parentJson.get("items"), Archetype.class);
+              archetypes = new ArrayList<Archetype>();
+              archetypes.add(single);
+            }
+            parent.setArchetypes(archetypes);
+            return parent;
+          }
+        });
+
+        Gson gson = gsonBuilder.create();
+        ArchetypeCollection ac = gson.fromJson(json, ArchetypeCollection.class);        
+        
         for (Archetype archetype : archetypes) {
             TableItem item = new TableItem(table, SWT.NONE);
             item.setText(0, getKey(archetype.getKey()));
