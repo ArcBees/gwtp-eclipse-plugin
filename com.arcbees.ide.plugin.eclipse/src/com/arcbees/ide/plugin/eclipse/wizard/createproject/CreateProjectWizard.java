@@ -24,6 +24,7 @@ public class CreateProjectWizard extends Wizard {
     private CreateProjectPage createProjectPage;
     private SelectArchetypePage selectArchetypePage;
     private ProjectConfigModel projectConfigModel;
+    private GenerateProjectPage generateProjectPage;
 
     public CreateProjectWizard() {
         super();
@@ -38,9 +39,11 @@ public class CreateProjectWizard extends Wizard {
         
         createProjectPage = new CreateProjectPage(projectConfigModel);
         selectArchetypePage = new SelectArchetypePage(projectConfigModel);
+        generateProjectPage = new GenerateProjectPage(projectConfigModel);
         
         addPage(createProjectPage);
         addPage(selectArchetypePage);
+        addPage(generateProjectPage);
     }
 
     @Override

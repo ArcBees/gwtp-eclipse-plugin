@@ -224,8 +224,6 @@ public class CreateProjectPage extends WizardPage {
 
     /**
      * Check all the bindings validators for OK status.
-     * 
-     * TODO add validators to each field.
      */
     private void checkBindingValidationStatus() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
