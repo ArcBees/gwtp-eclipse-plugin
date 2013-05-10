@@ -7,6 +7,7 @@ public class ProjectConfigModel extends ModelObject {
     private String groupId;
     private String artifactId;
     private String workspacePath;
+    private Archetype archetypeSelected;
     
     public ProjectConfigModel() {
     }
@@ -59,6 +60,14 @@ public class ProjectConfigModel extends ModelObject {
         firePropertyChange("workspacePath", this.workspacePath, this.workspacePath = workspacePath);
     }
     
+    public Archetype getArchetypeSelected() {
+        return archetypeSelected;
+    }
+
+    public void seArchetypeSelected(Archetype archetypeSelected) {
+        firePropertyChange("archetypeSelected", this.archetypeSelected, this.archetypeSelected = archetypeSelected);
+    }
+    
     @Override
     public String toString() {
         String s = "{ ProjectConfigModel: ";
@@ -68,7 +77,9 @@ public class ProjectConfigModel extends ModelObject {
         s += "groupId=" + groupId + " ";
         s += "artifactId=" + artifactId + " ";
         s += "workspacePath=" + workspacePath + " ";
+        s += "archetypeSelected=" + archetypeSelected + " ";
         s += " }"; 
         return s;
     }
+
 }
