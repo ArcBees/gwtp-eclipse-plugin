@@ -16,10 +16,8 @@
 
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -29,7 +27,10 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -41,36 +42,25 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.arcbees.ide.plugin.eclipse.domain.Archetype;
-import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
 import com.arcbees.ide.plugin.eclipse.validators.ArchetypeSelectionValidator;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.mapper.factory.GsonObjectMapperFactory;
+import com.google.inject.Inject;
 
 public class SelectArchetypePage extends WizardPage {
     private DataBindingContext m_bindingContext;
-    private static final String DIRECTORY_URL = "https://project-directory.appspot.com/_ah/api/archetypeendpoint/v1/archetype";
-
     private ProjectConfigModel projectConfigModel;
     private Table table;
     private TableViewer tableViewer;
+    private FetchArchetypesMonitor fetchMonitor;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
         super("wizardPageSelectArchetype");
@@ -88,18 +78,60 @@ public class SelectArchetypePage extends WizardPage {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
-        fetchArchetypes();
+        runMonitor();
+    }
+    
+    private void runMonitor() {
+        Job job = new Job("Fetching Archetypes...") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                String doing = "Fetching Archetyes...";
+
+                monitor.beginTask(doing, 100);
+                fetchMonitor.beginTask(doing, 100);
+
+                boolean loading = true;
+                do {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(25);
+
+                        monitor.worked(1);
+                        fetchMonitor.worked(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        return Status.CANCEL_STATUS;
+                    }
+                } while (loading);
+
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+    
+    private void runFetch() {
+        Job job = new Job("Fetch Request") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+              
+              return Status.OK_STATUS;
+            }
+          };
+
+          // Start the Job
+          job.schedule(); 
     }
 
     public void createControl(Composite parent) {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
-        container.setLayout(new FillLayout(SWT.VERTICAL));
+        container.setLayout(new RowLayout(SWT.VERTICAL));
 
         tableViewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
         tableViewer.setContentProvider(ArrayContentProvider.getInstance());
         table = tableViewer.getTable();
+        table.setLayoutData(new RowData(567, 259));
         table.setLinesVisible(true);
         table.setHeaderVisible(true);
 
@@ -112,6 +144,8 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnTags = tableViewerColumn_1.getColumn();
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
+
+        fetchMonitor = new FetchArchetypesMonitor(container);
 
         tableViewerColumn.setLabelProvider(new ColumnLabelProvider() {
             @Override
@@ -149,88 +183,20 @@ public class SelectArchetypePage extends WizardPage {
                 System.out.println("selected archetype: " + archetypeSelected);
             }
         });
-        
+
         m_bindingContext = initDataBindings();
-        
+
         observeBindingChanges();
     }
 
-    /**
-     * TODO add to thread? 
-     * TODO deal with network connection 
-     * TODO deal with fetch timeout 
-     * TODO deal with fetch error
-     */
-    private void fetchArchetypes() {
-        initRestAssured();
-
-        ArchetypeCollection archetypeCollection = RestAssured.given().expect().when().get(DIRECTORY_URL)
-                .as(ArchetypeCollection.class);
-        List<Archetype> archetypes = archetypeCollection.getArchetypes();
-
-        tableViewer.setInput(archetypes);
-    }
-
-    private void initRestAssured() {
-        GsonObjectMapperFactory gsonFactory = new GsonObjectMapperFactory() {
-            public Gson create(Class claszz, String s) {
-                return createGsonBuilder().create();
-            }
-        };
-        ObjectMapperConfig mapperConfig = RestAssuredConfig.config().getObjectMapperConfig()
-                .gsonObjectMapperFactory(gsonFactory);
-        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(mapperConfig);
-    }
-
-    private GsonBuilder createGsonBuilder() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-            public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                    throws JsonParseException {
-                return new Date(json.getAsJsonPrimitive().getAsLong());
-            }
-        });
-        gsonBuilder.registerTypeAdapter(ArchetypeCollection.class, new JsonDeserializer<ArchetypeCollection>() {
-            public ArchetypeCollection deserialize(JsonElement json, Type typeOft, JsonDeserializationContext context)
-                    throws JsonParseException {
-                JsonObject parentJson = json.getAsJsonObject();
-
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                            throws JsonParseException {
-                        return new Date(json.getAsJsonPrimitive().getAsLong());
-                    }
-                });
-                Gson gson = gsonBuilder.create();
-
-                ArchetypeCollection parent = gson.fromJson(json, ArchetypeCollection.class);
-                List<Archetype> archetypes = null;
-
-                if (parentJson.get("items").isJsonArray()) {
-                    JsonElement itemsJson = parentJson.get("items");
-                    archetypes = gson.fromJson(itemsJson, new TypeToken<List<Archetype>>() {
-                    }.getType());
-                } else {
-                    Archetype single = gson.fromJson(parentJson.get("items"), Archetype.class);
-                    archetypes = new ArrayList<Archetype>();
-                    archetypes.add(single);
-                }
-                parent.setArchetypes(archetypes);
-                return parent;
-            }
-        });
-        return gsonBuilder;
-    }
-    
     private void observeBindingChanges() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
         for (Object o : bindings) {
             Binding binding = (Binding) o;
-            
+
             // Validator feedback control
             ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
-            
+
             binding.getTarget().addChangeListener(new IChangeListener() {
                 @Override
                 public void handleChange(ChangeEvent event) {
@@ -239,7 +205,7 @@ public class SelectArchetypePage extends WizardPage {
             });
         }
     }
-    
+
     /**
      * Check all the bindings validators for OK status.
      */
@@ -260,14 +226,18 @@ public class SelectArchetypePage extends WizardPage {
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
+
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
-        IObservableValue observeSingleSelectionIndexTableObserveWidget = WidgetProperties.singleSelectionIndex().observe(table);
-        IObservableValue keyProjectConfigModelgetArchetypeSelectedObserveValue = PojoProperties.value("key").observe(projectConfigModel.getArchetypeSelected());
+        IObservableValue observeSingleSelectionIndexTableObserveWidget = WidgetProperties.singleSelectionIndex()
+                .observe(table);
+        IObservableValue keyProjectConfigModelgetArchetypeSelectedObserveValue = PojoProperties.value("key").observe(
+                projectConfigModel.getArchetypeSelected());
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setBeforeSetValidator(new ArchetypeSelectionValidator());
-        bindingContext.bindValue(observeSingleSelectionIndexTableObserveWidget, keyProjectConfigModelgetArchetypeSelectedObserveValue, strategy, null);
+        bindingContext.bindValue(observeSingleSelectionIndexTableObserveWidget,
+                keyProjectConfigModelgetArchetypeSelectedObserveValue, strategy, null);
         //
         return bindingContext;
     }
