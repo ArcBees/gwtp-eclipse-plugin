@@ -50,10 +50,10 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.arcbees.ide.plugin.eclipse.domain.Archetype;
+import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
 import com.arcbees.ide.plugin.eclipse.validators.ArchetypeSelectionValidator;
-import com.google.inject.Inject;
 
 public class SelectArchetypePage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -61,6 +61,7 @@ public class SelectArchetypePage extends WizardPage {
     private Table table;
     private TableViewer tableViewer;
     private FetchArchetypesMonitor fetchMonitor;
+    private boolean loading;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
         super("wizardPageSelectArchetype");
@@ -79,8 +80,9 @@ public class SelectArchetypePage extends WizardPage {
         super.setVisible(visible);
 
         runMonitor();
+        runFetch();
     }
-    
+
     private void runMonitor() {
         Job job = new Job("Fetching Archetypes...") {
             @Override
@@ -90,7 +92,7 @@ public class SelectArchetypePage extends WizardPage {
                 monitor.beginTask(doing, 100);
                 fetchMonitor.beginTask(doing, 100);
 
-                boolean loading = true;
+                loading = true;
                 do {
                     try {
                         TimeUnit.MILLISECONDS.sleep(25);
@@ -99,6 +101,7 @@ public class SelectArchetypePage extends WizardPage {
                         fetchMonitor.worked(1);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        loading = false;
                         return Status.CANCEL_STATUS;
                     }
                 } while (loading);
@@ -108,18 +111,30 @@ public class SelectArchetypePage extends WizardPage {
         };
         job.schedule();
     }
-    
+
     private void runFetch() {
         Job job = new Job("Fetch Request") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
-              
-              return Status.OK_STATUS;
-            }
-          };
+                FetchArchetypes fetch = new FetchArchetypes();
+                ArchetypeCollection collection = fetch.fetchArchetypes();
+                if (collection != null) {
+                    final List<Archetype> archetypes = collection.getArchetypes();
+                    if (archetypes != null) {
+                        Display.getDefault().asyncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableViewer.setInput(archetypes);
+                            }
+                        });
+                    }
+                }
 
-          // Start the Job
-          job.schedule(); 
+                loading = false;
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
     }
 
     public void createControl(Composite parent) {
