@@ -74,4 +74,13 @@ public class FetchArchetypesMonitor implements IProgressMonitor {
             }
         });
     }
+
+    public void setVisible(final boolean visible) {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisible(visible);
+            }
+        });
+    }
 }

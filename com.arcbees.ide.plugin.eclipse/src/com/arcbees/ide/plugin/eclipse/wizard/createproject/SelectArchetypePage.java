@@ -73,17 +73,17 @@ public class SelectArchetypePage extends WizardPage {
     }
 
     /**
-     * TODO add loading spinner
+     * TODO cache results locally
      */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
+        fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }
 
-    // TODO show/hide progress bar
     private void runMonitor() {
         Job job = new Job("Fetching Archetypes...") {
             @Override
@@ -107,9 +107,9 @@ public class SelectArchetypePage extends WizardPage {
                     }
                 } while (loading);
                 
-                // TODO hide progressbar
                 if (!loading) {
                     fetchMonitor.reset();
+                    fetchMonitor.setVisible(false);
                 }
 
                 return Status.OK_STATUS;
@@ -161,8 +161,8 @@ public class SelectArchetypePage extends WizardPage {
         tblclmnName.setWidth(193);
         tblclmnName.setText("Name");
 
-        TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(tableViewer, SWT.NONE);
-        TableColumn tblclmnTags = tableViewerColumn_1.getColumn();
+        TableViewerColumn tableViewerColumnTag = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
 
@@ -176,22 +176,22 @@ public class SelectArchetypePage extends WizardPage {
             }
         });
 
-        tableViewerColumn_1.setLabelProvider(new ColumnLabelProvider() {
+        tableViewerColumnTag.setLabelProvider(new ColumnLabelProvider() {
             @Override
             public String getText(Object element) {
                 Archetype a = (Archetype) element;
                 List<Tag> tags = a.getTags();
-                String s = "";
+                StringBuffer sb = new StringBuffer();
                 if (tags != null) {
                     for (int i = 0; i < tags.size(); i++) {
                         Tag t = tags.get(i);
-                        s += t.getName();
+                        sb.append(t.getName());
                         if (i < tags.size() - 1) {
-                            s += ", ";
+                            sb.append(", ");
                         }
                     }
                 }
-                return s;
+                return sb.toString();
             }
         });
 

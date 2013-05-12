@@ -17,6 +17,8 @@
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -38,13 +40,12 @@ public class GenerateProjectPage extends WizardPage {
 
         setControl(container);
         
-        
-        
-        System.out.println("test");
     }
     
     private void generate() {
-//        IProjectConfigurationManager projectConfig = MavenPlugin.getProjectConfigurationManager();
+        IProjectConfigurationManager projectConfig = MavenPlugin.getProjectConfigurationManager();
         //projectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage, properties, configuration, monitor);
+        
+        System.out.println("test");
     }
 }

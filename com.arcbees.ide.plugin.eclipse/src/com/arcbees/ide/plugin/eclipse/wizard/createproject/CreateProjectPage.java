@@ -172,6 +172,15 @@ public class CreateProjectPage extends WizardPage {
         });
         btnWorkspaceBrowse.setEnabled(false);
         btnWorkspaceBrowse.setText("Browse");
+        
+        Button btnHint = new Button(container, SWT.NONE);
+        btnHint.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                hintFillIn();
+            }
+        });
+        btnHint.setText("Hint");
         m_bindingContext = initDataBindings();
 
         // Observe input changes and add validator decorators
@@ -242,6 +251,17 @@ public class CreateProjectPage extends WizardPage {
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
+    
+    private void hintFillIn() {
+        projectName.setText("My Project");
+        packageName.setText("com.arcbees.project");
+        moduleName.setText("Project");
+        groupId.setText("com.arcbees.project");
+        artifactId.setText("myproject");
+        
+        checkProjectName();
+    }
+    
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
