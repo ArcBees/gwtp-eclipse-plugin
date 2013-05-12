@@ -108,7 +108,7 @@ public class ProjectConfigModel extends ModelObject {
 
     // TODO future
     public String getDescription() {
-        return "This Archetype was genereted by ArcBees Eclipse plugin.";
+        return "This project was genereted by ArcBees Eclipse plugin.";
     }
 
     public void setLocation(IPath location) {
@@ -117,5 +117,9 @@ public class ProjectConfigModel extends ModelObject {
     
     public IPath getLocation() {
         return location;
+    }
+
+    public boolean canBeFinished() {
+        return archetypeSelected != null;
     }
 }

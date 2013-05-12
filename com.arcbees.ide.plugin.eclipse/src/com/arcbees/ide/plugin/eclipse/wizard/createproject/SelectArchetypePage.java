@@ -68,13 +68,14 @@ public class SelectArchetypePage extends WizardPage {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         
-        //setPageComplete(false);
+        setPageComplete(false);
 
         fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }
 
+    // TODO extract to methods(s)
     private void runMonitor() {
         Job job = new Job("Fetching Archetypes...") {
             @Override
@@ -109,6 +110,7 @@ public class SelectArchetypePage extends WizardPage {
         job.schedule();
     }
 
+    // TODO extract to methods(s)
     private void runFetch() {
         Job job = new Job("Fetch Request") {
             @Override
@@ -134,6 +136,7 @@ public class SelectArchetypePage extends WizardPage {
         job.schedule();
     }
 
+    // TODO add categories, sort GWTP first
     public void createControl(Composite parent) {
         Composite container = new Composite(parent, SWT.NULL);
 
@@ -192,7 +195,6 @@ public class SelectArchetypePage extends WizardPage {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
                 Archetype archetypeSelected = (Archetype) selection.getFirstElement();
                 projectConfigModel.seArchetypeSelected(archetypeSelected);
-                System.out.println("selected archetype: " + archetypeSelected);
                 setPageComplete(true);
             }
         });

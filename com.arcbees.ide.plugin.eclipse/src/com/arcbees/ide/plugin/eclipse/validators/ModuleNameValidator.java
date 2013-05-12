@@ -23,9 +23,6 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-/**
- * Java package validator.
- */
 public class ModuleNameValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {

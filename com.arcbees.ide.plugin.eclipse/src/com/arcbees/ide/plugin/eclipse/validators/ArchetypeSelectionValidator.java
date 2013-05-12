@@ -20,23 +20,17 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-/**
- * Archetype validator.
- */
 public class ArchetypeSelectionValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {
         if (value instanceof Integer) {
             Integer index = ((Integer) value);
             if (index > -1) {
-                System.out.println("Archetye selection isOk");
                 return ValidationStatus.ok();
             } else {
-                System.out.println("Archetye selection error");
                 return ValidationStatus.error("Select a Archetype.");
             }
         }
-        System.out.println("Selection is not a Integer.");
         return ValidationStatus.error("Selection is not a Integer.");
     }
 }

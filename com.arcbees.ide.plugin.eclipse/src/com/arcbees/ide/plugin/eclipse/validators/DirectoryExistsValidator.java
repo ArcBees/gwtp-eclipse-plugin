@@ -22,9 +22,6 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-/**
- * Directory validator.
- */
 public class DirectoryExistsValidator implements IValidator {
     private File file;
 
