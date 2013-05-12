@@ -68,13 +68,14 @@ public class SelectArchetypePage extends WizardPage {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         
-        //setPageComplete(false);
+        setPageComplete(false);
 
         fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }
 
+    // TODO extract to methods(s)
     private void runMonitor() {
         Job job = new Job("Fetching Archetypes...") {
             @Override
@@ -109,6 +110,7 @@ public class SelectArchetypePage extends WizardPage {
         job.schedule();
     }
 
+    // TODO extract to methods(s)
     private void runFetch() {
         Job job = new Job("Fetch Request") {
             @Override

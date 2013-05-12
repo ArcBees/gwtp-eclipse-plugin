@@ -47,10 +47,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
-import com.arcbees.ide.plugin.eclipse.validators.ProjectNameValidator;
-import com.arcbees.ide.plugin.eclipse.validators.PackageNameValidator;
-import com.arcbees.ide.plugin.eclipse.validators.ModuleNameValidator;
 import com.arcbees.ide.plugin.eclipse.validators.DirectoryExistsValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ModuleNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.PackageNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ProjectNameValidator;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
