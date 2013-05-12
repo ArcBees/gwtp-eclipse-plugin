@@ -245,7 +245,6 @@ public class CreateProjectPage extends WizardPage {
             Binding b = (Binding) o;
             IObservableValue status = b.getValidationStatus();
             IStatus istatus = (IStatus) status.getValue();
-            System.out.println("isStatus=" + istatus);
             if (!istatus.isOK()) {
                 success = false;
             }

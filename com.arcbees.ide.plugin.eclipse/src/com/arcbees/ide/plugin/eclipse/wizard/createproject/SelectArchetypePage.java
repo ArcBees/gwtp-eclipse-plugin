@@ -194,7 +194,6 @@ public class SelectArchetypePage extends WizardPage {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
                 Archetype archetypeSelected = (Archetype) selection.getFirstElement();
                 projectConfigModel.seArchetypeSelected(archetypeSelected);
-                System.out.println("selected archetype: " + archetypeSelected);
                 setPageComplete(true);
             }
         });

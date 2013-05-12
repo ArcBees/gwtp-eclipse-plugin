@@ -37,10 +37,8 @@ public class ProgressMonitor implements IProgressMonitor {
             public void run() {
                 if (progressBar.getSelection() >= 100) {
                     progressBar.setSelection(0);
-                    System.out.println("reset");
                 } else {
                     progressBar.setSelection(progressBar.getSelection() + work);
-                    System.out.println("sel=" + progressBar.getSelection() + work);
                 }
             }
         });

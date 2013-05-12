@@ -20,9 +20,6 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-/**
- * Archetype validator.
- */
 public class ArchetypeSelectionValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {
