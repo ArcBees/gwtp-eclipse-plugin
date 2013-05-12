@@ -29,6 +29,15 @@ public class FetchArchetypesMonitor implements IProgressMonitor {
             }
         });
     }
+    
+    public void reset() {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setSelection(0);
+            }
+        });
+    }
 
     @Override
     public void subTask(String name) {

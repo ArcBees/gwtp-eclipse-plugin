@@ -83,6 +83,7 @@ public class SelectArchetypePage extends WizardPage {
         runFetch();
     }
 
+    // TODO show/hide progress bar
     private void runMonitor() {
         Job job = new Job("Fetching Archetypes...") {
             @Override
@@ -105,6 +106,11 @@ public class SelectArchetypePage extends WizardPage {
                         return Status.CANCEL_STATUS;
                     }
                 } while (loading);
+                
+                // TODO hide progressbar
+                if (!loading) {
+                    fetchMonitor.reset();
+                }
 
                 return Status.OK_STATUS;
             }

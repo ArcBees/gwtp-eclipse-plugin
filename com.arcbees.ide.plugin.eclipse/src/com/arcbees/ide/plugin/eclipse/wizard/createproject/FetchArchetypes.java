@@ -47,6 +47,7 @@ public class FetchArchetypes {
         RestAssured.config = RestAssuredConfig.config().objectMapperConfig(mapperConfig);
     }
 
+    // TODO extract more of this
     private GsonBuilder createGsonBuilder() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {

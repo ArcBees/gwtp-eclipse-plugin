@@ -37,5 +37,14 @@ public class GenerateProjectPage extends WizardPage {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
+        
+        
+        
+        System.out.println("test");
+    }
+    
+    private void generate() {
+//        IProjectConfigurationManager projectConfig = MavenPlugin.getProjectConfigurationManager();
+        //projectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage, properties, configuration, monitor);
     }
 }
