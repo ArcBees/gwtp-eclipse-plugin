@@ -229,6 +229,9 @@ public class CreateProjectPage extends WizardPage {
         String basePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
         basePath += "/" + name;
         workspacePath.setText(basePath);
+        
+        projectConfigModel.setWorkspacePath(basePath);
+        projectConfigModel.setLocation(ResourcesPlugin.getWorkspace().getRoot().getLocation());
     }
 
     /**
@@ -258,6 +261,12 @@ public class CreateProjectPage extends WizardPage {
         moduleName.setText("Project");
         groupId.setText("com.arcbees.project");
         artifactId.setText("myproject");
+        
+        projectConfigModel.setProjectName(projectName.getText());
+        projectConfigModel.setPackageName(packageName.getText());
+        projectConfigModel.setModuleName(moduleName.getText());
+        projectConfigModel.setGroupId(groupId.getText());
+        projectConfigModel.setArtifactId(artifactId.getText());
         
         checkProjectName();
     }

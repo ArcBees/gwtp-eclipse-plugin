@@ -48,6 +48,6 @@ public class CreateProjectWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        return false;
+        return generateProjectPage.canBeFinished();
     }
 }

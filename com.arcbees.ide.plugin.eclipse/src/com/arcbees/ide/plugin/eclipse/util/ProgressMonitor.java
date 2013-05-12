@@ -1,4 +1,4 @@
-package com.arcbees.ide.plugin.eclipse.wizard.createproject;
+package com.arcbees.ide.plugin.eclipse.util;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -6,10 +6,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
 
-public class FetchArchetypesMonitor implements IProgressMonitor {
+public class ProgressMonitor implements IProgressMonitor {
     private ProgressBar progressBar;
 
-    public FetchArchetypesMonitor(Composite parent) {
+    public ProgressMonitor(Composite parent) {
         progressBar = new ProgressBar(parent, SWT.SMOOTH);
         progressBar.setBounds(100, 10, 200, 20);
     }

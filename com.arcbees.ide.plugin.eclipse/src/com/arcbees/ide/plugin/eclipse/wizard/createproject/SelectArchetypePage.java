@@ -19,20 +19,10 @@ package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.core.databinding.Binding;
-import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -53,14 +43,13 @@ import com.arcbees.ide.plugin.eclipse.domain.Archetype;
 import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
-import com.arcbees.ide.plugin.eclipse.validators.ArchetypeSelectionValidator;
+import com.arcbees.ide.plugin.eclipse.util.ProgressMonitor;
 
 public class SelectArchetypePage extends WizardPage {
-    private DataBindingContext m_bindingContext;
     private ProjectConfigModel projectConfigModel;
     private Table table;
     private TableViewer tableViewer;
-    private FetchArchetypesMonitor fetchMonitor;
+    private ProgressMonitor fetchMonitor;
     private boolean loading;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
@@ -78,6 +67,8 @@ public class SelectArchetypePage extends WizardPage {
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
+        
+        //setPageComplete(false);
 
         fetchMonitor.setVisible(true);
         runMonitor();
@@ -166,7 +157,7 @@ public class SelectArchetypePage extends WizardPage {
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
 
-        fetchMonitor = new FetchArchetypesMonitor(container);
+        fetchMonitor = new ProgressMonitor(container);
 
         tableViewerColumn.setLabelProvider(new ColumnLabelProvider() {
             @Override
@@ -202,64 +193,8 @@ public class SelectArchetypePage extends WizardPage {
                 Archetype archetypeSelected = (Archetype) selection.getFirstElement();
                 projectConfigModel.seArchetypeSelected(archetypeSelected);
                 System.out.println("selected archetype: " + archetypeSelected);
+                setPageComplete(true);
             }
         });
-
-        m_bindingContext = initDataBindings();
-
-        observeBindingChanges();
-    }
-
-    private void observeBindingChanges() {
-        IObservableList bindings = m_bindingContext.getValidationStatusProviders();
-        for (Object o : bindings) {
-            Binding binding = (Binding) o;
-
-            // Validator feedback control
-            ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
-
-            binding.getTarget().addChangeListener(new IChangeListener() {
-                @Override
-                public void handleChange(ChangeEvent event) {
-                    checkBindingValidationStatus();
-                }
-            });
-        }
-    }
-
-    /**
-     * Check all the bindings validators for OK status.
-     */
-    private void checkBindingValidationStatus() {
-        IObservableList bindings = m_bindingContext.getValidationStatusProviders();
-
-        boolean success = true;
-        for (Object o : bindings) {
-            Binding b = (Binding) o;
-            IObservableValue status = b.getValidationStatus();
-            IStatus istatus = (IStatus) status.getValue();
-            System.out.println("isStatus=" + istatus);
-            if (!istatus.isOK()) {
-                success = false;
-            }
-        }
-
-        // All statuses passed, enable next button.
-        setPageComplete(success);
-    }
-
-    protected DataBindingContext initDataBindings() {
-        DataBindingContext bindingContext = new DataBindingContext();
-        //
-        IObservableValue observeSingleSelectionIndexTableObserveWidget = WidgetProperties.singleSelectionIndex()
-                .observe(table);
-        IObservableValue keyProjectConfigModelgetArchetypeSelectedObserveValue = PojoProperties.value("key").observe(
-                projectConfigModel.getArchetypeSelected());
-        UpdateValueStrategy strategy = new UpdateValueStrategy();
-        strategy.setBeforeSetValidator(new ArchetypeSelectionValidator());
-        bindingContext.bindValue(observeSingleSelectionIndexTableObserveWidget,
-                keyProjectConfigModelgetArchetypeSelectedObserveValue, strategy, null);
-        //
-        return bindingContext;
     }
 }
