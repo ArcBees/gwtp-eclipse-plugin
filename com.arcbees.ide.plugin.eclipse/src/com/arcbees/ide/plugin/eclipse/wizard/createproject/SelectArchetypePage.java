@@ -136,6 +136,7 @@ public class SelectArchetypePage extends WizardPage {
         job.schedule();
     }
 
+    // TODO add categories, sort GWTP first
     public void createControl(Composite parent) {
         Composite container = new Composite(parent, SWT.NULL);
 
