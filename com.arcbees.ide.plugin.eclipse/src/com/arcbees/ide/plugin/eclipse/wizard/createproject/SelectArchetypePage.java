@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.arcbees.ide.plugin.eclipse.domain.Archetype;
 import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
+import com.arcbees.ide.plugin.eclipse.domain.Category;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
 import com.arcbees.ide.plugin.eclipse.util.ProgressMonitor;
@@ -154,6 +155,11 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnName = tableViewerColumn.getColumn();
         tblclmnName.setWidth(193);
         tblclmnName.setText("Name");
+        
+        TableViewerColumn tableViewerColumnCategories = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableColumn tblclmnCategories = tableViewerColumnCategories.getColumn();
+        tblclmnCategories.setWidth(100);
+        tblclmnCategories.setText("Categories");
 
         TableViewerColumn tableViewerColumnTag = new TableViewerColumn(tableViewer, SWT.NONE);
         TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
@@ -170,6 +176,7 @@ public class SelectArchetypePage extends WizardPage {
             }
         });
 
+        // TODO deal with nulls
         tableViewerColumnTag.setLabelProvider(new ColumnLabelProvider() {
             @Override
             public String getText(Object element) {
@@ -181,6 +188,26 @@ public class SelectArchetypePage extends WizardPage {
                         Tag t = tags.get(i);
                         sb.append(t.getName());
                         if (i < tags.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                }
+                return sb.toString();
+            }
+        });
+        
+        // TODO deal with nulls
+        tableViewerColumnCategories.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public String getText(Object element) {
+                Archetype a = (Archetype) element;
+                List<Category> categories = a.getCategories();
+                StringBuffer sb = new StringBuffer();
+                if (categories != null) {
+                    for (int i = 0; i < categories.size(); i++) {
+                        Category c = categories.get(i);
+                        sb.append(c.getName());
+                        if (i < categories.size() - 1) {
                             sb.append(", ");
                         }
                     }
