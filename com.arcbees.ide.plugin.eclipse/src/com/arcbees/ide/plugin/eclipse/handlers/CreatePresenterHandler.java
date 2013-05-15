@@ -24,10 +24,10 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.arcbees.ide.plugin.eclipse.wizard.createproject.CreateProjectWizard;
+import com.arcbees.ide.plugin.eclipse.wizard.createpresenter.CreatePresenterWizard;
 
-public class CreateProjectHandler extends AbstractHandler {
-    public CreateProjectHandler() {
+public class CreatePresenterHandler extends AbstractHandler {
+    public CreatePresenterHandler() {
     }
 
     public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -37,7 +37,7 @@ public class CreateProjectHandler extends AbstractHandler {
     }
 
     private void open(IWorkbenchWindow window) {
-        Wizard wizard = new CreateProjectWizard();
+        Wizard wizard = new CreatePresenterWizard();
        
         WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
         dialog.create();

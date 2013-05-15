@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import java.lang.reflect.Type;
@@ -49,8 +48,7 @@ public class FetchArchetypes {
     public ArchetypeCollection fetchArchetypes() {
         initRestAssured();
 
-        ArchetypeCollection archetypeCollection = RestAssured.given().expect().when().get(DIRECTORY_URL)
-                .as(ArchetypeCollection.class);
+        ArchetypeCollection archetypeCollection = RestAssured.get(DIRECTORY_URL).as(ArchetypeCollection.class);
         return archetypeCollection;
     }
 

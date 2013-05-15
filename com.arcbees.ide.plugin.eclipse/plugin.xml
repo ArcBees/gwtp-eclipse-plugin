@@ -18,12 +18,21 @@
             id="referenceToMenuId"
             name="referenceToMenuId">
       </command>
+      <command
+            categoryId="com.arcbees.ide.plugin.eclipse.commands.category"
+            id="com.arcbees.ide.plugin.eclipse.commands.createPresenter"
+            name="Create Presenter">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             commandId="com.arcbees.ide.plugin.eclipse.commands.createProject"
             class="com.arcbees.ide.plugin.eclipse.handlers.CreateProjectHandler">
+      </handler>
+      <handler
+            class="com.arcbees.ide.plugin.eclipse.handlers.CreatePresenterHandler"
+            commandId="com.arcbees.ide.plugin.eclipse.commands.createPresenter">
       </handler>
    </extension>
    <extension
@@ -45,7 +54,7 @@
                   commandId="referenceToMenuId"
                   icon="icons/addgwtp.png"
                   style="pulldown"
-                  tooltip="Create GWTP Project...">
+                  tooltip="Create GWTP Project">
             </command>
          </toolbar>
       </menuContribution>
@@ -54,7 +63,12 @@
             locationURI="menu:referenceToMenuId">
          <command
                commandId="com.arcbees.ide.plugin.eclipse.commands.createProject"
-               label="Create GWTP Project…"
+               label="Create GWTP Project"
+               style="push">
+         </command>
+         <command
+               commandId="com.arcbees.ide.plugin.eclipse.commands.createPresenter"
+               label="Create Presenter"
                style="push">
          </command>
       </menuContribution>
