@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.arcbees.ide.plugin.eclipse.project;
+package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -47,7 +47,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
-import com.arcbees.ide.plugin.eclipse.validators.NameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.DirectoryExistsValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ModuleNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.PackageNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ProjectNameValidator;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -60,8 +63,11 @@ public class CreateProjectPage extends WizardPage {
     private ProjectConfigModel projectConfigModel;
     private Button btnWorkspaceBrowse;
 
-    public CreateProjectPage() {
+    public CreateProjectPage(ProjectConfigModel projectConfigModel) {
         super("wizardPageCreateProject");
+        
+        this.projectConfigModel = projectConfigModel;
+        
         setMessage("Create a GWT-Platform project.");
         setPageComplete(false);
 
@@ -71,11 +77,7 @@ public class CreateProjectPage extends WizardPage {
     }
 
     public void createControl(final Composite parent) {
-        projectConfigModel = new ProjectConfigModel();
-
-        parent.setTouchEnabled(true);
         Composite container = new Composite(parent, SWT.NULL);
-        container.setTouchEnabled(true);
 
         setControl(container);
         container.setLayout(new GridLayout(1, false));
@@ -93,14 +95,12 @@ public class CreateProjectPage extends WizardPage {
         GridData gd_projectName = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
         gd_projectName.widthHint = 516;
         projectName.setLayoutData(gd_projectName);
-        projectName.setTouchEnabled(true);
 
         Label lblPackageName = new Label(container, SWT.NONE);
         lblPackageName.setText("Package Name: 'com.arcbees.project'");
 
         packageName = new Text(container, SWT.BORDER);
         packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-        packageName.setTouchEnabled(true);
 
         Label lblNewLabel = new Label(container, SWT.NONE);
         lblNewLabel.setText("Module Name: 'Project'");
@@ -172,6 +172,15 @@ public class CreateProjectPage extends WizardPage {
         });
         btnWorkspaceBrowse.setEnabled(false);
         btnWorkspaceBrowse.setText("Browse");
+        
+        Button btnHint = new Button(container, SWT.NONE);
+        btnHint.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                hintFillIn();
+            }
+        });
+        btnHint.setText("Hint");
         m_bindingContext = initDataBindings();
 
         // Observe input changes and add validator decorators
@@ -220,12 +229,13 @@ public class CreateProjectPage extends WizardPage {
         String basePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
         basePath += "/" + name;
         workspacePath.setText(basePath);
+        
+        projectConfigModel.setWorkspacePath(basePath);
+        projectConfigModel.setLocation(ResourcesPlugin.getWorkspace().getRoot().getLocation());
     }
 
     /**
      * Check all the bindings validators for OK status.
-     * 
-     * TODO add validators to each field.
      */
     private void checkBindingValidationStatus() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
@@ -235,7 +245,6 @@ public class CreateProjectPage extends WizardPage {
             Binding b = (Binding) o;
             IObservableValue status = b.getValidationStatus();
             IStatus istatus = (IStatus) status.getValue();
-            System.out.println("isStatus=" + istatus);
             if (!istatus.isOK()) {
                 success = false;
             }
@@ -244,34 +253,61 @@ public class CreateProjectPage extends WizardPage {
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
+    
+    private void hintFillIn() {
+        projectName.setText("My Project");
+        packageName.setText("com.arcbees.project");
+        moduleName.setText("Project");
+        groupId.setText("com.arcbees.project");
+        artifactId.setText("myproject");
+        
+        projectConfigModel.setProjectName(projectName.getText());
+        projectConfigModel.setPackageName(packageName.getText());
+        projectConfigModel.setModuleName(moduleName.getText());
+        projectConfigModel.setGroupId(groupId.getText());
+        projectConfigModel.setArtifactId(artifactId.getText());
+        
+        checkProjectName();
+    }
+    
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
         IObservableValue observeTextProjectNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(projectName);
         IObservableValue bytesProjectConfigModelgetProjectNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getProjectName());
         UpdateValueStrategy strategy = new UpdateValueStrategy();
-        strategy.setBeforeSetValidator(new NameValidator());
+        strategy.setBeforeSetValidator(new ProjectNameValidator());
         bindingContext.bindValue(observeTextProjectNameObserveWidget, bytesProjectConfigModelgetProjectNameObserveValue, strategy, null);
         //
         IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
         IObservableValue bytesProjectConfigModelgetPackageNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getPackageName());
-        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesProjectConfigModelgetPackageNameObserveValue, null, null);
+        UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
+        strategy_1.setBeforeSetValidator(new PackageNameValidator());
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesProjectConfigModelgetPackageNameObserveValue, strategy_1, null);
         //
         IObservableValue observeTextModuleNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(moduleName);
         IObservableValue bytesProjectConfigModelgetModuleNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getModuleName());
-        bindingContext.bindValue(observeTextModuleNameObserveWidget, bytesProjectConfigModelgetModuleNameObserveValue, null, null);
+        UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
+        strategy_2.setBeforeSetValidator(new ModuleNameValidator());
+        bindingContext.bindValue(observeTextModuleNameObserveWidget, bytesProjectConfigModelgetModuleNameObserveValue, strategy_2, null);
         //
         IObservableValue observeTextGroupIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(groupId);
         IObservableValue bytesProjectConfigModelgetGroupIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getGroupId());
-        bindingContext.bindValue(observeTextGroupIdObserveWidget, bytesProjectConfigModelgetGroupIdObserveValue, null, null);
+        UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
+        strategy_3.setBeforeSetValidator(new PackageNameValidator());
+        bindingContext.bindValue(observeTextGroupIdObserveWidget, bytesProjectConfigModelgetGroupIdObserveValue, strategy_3, null);
         //
         IObservableValue observeTextArtifactIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(artifactId);
         IObservableValue bytesProjectConfigModelgetArtifactIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getArtifactId());
-        bindingContext.bindValue(observeTextArtifactIdObserveWidget, bytesProjectConfigModelgetArtifactIdObserveValue, null, null);
+        UpdateValueStrategy strategy_4 = new UpdateValueStrategy();
+        strategy_4.setBeforeSetValidator(new ProjectNameValidator());
+        bindingContext.bindValue(observeTextArtifactIdObserveWidget, bytesProjectConfigModelgetArtifactIdObserveValue, strategy_4, null);
         //
         IObservableValue observeTextWorkspacePathObserveWidget = WidgetProperties.text(SWT.Modify).observe(workspacePath);
         IObservableValue bytesProjectConfigModelgetWorkspacePathObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getWorkspacePath());
-        bindingContext.bindValue(observeTextWorkspacePathObserveWidget, bytesProjectConfigModelgetWorkspacePathObserveValue, null, null);
+        UpdateValueStrategy strategy_5 = new UpdateValueStrategy();
+        strategy_5.setBeforeSetValidator(new DirectoryExistsValidator());
+        bindingContext.bindValue(observeTextWorkspacePathObserveWidget, bytesProjectConfigModelgetWorkspacePathObserveValue, strategy_5, null);
         //
         return bindingContext;
     }
