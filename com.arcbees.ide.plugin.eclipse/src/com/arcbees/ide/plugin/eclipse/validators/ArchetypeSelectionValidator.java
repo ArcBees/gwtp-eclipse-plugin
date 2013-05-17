@@ -16,32 +16,21 @@
 
 package com.arcbees.ide.plugin.eclipse.validators;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-public class ModuleNameValidator implements IValidator {
+public class ArchetypeSelectionValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {
-        if (value instanceof String) {
-            String name = ((String) value).trim();
-            boolean passes = validatePattern(name);
-            if (passes) {
+        if (value instanceof Integer) {
+            Integer index = ((Integer) value);
+            if (index > -1) {
                 return ValidationStatus.ok();
             } else {
-                String message = "The module format doesn't follow the GWT naming convention.";
-                return ValidationStatus.error(message);
+                return ValidationStatus.error("Select a Archetype.");
             }
         }
-        return ValidationStatus.error("Name is not a String.");
-    }
-
-    private boolean validatePattern(String name) {
-        Pattern pattern = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]+)", Pattern.UNICODE_CHARACTER_CLASS);
-        Matcher matcher = pattern.matcher(name);
-        return matcher.find();
+        return ValidationStatus.error("Selection is not a Integer.");
     }
 }

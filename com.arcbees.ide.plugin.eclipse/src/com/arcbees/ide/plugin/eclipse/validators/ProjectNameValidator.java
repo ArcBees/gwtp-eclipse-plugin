@@ -23,9 +23,6 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-/**
- * Name validator.
- */
 public class ProjectNameValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {
