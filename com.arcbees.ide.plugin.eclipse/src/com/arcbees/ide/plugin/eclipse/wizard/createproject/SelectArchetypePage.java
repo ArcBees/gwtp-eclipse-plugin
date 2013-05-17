@@ -1,38 +1,56 @@
+/**
+ * Copyright 2013 ArcBees Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 
 import com.arcbees.ide.plugin.eclipse.domain.Archetype;
 import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-import com.jayway.restassured.RestAssured;
+import com.arcbees.ide.plugin.eclipse.util.ProgressMonitor;
 
 public class SelectArchetypePage extends WizardPage {
-    private static final String DIRECTORY_URL = "https://project-manager-directory.appspot.com/_ah/api/archetypeendpoint/v1/archetype";
-
     private ProjectConfigModel projectConfigModel;
     private Table table;
+    private TableViewer tableViewer;
+    private ProgressMonitor fetchMonitor;
+    private boolean loading;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
         super("wizardPageSelectArchetype");
@@ -43,109 +61,142 @@ public class SelectArchetypePage extends WizardPage {
         setDescription("Select a project template to start with.");
     }
 
+    /**
+     * TODO cache results locally
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        
+        setPageComplete(false);
+
+        fetchMonitor.setVisible(true);
+        runMonitor();
+        runFetch();
+    }
+
+    // TODO extract to methods(s)
+    private void runMonitor() {
+        Job job = new Job("Fetching Archetypes...") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                String doing = "Fetching Archetyes...";
+
+                monitor.beginTask(doing, 100);
+                fetchMonitor.beginTask(doing, 100);
+
+                loading = true;
+                do {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(25);
+
+                        monitor.worked(1);
+                        fetchMonitor.worked(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        loading = false;
+                        return Status.CANCEL_STATUS;
+                    }
+                } while (loading);
+                
+                if (!loading) {
+                    fetchMonitor.reset();
+                    fetchMonitor.setVisible(false);
+                }
+
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+
+    // TODO extract to methods(s)
+    private void runFetch() {
+        Job job = new Job("Fetch Request") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                FetchArchetypes fetch = new FetchArchetypes();
+                ArchetypeCollection collection = fetch.fetchArchetypes();
+                if (collection != null) {
+                    final List<Archetype> archetypes = collection.getArchetypes();
+                    if (archetypes != null) {
+                        Display.getDefault().asyncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableViewer.setInput(archetypes);
+                            }
+                        });
+                    }
+                }
+
+                loading = false;
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+
+    // TODO add categories, sort GWTP first
     public void createControl(Composite parent) {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
-        container.setLayout(new GridLayout(1, false));
+        container.setLayout(new RowLayout(SWT.VERTICAL));
 
-        table = new Table(container, SWT.BORDER | SWT.FULL_SELECTION);
-        GridData gd_table = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
-        gd_table.heightHint = 127;
-        table.setLayoutData(gd_table);
-        table.setHeaderVisible(true);
+        tableViewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
+        tableViewer.setContentProvider(ArrayContentProvider.getInstance());
+        table = tableViewer.getTable();
+        table.setLayoutData(new RowData(567, 259));
         table.setLinesVisible(true);
+        table.setHeaderVisible(true);
 
-        TableColumn tblclmnKey = new TableColumn(table, SWT.NONE);
-        tblclmnKey.setWidth(100);
-        tblclmnKey.setText("Key");
-
-        TableColumn tblclmnName = new TableColumn(table, SWT.NONE);
-        tblclmnName.setWidth(150);
+        TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableColumn tblclmnName = tableViewerColumn.getColumn();
+        tblclmnName.setWidth(193);
         tblclmnName.setText("Name");
 
-        TableColumn tblclmnTags = new TableColumn(table, SWT.NONE);
-        tblclmnTags.setWidth(325);
+        TableViewerColumn tableViewerColumnTag = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
+        tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
-    }
 
-    private void fetchArchetypes(List<Archetype> archetypes ) {
-        String json = RestAssured.given().expect().when().get(DIRECTORY_URL).asString();
-        
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-          public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-              throws JsonParseException {
-            return new Date(json.getAsJsonPrimitive().getAsLong());
-          }
-        });
-        gsonBuilder.registerTypeAdapter(ArchetypeCollection.class, new JsonDeserializer<ArchetypeCollection>() {
-          public ArchetypeCollection deserialize(JsonElement json, Type typeOft, JsonDeserializationContext context)
-              throws JsonParseException {
-            JsonObject parentJson = json.getAsJsonObject();
-            
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-              public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                  throws JsonParseException {
-                return new Date(json.getAsJsonPrimitive().getAsLong());
-              }
-            });
-            Gson gson = gsonBuilder.create();
-            
-            ArchetypeCollection parent = gson.fromJson(json, ArchetypeCollection.class);
-            List<Archetype> archetypes = null;
+        fetchMonitor = new ProgressMonitor(container);
 
-            if (parentJson.get("items").isJsonArray()) {
-              JsonElement itemsJson = parentJson.get("items");
-              archetypes = gson.fromJson(itemsJson, new TypeToken<List<Archetype>>() {
-              }.getType());
-            } else {
-              Archetype single = gson.fromJson(parentJson.get("items"), Archetype.class);
-              archetypes = new ArrayList<Archetype>();
-              archetypes.add(single);
+        tableViewerColumn.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public String getText(Object element) {
+                Archetype a = (Archetype) element;
+                return a.getName();
             }
-            parent.setArchetypes(archetypes);
-            return parent;
-          }
         });
 
-        Gson gson = gsonBuilder.create();
-        ArchetypeCollection ac = gson.fromJson(json, ArchetypeCollection.class);        
-        
-        for (Archetype archetype : archetypes) {
-            TableItem item = new TableItem(table, SWT.NONE);
-            item.setText(0, getKey(archetype.getKey()));
-            item.setText(1, getName(archetype.getName()));
-            item.setText(2, getTags(archetype.getTags()));
-        }
-    }
-
-    private String getName(String name) {
-        if (name == null) {
-            return "";
-        }
-        return name;
-    }
-
-    private String getKey(String key) {
-        if (key == null) {
-            return "";
-        }
-        return key;
-    }
-
-    private String getTags(List<Tag> tags) {
-        if (tags == null) {
-            return "";
-        }
-        String s = "";
-        for (int i = 0; i < tags.size(); i++) {
-            s += tags.get(i);
-            if (i < tags.size() - 1) {
-                s += ", ";
+        tableViewerColumnTag.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public String getText(Object element) {
+                Archetype a = (Archetype) element;
+                List<Tag> tags = a.getTags();
+                StringBuffer sb = new StringBuffer();
+                if (tags != null) {
+                    for (int i = 0; i < tags.size(); i++) {
+                        Tag t = tags.get(i);
+                        sb.append(t.getName());
+                        if (i < tags.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                }
+                return sb.toString();
             }
-        }
-        return s;
+        });
+
+        tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+                Archetype archetypeSelected = (Archetype) selection.getFirstElement();
+                projectConfigModel.seArchetypeSelected(archetypeSelected);
+                setPageComplete(true);
+            }
+        });
     }
 }
