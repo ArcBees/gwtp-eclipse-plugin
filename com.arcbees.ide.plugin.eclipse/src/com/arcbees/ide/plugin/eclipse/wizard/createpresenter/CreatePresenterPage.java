@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Text;
 import com.arcbees.ide.plugin.eclipse.domain.PresenterConfigModel;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Button;
+import swing2swt.layout.FlowLayout;
 
 public class CreatePresenterPage extends WizardPage {
     private PresenterConfigModel presenterConfigModel;
@@ -60,5 +61,26 @@ public class CreatePresenterPage extends WizardPage {
         Label lblAboutPresenterType = new Label(grpPresenterType, SWT.NONE);
         lblAboutPresenterType.setBounds(10, 33, 542, 14);
         lblAboutPresenterType.setText("About presenter type...");
+        
+        Group grpNestedPresenterOptions = new Group(container, SWT.NONE);
+        grpNestedPresenterOptions.setLayout(new GridLayout(1, false));
+        GridData gd_grpNestedPresenterOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_grpNestedPresenterOptions.widthHint = 559;
+        grpNestedPresenterOptions.setLayoutData(gd_grpNestedPresenterOptions);
+        grpNestedPresenterOptions.setText("Nested Presenter Options");
+        
+        Group grpPresenterWidget = new Group(container, SWT.NONE);
+        grpPresenterWidget.setLayout(new GridLayout(1, false));
+        GridData gd_grpPresenterWidget = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_grpPresenterWidget.widthHint = 554;
+        grpPresenterWidget.setLayoutData(gd_grpPresenterWidget);
+        grpPresenterWidget.setText("Presenter Widget Options");
+        
+        Group grpPopupPresenter = new Group(container, SWT.NONE);
+        grpPopupPresenter.setLayout(new GridLayout(1, false));
+        GridData gd_grpPopupPresenter = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_grpPopupPresenter.widthHint = 558;
+        grpPopupPresenter.setLayoutData(gd_grpPopupPresenter);
+        grpPopupPresenter.setText("Popup Presenter Options");
     }
 }
