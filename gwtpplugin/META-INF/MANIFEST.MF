@@ -65,16 +65,4 @@ Export-Package: com.gwtplatform.plugin;
    org.eclipse.ui,
    org.eclipse.jdt.ui.dialogs,
    org.eclipse.ui.dialogs,
-   org.eclipse.swt.widgets",
- com.gwtplatform.plugin.wizard;
-  uses:="org.eclipse.jface.wizard,
-   org.eclipse.core.runtime,
-   org.eclipse.ui,
-   org.eclipse.jdt.core,
-   org.eclipse.jdt.ui.wizards,
-   org.eclipse.core.resources,
-   org.eclipse.jface.viewers,
-   org.eclipse.jdt.ui.dialogs,
-   org.eclipse.ui.dialogs,
-   org.eclipse.swt.widgets,
-   com.gwtplatform.plugin"
+   org.eclipse.swt.widgets"
