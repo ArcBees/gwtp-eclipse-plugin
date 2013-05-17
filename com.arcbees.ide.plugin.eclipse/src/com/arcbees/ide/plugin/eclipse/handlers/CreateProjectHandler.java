@@ -24,7 +24,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.arcbees.ide.plugin.eclipse.project.CreateProjectWizard;
+import com.arcbees.ide.plugin.eclipse.wizard.createproject.CreateProjectWizard;
 
 public class CreateProjectHandler extends AbstractHandler {
     public CreateProjectHandler() {
