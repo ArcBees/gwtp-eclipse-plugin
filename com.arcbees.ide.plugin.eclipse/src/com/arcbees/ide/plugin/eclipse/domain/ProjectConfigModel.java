@@ -16,6 +16,8 @@
 
 package com.arcbees.ide.plugin.eclipse.domain;
 
+import org.eclipse.core.runtime.IPath;
+
 public class ProjectConfigModel extends ModelObject {
     private String projectName;
     private String packageName;
@@ -24,6 +26,7 @@ public class ProjectConfigModel extends ModelObject {
     private String artifactId;
     private String workspacePath;
     private Archetype archetypeSelected;
+    private IPath location;
     
     public ProjectConfigModel() {
     }
@@ -98,4 +101,25 @@ public class ProjectConfigModel extends ModelObject {
         return s;
     }
 
+    // TODO future
+    public String getVersion() {
+        return "1.0-SNAPSHOT";
+    }
+
+    // TODO future
+    public String getDescription() {
+        return "This project was genereted by ArcBees Eclipse plugin.";
+    }
+
+    public void setLocation(IPath location) {
+        this.location = location;
+    }
+    
+    public IPath getLocation() {
+        return location;
+    }
+
+    public boolean canBeFinished() {
+        return archetypeSelected != null;
+    }
 }

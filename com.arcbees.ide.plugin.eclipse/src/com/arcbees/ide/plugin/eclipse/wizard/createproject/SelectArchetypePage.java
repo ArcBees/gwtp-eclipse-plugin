@@ -16,11 +16,13 @@
 
 package com.arcbees.ide.plugin.eclipse.wizard.createproject;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -30,8 +32,10 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -39,25 +43,14 @@ import com.arcbees.ide.plugin.eclipse.domain.Archetype;
 import com.arcbees.ide.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.ide.plugin.eclipse.domain.Tag;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.ObjectMapperConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.mapper.factory.GsonObjectMapperFactory;
+import com.arcbees.ide.plugin.eclipse.util.ProgressMonitor;
 
 public class SelectArchetypePage extends WizardPage {
-    private static final String DIRECTORY_URL = "https://project-directory.appspot.com/_ah/api/archetypeendpoint/v1/archetype";
-
     private ProjectConfigModel projectConfigModel;
     private Table table;
     private TableViewer tableViewer;
+    private ProgressMonitor fetchMonitor;
+    private boolean loading;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
         super("wizardPageSelectArchetype");
@@ -69,24 +62,91 @@ public class SelectArchetypePage extends WizardPage {
     }
 
     /**
-     * TODO add loading spinner
+     * TODO cache results locally
      */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
+        
+        setPageComplete(false);
 
-        fetchArchetypes();
+        fetchMonitor.setVisible(true);
+        runMonitor();
+        runFetch();
     }
 
+    // TODO extract to methods(s)
+    private void runMonitor() {
+        Job job = new Job("Fetching Archetypes...") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                String doing = "Fetching Archetyes...";
+
+                monitor.beginTask(doing, 100);
+                fetchMonitor.beginTask(doing, 100);
+
+                loading = true;
+                do {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(25);
+
+                        monitor.worked(1);
+                        fetchMonitor.worked(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        loading = false;
+                        return Status.CANCEL_STATUS;
+                    }
+                } while (loading);
+                
+                if (!loading) {
+                    fetchMonitor.reset();
+                    fetchMonitor.setVisible(false);
+                }
+
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+
+    // TODO extract to methods(s)
+    private void runFetch() {
+        Job job = new Job("Fetch Request") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                FetchArchetypes fetch = new FetchArchetypes();
+                ArchetypeCollection collection = fetch.fetchArchetypes();
+                if (collection != null) {
+                    final List<Archetype> archetypes = collection.getArchetypes();
+                    if (archetypes != null) {
+                        Display.getDefault().asyncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableViewer.setInput(archetypes);
+                            }
+                        });
+                    }
+                }
+
+                loading = false;
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+
+    // TODO add categories, sort GWTP first
     public void createControl(Composite parent) {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
-        container.setLayout(new FillLayout(SWT.VERTICAL));
+        container.setLayout(new RowLayout(SWT.VERTICAL));
 
         tableViewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
         tableViewer.setContentProvider(ArrayContentProvider.getInstance());
         table = tableViewer.getTable();
+        table.setLayoutData(new RowData(567, 259));
         table.setLinesVisible(true);
         table.setHeaderVisible(true);
 
@@ -95,10 +155,12 @@ public class SelectArchetypePage extends WizardPage {
         tblclmnName.setWidth(193);
         tblclmnName.setText("Name");
 
-        TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(tableViewer, SWT.NONE);
-        TableColumn tblclmnTags = tableViewerColumn_1.getColumn();
+        TableViewerColumn tableViewerColumnTag = new TableViewerColumn(tableViewer, SWT.NONE);
+        TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
+
+        fetchMonitor = new ProgressMonitor(container);
 
         tableViewerColumn.setLabelProvider(new ColumnLabelProvider() {
             @Override
@@ -108,22 +170,22 @@ public class SelectArchetypePage extends WizardPage {
             }
         });
 
-        tableViewerColumn_1.setLabelProvider(new ColumnLabelProvider() {
+        tableViewerColumnTag.setLabelProvider(new ColumnLabelProvider() {
             @Override
             public String getText(Object element) {
                 Archetype a = (Archetype) element;
                 List<Tag> tags = a.getTags();
-                String s = "";
+                StringBuffer sb = new StringBuffer();
                 if (tags != null) {
                     for (int i = 0; i < tags.size(); i++) {
                         Tag t = tags.get(i);
-                        s += t.getName();
+                        sb.append(t.getName());
                         if (i < tags.size() - 1) {
-                            s += ", ";
+                            sb.append(", ");
                         }
                     }
                 }
-                return s;
+                return sb.toString();
             }
         });
 
@@ -133,76 +195,8 @@ public class SelectArchetypePage extends WizardPage {
                 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
                 Archetype archetypeSelected = (Archetype) selection.getFirstElement();
                 projectConfigModel.seArchetypeSelected(archetypeSelected);
-                System.out.println("selected archetype: " + archetypeSelected);
+                setPageComplete(true);
             }
         });
-    }
-
-    /**
-     * TODO add to thread? 
-     * TODO deal with network connection 
-     * TODO deal with fetch timeout 
-     * TODO deal with fetch error
-     */
-    private void fetchArchetypes() {
-        initRestAssured();
-
-        ArchetypeCollection archetypeCollection = RestAssured.given().expect().when().get(DIRECTORY_URL)
-                .as(ArchetypeCollection.class);
-        List<Archetype> archetypes = archetypeCollection.getArchetypes();
-
-        tableViewer.setInput(archetypes);
-    }
-
-    private void initRestAssured() {
-        GsonObjectMapperFactory gsonFactory = new GsonObjectMapperFactory() {
-            public Gson create(Class claszz, String s) {
-                return createGsonBuilder().create();
-            }
-        };
-        ObjectMapperConfig mapperConfig = RestAssuredConfig.config().getObjectMapperConfig()
-                .gsonObjectMapperFactory(gsonFactory);
-        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(mapperConfig);
-    }
-
-    private GsonBuilder createGsonBuilder() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-            public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                    throws JsonParseException {
-                return new Date(json.getAsJsonPrimitive().getAsLong());
-            }
-        });
-        gsonBuilder.registerTypeAdapter(ArchetypeCollection.class, new JsonDeserializer<ArchetypeCollection>() {
-            public ArchetypeCollection deserialize(JsonElement json, Type typeOft, JsonDeserializationContext context)
-                    throws JsonParseException {
-                JsonObject parentJson = json.getAsJsonObject();
-
-                GsonBuilder gsonBuilder = new GsonBuilder();
-                gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                    public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                            throws JsonParseException {
-                        return new Date(json.getAsJsonPrimitive().getAsLong());
-                    }
-                });
-                Gson gson = gsonBuilder.create();
-
-                ArchetypeCollection parent = gson.fromJson(json, ArchetypeCollection.class);
-                List<Archetype> archetypes = null;
-
-                if (parentJson.get("items").isJsonArray()) {
-                    JsonElement itemsJson = parentJson.get("items");
-                    archetypes = gson.fromJson(itemsJson, new TypeToken<List<Archetype>>() {
-                    }.getType());
-                } else {
-                    Archetype single = gson.fromJson(parentJson.get("items"), Archetype.class);
-                    archetypes = new ArrayList<Archetype>();
-                    archetypes.add(single);
-                }
-                parent.setArchetypes(archetypes);
-                return parent;
-            }
-        });
-        return gsonBuilder;
     }
 }

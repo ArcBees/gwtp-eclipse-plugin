@@ -47,10 +47,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.ide.plugin.eclipse.domain.ProjectConfigModel;
-import com.arcbees.ide.plugin.eclipse.validators.ProjectNameValidator;
-import com.arcbees.ide.plugin.eclipse.validators.PackageNameValidator;
-import com.arcbees.ide.plugin.eclipse.validators.ModuleNameValidator;
 import com.arcbees.ide.plugin.eclipse.validators.DirectoryExistsValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ModuleNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.PackageNameValidator;
+import com.arcbees.ide.plugin.eclipse.validators.ProjectNameValidator;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -172,6 +172,15 @@ public class CreateProjectPage extends WizardPage {
         });
         btnWorkspaceBrowse.setEnabled(false);
         btnWorkspaceBrowse.setText("Browse");
+        
+        Button btnHint = new Button(container, SWT.NONE);
+        btnHint.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                hintFillIn();
+            }
+        });
+        btnHint.setText("Hint");
         m_bindingContext = initDataBindings();
 
         // Observe input changes and add validator decorators
@@ -220,12 +229,13 @@ public class CreateProjectPage extends WizardPage {
         String basePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
         basePath += "/" + name;
         workspacePath.setText(basePath);
+        
+        projectConfigModel.setWorkspacePath(basePath);
+        projectConfigModel.setLocation(ResourcesPlugin.getWorkspace().getRoot().getLocation());
     }
 
     /**
      * Check all the bindings validators for OK status.
-     * 
-     * TODO add validators to each field.
      */
     private void checkBindingValidationStatus() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
@@ -235,7 +245,6 @@ public class CreateProjectPage extends WizardPage {
             Binding b = (Binding) o;
             IObservableValue status = b.getValidationStatus();
             IStatus istatus = (IStatus) status.getValue();
-            System.out.println("isStatus=" + istatus);
             if (!istatus.isOK()) {
                 success = false;
             }
@@ -244,6 +253,23 @@ public class CreateProjectPage extends WizardPage {
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
+    
+    private void hintFillIn() {
+        projectName.setText("My Project");
+        packageName.setText("com.arcbees.project");
+        moduleName.setText("Project");
+        groupId.setText("com.arcbees.project");
+        artifactId.setText("myproject");
+        
+        projectConfigModel.setProjectName(projectName.getText());
+        projectConfigModel.setPackageName(packageName.getText());
+        projectConfigModel.setModuleName(moduleName.getText());
+        projectConfigModel.setGroupId(groupId.getText());
+        projectConfigModel.setArtifactId(artifactId.getText());
+        
+        checkProjectName();
+    }
+    
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
