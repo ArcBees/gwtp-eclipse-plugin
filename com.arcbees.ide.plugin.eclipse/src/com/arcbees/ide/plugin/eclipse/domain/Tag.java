@@ -14,23 +14,28 @@
  * the License.
  */
 
-package com.arcbees.ide.plugin.eclipse.project;
+package com.arcbees.ide.plugin.eclipse.domain;
 
-import org.eclipse.jface.wizard.Wizard;
-
-public class CreateProjectWizard extends Wizard {
-    public CreateProjectWizard() {
-        setWindowTitle("Create GWTP Project");
+public class Tag {
+    private String key;
+    private String name;
+    
+    public Tag() {
     }
 
-    @Override
-    public void addPages() {
-        addPage(new CreateProjectPage());
-        addPage(new SelectArchetypePage());
+    public String getKey() {
+        return key;
     }
 
-    @Override
-    public boolean performFinish() {
-        return false;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
