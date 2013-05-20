@@ -16,12 +16,19 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 
 public class CreatePresenterWizard extends Wizard {
     private CreatePresenterPage createPresenterPage;
+    private PresenterConfigModel presenterConfigModel;
 
     public CreatePresenterWizard() {
         setWindowTitle("Create Presenter");
@@ -29,15 +36,35 @@ public class CreatePresenterWizard extends Wizard {
 
     @Override
     public void addPages() {
-        PresenterConfigModel presenterConfigModel = new PresenterConfigModel();
+        presenterConfigModel = new PresenterConfigModel();
+
+        IProject project = getProjectFocusedOn();
+        presenterConfigModel.setProject(project);
         
         createPresenterPage = new CreatePresenterPage(presenterConfigModel);
-        
         addPage(createPresenterPage);
     }
 
     @Override
     public boolean performFinish() {
         return false;
+    }
+
+    // TODO when deeper in the project, for some reason firstElement type is different
+    private IProject getProjectFocusedOn() {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window != null) {
+            IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+            Object firstElement = selection.getFirstElement();
+            if (firstElement instanceof IAdaptable) {
+                IProject project = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
+                if (project != null) {
+                    IPath path = project.getFullPath();
+                    System.out.println(path);
+                    return project;
+                }
+            }
+        }
+        return null;
     }
 }

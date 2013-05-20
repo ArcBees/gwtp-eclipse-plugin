@@ -14,7 +14,6 @@
  * the License.
  */
 
-
 package com.arcbees.plugin.eclipse.util;
 
 import com.jayway.restassured.RestAssured;

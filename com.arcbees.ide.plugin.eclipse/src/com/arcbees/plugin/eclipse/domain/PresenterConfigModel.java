@@ -16,10 +16,15 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
 
 public class PresenterConfigModel extends ModelObject {
+    private IProject project;    
     private String name;
-    
+
     public PresenterConfigModel() {
     }
 
@@ -38,5 +43,18 @@ public class PresenterConfigModel extends ModelObject {
         s += "name=" + name + " ";
         s += " }"; 
         return s;
+    }
+
+    public void setProject(IProject project) {
+        this.project = project;
+    }
+
+    public IProject getProject() {
+        return project;
+    }
+    
+    public IJavaProject getJavaProject() {
+        IJavaProject javaProject = JavaCore.create(project);
+        return javaProject;
     }
 }
