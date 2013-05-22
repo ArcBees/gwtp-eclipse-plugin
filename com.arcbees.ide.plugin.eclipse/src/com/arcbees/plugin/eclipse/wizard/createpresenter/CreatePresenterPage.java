@@ -16,17 +16,15 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,17 +37,15 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 
 public class CreatePresenterPage extends NewTypeWizardPage {
-    private Composite parent;
-    
     private PresenterConfigModel presenterConfigModel;
+
+    private Composite parent;
 
     private Group grpNestedPresenterOptions;
     private Group grpPopupPresenter;
@@ -58,6 +54,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnPresenterWidget;
     private Button btnPopupPresenter;
 
+    private Text packageName;
     private Text name;
     private Text nameToken;
     private Text gateKeeper;
@@ -69,7 +66,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnRevealrootlayoutcontentevent;
     private Button btnIsAPlace;
     private Button btnIsCrawlable;
-    private Text packageName;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -85,11 +81,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         super.setVisible(visible);
 
         setDefaults();
+        setPackageName();
     }
 
     public void createControl(Composite parent) {
         this.parent = parent;
-        
+
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
@@ -102,10 +99,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblPackage = new Label(container, SWT.NONE);
-        lblPackage.setText("Package: 'com.arcbees.project.client'");
+        lblPackage.setText("Package Path: '/myproject/src/main/java/com/arcbees/project/client'");
 
         Composite composite = new Composite(container, SWT.NONE);
-        GridData gd_composite = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        GridData gd_composite = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
         gd_composite.heightHint = 28;
         gd_composite.widthHint = 568;
         composite.setLayoutData(gd_composite);
@@ -262,7 +259,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 if (contentSlotType != null) {
                     String slot = contentSlotType.getFullyQualifiedName('.');
                     contentSlot.setText(slot);
-                } 
+                }
             }
         });
         btnSelectContentSlot.setBounds(365, 34, 152, 28);
@@ -294,7 +291,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 if (popupType != null) {
                     String widget = popupType.getFullyQualifiedName('.');
                     overridePopupPanel.setText(widget);
-                } 
+                }
             }
         });
         btnSelectPanel.setBounds(385, 6, 95, 28);
@@ -389,11 +386,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnPrepareFromRequest.setBounds(224, 86, 209, 18);
         btnPrepareFromRequest.setText("Use Prepare from Request");
-
-        setPackageName();
     }
 
-    // TODO when the dialog opens up, focus on the package directory first, if its selected
+    // TODO when the dialog opens up, focus on the package directory first, if
+    // its selected
     private void openPackageSelectionDialog() {
         DirectoryDialog dirDialog = new DirectoryDialog(parent.getShell());
         dirDialog.setText("Select a directory to put the presenter in.");
@@ -404,42 +400,20 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private void setPackageName() {
-        String name = getPackageSelection();
-        if (name != null) {
+        String name = presenterConfigModel.getPackageSelection();
+        if (name != null && name.contains("/client")) {
             packageName.setText(name);
+        } else if (name != null) {
+            setMessage("The package '" + name + " is not a client side package.", IMessageProvider.ERROR);
+        } else {
+            setMessage("Select a project in the navigator with a client side package before creating the presenter.", IMessageProvider.ERROR);
         }
-    }
-
-    // TODO display warning when no project is selected
-    // TODO display warning when project .client.* is not selected, or project is closed.
-    private String getPackageSelection() {
-        ISelectionService selectionservice = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
-        
-        TreeSelection selection = (TreeSelection) selectionservice.getSelection(); // TODO can be null?
-        if (selection == null) {
-            // TODO warn
-            return null;
-        }
-        
-        try {
-            PackageFragment selectedPackage = (PackageFragment) selection.getFirstElement(); // TODo can be null?
-            if (selectedPackage != null) {
-                // TODO is a package selected
-                // TODO is it on the client side
-                IPath path = selectedPackage.getPath();
-                System.out.println("path=" + path); // /myproject/src/main/java/com/arcbees/project/client/application
-                return path.toString();
-            }
-        } catch (Exception e) {
-        }
-        return null;
     }
 
     private void setDefaults() {
-        // TODO
-        // grpNestedPresenterOptions.setVisible(true);
-        // grpPopupPresenter.setVisible(false);
-        // grpPresenterWidgetOptions.setVisible(false);
+        grpNestedPresenterOptions.setVisible(true);
+        grpPopupPresenter.setVisible(false);
+        grpPresenterWidgetOptions.setVisible(false);
 
         nameToken.setEnabled(false);
         btnIsCrawlable.setEnabled(false);
@@ -456,7 +430,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
         FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, getWizard()
-                .getContainer(), scope, IJavaSearchConstants.CLASS, new ContentSlotSelectionExtension(presenterConfigModel));
+                .getContainer(), scope, IJavaSearchConstants.CLASS, new ContentSlotSelectionExtension(
+                presenterConfigModel));
         dialog.setTitle("ContentSlot Selection");
         dialog.setMessage("Select the Presenter's parent. Parent must implement 'HasSlots'.");
         dialog.setInitialPattern("*Presenter");
@@ -466,7 +441,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
         return null;
     }
-    
+
     private IType selectPopupWidget() {
         IJavaProject project = presenterConfigModel.getJavaProject();
         if (project == null) {

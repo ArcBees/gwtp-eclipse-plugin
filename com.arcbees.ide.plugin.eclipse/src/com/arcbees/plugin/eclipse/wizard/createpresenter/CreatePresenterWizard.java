@@ -18,7 +18,9 @@ package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -38,9 +40,9 @@ public class CreatePresenterWizard extends Wizard {
     public void addPages() {
         presenterConfigModel = new PresenterConfigModel();
 
-        IProject project = getProjectFocusedOn();
+        IJavaProject project = getProjectFocusedOn();
         presenterConfigModel.setProject(project);
-        
+
         createPresenterPage = new CreatePresenterPage(presenterConfigModel);
         addPage(createPresenterPage);
     }
@@ -50,21 +52,39 @@ public class CreatePresenterWizard extends Wizard {
         return false;
     }
 
-    // TODO when deeper in the project, for some reason firstElement type is different
-    private IProject getProjectFocusedOn() {
+    /**
+     * When focused on the project, save that for use when creating units.
+     */
+    private IJavaProject getProjectFocusedOn() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        if (window != null) {
-            IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
-            Object firstElement = selection.getFirstElement();
-            if (firstElement instanceof IAdaptable) {
-                IProject project = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
-                if (project != null) {
-                    IPath path = project.getFullPath();
-                    System.out.println(path);
-                    return project;
-                }
-            }
+
+        IJavaProject project = null;
+        try {
+            project = getProject(window);
+        } catch (Exception e) {
         }
-        return null;
+        
+        return project;
+    }
+
+    private IJavaProject getProject(IWorkbenchWindow window) {
+        if (window == null) {
+            return null;
+        }
+        IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+        Object firstElement = selection.getFirstElement();
+        IJavaProject project = null;
+        if (firstElement instanceof IAdaptable) {
+            // when focused on the root, project comes back
+            IProject iproject = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
+            if (iproject != null) {
+                project = JavaCore.create(iproject);
+            }
+        } else if (firstElement instanceof IPackageFragment) {
+            // when focused on a package in the project
+            IPackageFragment packageFrag = (IPackageFragment) firstElement;
+            project = packageFrag.getJavaProject();
+        }
+        return project;
     }
 }
