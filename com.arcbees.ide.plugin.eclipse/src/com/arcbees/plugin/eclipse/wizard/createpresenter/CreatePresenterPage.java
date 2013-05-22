@@ -406,7 +406,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         } else if (name != null) {
             setMessage("The package '" + name + " is not a client side package.", IMessageProvider.ERROR);
         } else {
-            setMessage("Select a project in the navigator with a client side package before creating the presenter.", IMessageProvider.ERROR);
+            setMessage("Select a project in the navigator with a client side package before creating the presenter.",
+                    IMessageProvider.ERROR);
         }
     }
 
