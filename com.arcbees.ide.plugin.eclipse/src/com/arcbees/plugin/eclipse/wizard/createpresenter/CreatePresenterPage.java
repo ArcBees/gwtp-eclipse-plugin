@@ -16,6 +16,16 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import org.eclipse.core.databinding.Binding;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.ChangeEvent;
+import org.eclipse.core.databinding.observable.IChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -24,6 +34,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -41,8 +53,11 @@ import org.eclipse.swt.widgets.Text;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
+import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
+import com.arcbees.plugin.eclipse.validators.PresenterNameValidator;
 
 public class CreatePresenterPage extends NewTypeWizardPage {
+    private DataBindingContext m_bindingContext;
     private PresenterConfigModel presenterConfigModel;
 
     private Composite parent;
@@ -99,7 +114,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblPackage = new Label(container, SWT.NONE);
-        lblPackage.setText("Package Path: '/myproject/src/main/java/com/arcbees/project/client'");
+        lblPackage.setText("Package Path: '/project/src/main/java/com/arcbees/project/client'");
 
         Composite composite = new Composite(container, SWT.NONE);
         GridData gd_composite = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
@@ -386,6 +401,46 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnPrepareFromRequest.setBounds(224, 86, 209, 18);
         btnPrepareFromRequest.setText("Use Prepare from Request");
+        m_bindingContext = initDataBindings();
+        
+        observeBindingChanges();
+    }
+    
+    private void observeBindingChanges() {
+        IObservableList bindings = m_bindingContext.getValidationStatusProviders();
+        for (Object o : bindings) {
+            Binding binding = (Binding) o;
+            
+            // Validator feedback control
+            ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
+            
+            binding.getTarget().addChangeListener(new IChangeListener() {
+                @Override
+                public void handleChange(ChangeEvent event) {
+                    checkBindingValidationStatus();
+                }
+            });
+        }
+    }
+    
+    /**
+     * Check all the bindings validators for OK status.
+     */
+    private void checkBindingValidationStatus() {
+        IObservableList bindings = m_bindingContext.getValidationStatusProviders();
+
+        boolean success = true;
+        for (Object o : bindings) {
+            Binding b = (Binding) o;
+            IObservableValue status = b.getValidationStatus();
+            IStatus istatus = (IStatus) status.getValue();
+            if (!istatus.isOK()) {
+                success = false;
+            }
+        }
+
+        // All statuses passed, enable next button.
+        setPageComplete(success);
     }
 
     // TODO when the dialog opens up, focus on the package directory first, if
@@ -421,7 +476,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private IType selectContentSlot() {
-        IJavaProject project = presenterConfigModel.getJavaProject();
+        IJavaProject project = presenterConfigModel.getProject();
         if (project == null) {
             // TODO notify the user that a project is not selected.
             return null;
@@ -444,7 +499,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private IType selectPopupWidget() {
-        IJavaProject project = presenterConfigModel.getJavaProject();
+        IJavaProject project = presenterConfigModel.getProject();
         if (project == null) {
             // TODO notify the user that a project is not selected.
             return null;
@@ -463,5 +518,35 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             return (IType) dialog.getFirstResult();
         }
         return null;
+    }
+    
+    protected DataBindingContext initDataBindings() {
+        DataBindingContext bindingContext = new DataBindingContext();
+        //
+        IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
+        IObservableValue bytesPresenterConfigModelgetNameObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getName());
+        UpdateValueStrategy strategy = new UpdateValueStrategy();
+        strategy.setBeforeSetValidator(new PresenterNameValidator());
+        bindingContext.bindValue(observeTextNameObserveWidget, bytesPresenterConfigModelgetNameObserveValue, strategy, null);
+        //
+        IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
+        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getPath());
+        UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
+        strategy_1.setBeforeSetValidator(new PackageNameValidator());
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue, strategy_1, null);
+        //
+        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(btnNestedPresenter);
+        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget, nestedPresenterPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(btnPresenterWidget);
+        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget, presenterWidgetPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(btnPopupPresenter);
+        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget, popupPresenterPresenterConfigModelObserveValue, null, null);
+        //
+        return bindingContext;
     }
 }

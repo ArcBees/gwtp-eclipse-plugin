@@ -55,7 +55,9 @@ Bundle-ClassPath: .,
  lib/rest-assured-1.8.0.jar,
  lib/tagsoup-1.2.1.jar,
  lib/gson-2.2.3.jar,
- swing2swt.jar
+ swing2swt.jar,
+ lib/velocity-1.7-dep.jar,
+ lib/velocity-1.7.jar
 Export-Package: com.jayway.restassured,
  com.jayway.restassured.assertion,
  com.jayway.restassured.authentication,

@@ -49,7 +49,7 @@ public class WidgetSelectionExtension extends TypeSelectionExtension {
     }
 
     private boolean canSelect(ITypeInfoRequestor requestor) throws JavaModelException {
-        IType type = presenterConfigModel.getJavaProject().findType(
+        IType type = presenterConfigModel.getProject().findType(
                 requestor.getPackageName() + "." + requestor.getTypeName());
         if (type == null || !type.exists()) {
             return false;

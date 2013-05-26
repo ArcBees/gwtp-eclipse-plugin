@@ -97,7 +97,6 @@ public class CreateProjectWizard extends Wizard {
         // config
         Properties properties = new Properties();
 
-        
         // TODO need to get from directory and add to directory the required properties.
         properties.put("module", projectConfigModel.getModuleName());
         archetype.setProperties(properties);

@@ -18,6 +18,11 @@ package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -49,7 +54,14 @@ public class CreatePresenterWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        return false;
+        // TODO add finish logic
+        boolean canBeFinished = true;
+        if (canBeFinished) {
+            runGenerate();
+        } else {
+            // TODO status or display why
+        }
+        return canBeFinished;
     }
 
     /**
@@ -63,7 +75,7 @@ public class CreatePresenterWizard extends Wizard {
             project = getProject(window);
         } catch (Exception e) {
         }
-        
+
         return project;
     }
 
@@ -74,17 +86,37 @@ public class CreatePresenterWizard extends Wizard {
         IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
         Object firstElement = selection.getFirstElement();
         IJavaProject project = null;
-        if (firstElement instanceof IAdaptable) {
+
+        if (firstElement instanceof IPackageFragment) {
+            // when focused on a package in the project
+            IPackageFragment packageFrag = (IPackageFragment) firstElement;
+            project = packageFrag.getJavaProject();
+        } else if (firstElement instanceof ICompilationUnit) {
+            ICompilationUnit compilationUnit = (ICompilationUnit) firstElement;
+            // TODO verify
+            project = compilationUnit.getJavaProject();
+        } else if (firstElement instanceof IAdaptable) {
             // when focused on the root, project comes back
             IProject iproject = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
             if (iproject != null) {
                 project = JavaCore.create(iproject);
             }
-        } else if (firstElement instanceof IPackageFragment) {
-            // when focused on a package in the project
-            IPackageFragment packageFrag = (IPackageFragment) firstElement;
-            project = packageFrag.getJavaProject();
         }
         return project;
+    }
+    
+    public void runGenerate() {
+        Job job = new Job("Generate Presenter") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                generate(monitor);
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
+    }
+
+    private void generate(IProgressMonitor monitor) {
+        
     }
 }
