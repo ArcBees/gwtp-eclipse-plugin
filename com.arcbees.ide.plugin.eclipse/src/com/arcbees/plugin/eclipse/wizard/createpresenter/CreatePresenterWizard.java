@@ -16,6 +16,12 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,8 +38,16 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
+import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
+import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
+import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
+import com.arcbees.plugin.template.utils.FetchTemplate;
+import com.arcbees.plugin.template.utils.FetchTemplates;
 
 public class CreatePresenterWizard extends Wizard {
+    private static final String URL_NESTED = "https://raw.github.com/ArcBees/IDE-Templates/1.0.0/src/main/resources/com/arcbees/plugin/template/presenter/nested";
+
     private CreatePresenterPage createPresenterPage;
     private PresenterConfigModel presenterConfigModel;
 
@@ -104,7 +118,7 @@ public class CreatePresenterWizard extends Wizard {
         }
         return project;
     }
-    
+
     public void runGenerate() {
         Job job = new Job("Generate Presenter") {
             @Override
@@ -117,6 +131,70 @@ public class CreatePresenterWizard extends Wizard {
     }
 
     private void generate(IProgressMonitor monitor) {
-        
+        try {
+            createDir();
+        } catch (IOException e) {
+            // TODO display error
+            e.printStackTrace();
+            return;
+        }
+
+        fetchTemplates();
+    }
+
+    private void createDir() throws IOException {
+        // TODO dir property is missing, fix
+        String dir = presenterConfigModel.getPath();
+        FileUtils.forceMkdir(new File(dir));
+    }
+
+    private void fetchTemplates() {
+        // TODO fetch logic
+        FetchTemplates fetchedTemplates = fetchNestedPresenter();
+        Map<String, FetchTemplate> fetchedPaths = fetchedTemplates.getPathsToFetch();
+
+        createFiles(fetchedPaths);
+    }
+
+    private FetchTemplates fetchNestedPresenter() {
+        FetchTemplates fetchTemplates = new FetchTemplates();
+        fetchTemplates.addPath(URL_NESTED + "/__name__Module.java.vm");
+        fetchTemplates.addPath(URL_NESTED + "/__name__Presenter.java.vm");
+        fetchTemplates.addPath(URL_NESTED + "/__name__UiHandlers.java.vm");
+        fetchTemplates.addPath(URL_NESTED + "/__name__View.java.vm");
+        fetchTemplates.addPath(URL_NESTED + "/__name__View.ui.xml.vm");
+        fetchTemplates.run();
+
+        return fetchTemplates;
+    }
+
+    private void createFiles(Map<String, FetchTemplate> fetchedPaths) {
+        Set<String> paths = fetchedPaths.keySet();
+        for (String path : paths) {
+            createFile(path, fetchedPaths.get(path));
+        }
+    }
+
+    private void createFile(String path, FetchTemplate fetchedTemplate) {
+        String filename = path.replaceAll("__.*?__", "");
+        System.out.println("filename=" + filename);
+        // TODO confirm things look correct
+    }
+
+    private void process() {
+        PresenterOptions presenterOptions = new PresenterOptions();
+        presenterOptions.setPackageName("com.arcbees.project.client.app");
+        presenterOptions.setName("MyAppHome");
+
+        NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
+        nestedPresenterOptions.setCodeSplit(true);
+
+        CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions);
+
+        System.out.println("test");
+    }
+
+    private void createFile() {
+
     }
 }
