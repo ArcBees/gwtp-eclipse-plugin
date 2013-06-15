@@ -16,11 +16,19 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 public class PresenterConfigModel extends ModelObject {
@@ -51,12 +59,13 @@ public class PresenterConfigModel extends ModelObject {
     private String gatekeeper;
 
     public PresenterConfigModel() {
+        nestedPresenter = true;
     }
 
     public void setProject(IJavaProject project) {
         this.project = project;
     }
-    
+
     public IJavaProject getProject() {
         return project;
     }
@@ -68,11 +77,11 @@ public class PresenterConfigModel extends ModelObject {
     public void setName(String name) {
         firePropertyChange("name", this.name, this.name = name);
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public String getPath() {
         return path;
     }
@@ -222,7 +231,8 @@ public class PresenterConfigModel extends ModelObject {
     }
 
     public void setUsePrepareFromRequest(boolean usePrepareFromRequest) {
-        firePropertyChange("usePrepareFromRequest", this.usePrepareFromRequest, this.usePrepareFromRequest = usePrepareFromRequest);
+        firePropertyChange("usePrepareFromRequest", this.usePrepareFromRequest,
+                this.usePrepareFromRequest = usePrepareFromRequest);
     }
 
     public String getGatekeeper() {
@@ -234,7 +244,9 @@ public class PresenterConfigModel extends ModelObject {
     }
 
     public String getPackageSelection() {
-        ISelectionService selectionservice = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
+        IWorkbench workbench = PlatformUI.getWorkbench();
+        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+        ISelectionService selectionservice = window.getSelectionService();
         if (selectionservice == null) {
             return null;
         }
@@ -248,8 +260,8 @@ public class PresenterConfigModel extends ModelObject {
         try {
             IPackageFragment selectedPackage = (IPackageFragment) selection.getFirstElement();
             if (selectedPackage != null) {
-                IPath path = selectedPackage.getPath();
-                spath = path.toString();
+                spath = selectedPackage.getElementName();
+                System.out.println("path=" + spath);
             }
         } catch (Exception e) {
         }
@@ -259,8 +271,9 @@ public class PresenterConfigModel extends ModelObject {
     @Override
     public String toString() {
         String s = "{ PresenterConfigModel: ";
-        s += "project=" + project.toString() + " ";
+        // s += "project=" + project.toString() + " ";
         s += "name=" + name + " ";
+        s += "path=" + path + " ";
         s += " }";
         return s;
     }

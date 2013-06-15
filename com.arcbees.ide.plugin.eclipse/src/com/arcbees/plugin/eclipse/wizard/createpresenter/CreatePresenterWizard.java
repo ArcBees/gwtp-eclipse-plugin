@@ -46,7 +46,6 @@ import com.arcbees.plugin.template.utils.FetchTemplate;
 import com.arcbees.plugin.template.utils.FetchTemplates;
 
 public class CreatePresenterWizard extends Wizard {
-    private static final String URL_NESTED = "https://raw.github.com/ArcBees/IDE-Templates/1.0.0/src/main/resources/com/arcbees/plugin/template/presenter/nested";
 
     private CreatePresenterPage createPresenterPage;
     private PresenterConfigModel presenterConfigModel;
@@ -139,7 +138,22 @@ public class CreatePresenterWizard extends Wizard {
             return;
         }
 
-        fetchTemplates();
+        processTemplates();
+    }
+
+    private void processTemplates() {
+        PresenterOptions presenterOptions = new PresenterOptions();
+        presenterOptions.setPackageName(getPackageName());
+        presenterOptions.setName(presenterConfigModel.getName());
+        // TODO more options...
+
+        if (presenterConfigModel.getNestedPresenter()) {
+            processNestedPresenter(presenterOptions);
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            // TODO
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            // TODO
+        }
     }
 
     private void createDir() throws IOException {
@@ -148,53 +162,19 @@ public class CreatePresenterWizard extends Wizard {
         FileUtils.forceMkdir(new File(dir));
     }
 
-    private void fetchTemplates() {
-        // TODO fetch logic
-        FetchTemplates fetchedTemplates = fetchNestedPresenter();
-        Map<String, FetchTemplate> fetchedPaths = fetchedTemplates.getPathsToFetch();
-
-        createFiles(fetchedPaths);
-    }
-
-    private FetchTemplates fetchNestedPresenter() {
-        FetchTemplates fetchTemplates = new FetchTemplates();
-        fetchTemplates.addPath(URL_NESTED + "/__name__Module.java.vm");
-        fetchTemplates.addPath(URL_NESTED + "/__name__Presenter.java.vm");
-        fetchTemplates.addPath(URL_NESTED + "/__name__UiHandlers.java.vm");
-        fetchTemplates.addPath(URL_NESTED + "/__name__View.java.vm");
-        fetchTemplates.addPath(URL_NESTED + "/__name__View.ui.xml.vm");
-        fetchTemplates.run();
-
-        return fetchTemplates;
-    }
-
-    private void createFiles(Map<String, FetchTemplate> fetchedPaths) {
-        Set<String> paths = fetchedPaths.keySet();
-        for (String path : paths) {
-            createFile(path, fetchedPaths.get(path));
-        }
-    }
-
-    private void createFile(String path, FetchTemplate fetchedTemplate) {
-        String filename = path.replaceAll("__.*?__", "");
-        System.out.println("filename=" + filename);
-        // TODO confirm things look correct
-    }
-
-    private void process() {
-        PresenterOptions presenterOptions = new PresenterOptions();
-        presenterOptions.setPackageName("com.arcbees.project.client.app");
-        presenterOptions.setName("MyAppHome");
-
+    private void processNestedPresenter(PresenterOptions presenterOptions) {
+        // TODO translate options
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
-        nestedPresenterOptions.setCodeSplit(true);
+        nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
 
-        CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions);
+        CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
 
-        System.out.println("test");
+        // TODO
+        System.out.println("finished");
     }
 
-    private void createFile() {
-
+    private String getPackageName() {
+        String packageName = presenterConfigModel.getPath().replace("[/\\]", ".");
+        return packageName;
     }
 }

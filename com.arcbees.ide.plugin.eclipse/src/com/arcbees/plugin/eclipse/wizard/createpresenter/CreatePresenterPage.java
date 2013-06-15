@@ -114,7 +114,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblPackage = new Label(container, SWT.NONE);
-        lblPackage.setText("Package Path: '/project/src/main/java/com/arcbees/project/client'");
+        lblPackage.setText("Package: 'com.arcbees.project.client'");
 
         Composite composite = new Composite(container, SWT.NONE);
         GridData gd_composite = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
@@ -437,6 +437,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             if (!istatus.isOK()) {
                 success = false;
             }
+            // TODO
+            //System.out.println("istatus=" + istatus.getMessage() + " ... " + istatus.isOK() + " " + presenterConfigModel);
         }
 
         // All statuses passed, enable next button.
@@ -451,12 +453,14 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         String selectedDir = dirDialog.open();
         if (selectedDir != null) {
             packageName.setText(selectedDir);
+            presenterConfigModel.setPath(selectedDir);
         }
     }
 
     private void setPackageName() {
         String name = presenterConfigModel.getPackageSelection();
-        if (name != null && name.contains("/client")) {
+        if (name != null && name.contains(".client")) {
+            presenterConfigModel.setPath(name);
             packageName.setText(name);
         } else if (name != null) {
             setMessage("The package '" + name + " is not a client side package.", IMessageProvider.ERROR);
@@ -519,15 +523,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
         return null;
     }
-    
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
-        //
-        IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
-        IObservableValue bytesPresenterConfigModelgetNameObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getName());
-        UpdateValueStrategy strategy = new UpdateValueStrategy();
-        strategy.setBeforeSetValidator(new PresenterNameValidator());
-        bindingContext.bindValue(observeTextNameObserveWidget, bytesPresenterConfigModelgetNameObserveValue, strategy, null);
         //
         IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
         IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getPath());
@@ -546,6 +543,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(btnPopupPresenter);
         IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter").observe(presenterConfigModel);
         bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget, popupPresenterPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
+        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(presenterConfigModel);
+        UpdateValueStrategy strategy = new UpdateValueStrategy();
+        strategy.setBeforeSetValidator(new PackageNameValidator());
+        bindingContext.bindValue(observeTextNameObserveWidget, namePresenterConfigModelObserveValue, strategy, null);
         //
         return bindingContext;
     }

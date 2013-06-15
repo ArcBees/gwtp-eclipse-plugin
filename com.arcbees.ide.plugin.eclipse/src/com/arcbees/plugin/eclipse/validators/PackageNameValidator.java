@@ -30,9 +30,11 @@ public class PackageNameValidator implements IValidator {
             String name = ((String) value).trim();
             boolean passes = validatePattern(name);
             if (passes) {
+                System.out.println("~~~~~~~~~passes ==" + value);
                 return ValidationStatus.ok();
             } else {
                 String message = "The package format doesn't follow the Java language specification.";
+                System.out.println("~~~~failed ==" + value);
                 return ValidationStatus.error(message);
             }
         }
