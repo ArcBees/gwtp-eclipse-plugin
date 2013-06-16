@@ -16,12 +16,6 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,12 +32,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
-import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
-import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
-import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
-import com.arcbees.plugin.template.utils.FetchTemplate;
-import com.arcbees.plugin.template.utils.FetchTemplates;
 
 public class CreatePresenterWizard extends Wizard {
 
@@ -130,62 +118,6 @@ public class CreatePresenterWizard extends Wizard {
     }
 
     private void generate(IProgressMonitor monitor) {
-        try {
-            createDir();
-        } catch (IOException e) {
-            // TODO display error
-            e.printStackTrace();
-            return;
-        }
-
-        processTemplates();
-    }
-
-    private void processTemplates() {
-        PresenterOptions presenterOptions = new PresenterOptions();
-        presenterOptions.setPackageName(getPackageName());
-        presenterOptions.setName(presenterConfigModel.getName());
-        // TODO more options...
-
-        if (presenterConfigModel.getNestedPresenter()) {
-            processNestedPresenter(presenterOptions);
-        } else if (presenterConfigModel.getPresenterWidget()) {
-            // TODO
-        } else if (presenterConfigModel.getPopupPresenter()) {
-            // TODO
-        }
-    }
-
-    private void createDir() throws IOException {
-        // TODO dir property is missing, fix
-        String dir = presenterConfigModel.getPath();
-        FileUtils.forceMkdir(new File(dir));
-    }
-
-    private void processNestedPresenter(PresenterOptions presenterOptions) {
-        // TODO translate options
-        NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
-        nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
-
-        CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
-
-        // TODO create package for 
-        // TODO module
-        // TODO module link in parent gin
-        // TODO presenter
-        // TODO presneter into parent slot
-        // TODO uihandlers
-        // TODO view
-        // TODO viewUi binder
-        // TODO NameTokens file
-        // TODO NameTokens field and method
-        
-        // TODO
-        System.out.println("finished");
-    }
-
-    private String getPackageName() {
-        String packageName = presenterConfigModel.getPath().replace("[/\\]", ".");
-        return packageName;
+        CreatePresenterTask.run(presenterConfigModel, monitor);
     }
 }

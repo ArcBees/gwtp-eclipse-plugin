@@ -28,6 +28,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -49,12 +51,15 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
-import com.arcbees.plugin.eclipse.validators.PresenterNameValidator;
 
 public class CreatePresenterPage extends NewTypeWizardPage {
     private DataBindingContext m_bindingContext;
@@ -458,9 +463,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private void setPackageName() {
-        String name = presenterConfigModel.getPackageSelection();
-        if (name != null && name.contains(".client")) {
+        IPackageFragment selectedPackage = getPackageSelection();
+        String name = "";
+        if (selectedPackage != null) {
+            name = selectedPackage.getElementName();
+        }
+        
+        if (selectedPackage != null && name.contains(".client")) {
             presenterConfigModel.setPath(name);
+            presenterConfigModel.setSelectedPackage(selectedPackage);
             packageName.setText(name);
         } else if (name != null) {
             setMessage("The package '" + name + " is not a client side package.", IMessageProvider.ERROR);
@@ -468,6 +479,27 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             setMessage("Select a project in the navigator with a client side package before creating the presenter.",
                     IMessageProvider.ERROR);
         }
+    }
+    
+    private IPackageFragment getPackageSelection() {
+        IWorkbench workbench = PlatformUI.getWorkbench();
+        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+        ISelectionService selectionservice = window.getSelectionService();
+        if (selectionservice == null) {
+            return null;
+        }
+
+        TreeSelection selection = (TreeSelection) selectionservice.getSelection();
+        if (selection == null) {
+            return null;
+        }
+
+        IPackageFragment selectedPackage = null;
+        try {
+            selectedPackage = (IPackageFragment) selection.getFirstElement();
+        } catch (Exception e) {
+        }
+        return selectedPackage;
     }
 
     private void setDefaults() {

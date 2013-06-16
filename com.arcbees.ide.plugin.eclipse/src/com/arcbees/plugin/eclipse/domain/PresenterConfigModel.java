@@ -16,20 +16,8 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 public class PresenterConfigModel extends ModelObject {
     private IJavaProject project;
@@ -57,6 +45,7 @@ public class PresenterConfigModel extends ModelObject {
     private boolean useManualReveal;
     private boolean usePrepareFromRequest;
     private String gatekeeper;
+    private IPackageFragment selectedPackage;
 
     public PresenterConfigModel() {
         nestedPresenter = true;
@@ -242,30 +231,13 @@ public class PresenterConfigModel extends ModelObject {
     public void setGatekeeper(String gatekeeper) {
         firePropertyChange("gatekeeper", this.gatekeeper, this.gatekeeper = gatekeeper);
     }
-
-    public String getPackageSelection() {
-        IWorkbench workbench = PlatformUI.getWorkbench();
-        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-        ISelectionService selectionservice = window.getSelectionService();
-        if (selectionservice == null) {
-            return null;
-        }
-
-        TreeSelection selection = (TreeSelection) selectionservice.getSelection();
-        if (selection == null) {
-            return null;
-        }
-
-        String spath = null;
-        try {
-            IPackageFragment selectedPackage = (IPackageFragment) selection.getFirstElement();
-            if (selectedPackage != null) {
-                spath = selectedPackage.getElementName();
-                System.out.println("path=" + spath);
-            }
-        } catch (Exception e) {
-        }
-        return spath;
+    
+    public void setSelectedPackage(IPackageFragment selectedPackage) {
+        this.selectedPackage = selectedPackage;
+    }
+    
+    public IPackageFragment getSelectedPackage() {
+        return selectedPackage;
     }
 
     @Override
