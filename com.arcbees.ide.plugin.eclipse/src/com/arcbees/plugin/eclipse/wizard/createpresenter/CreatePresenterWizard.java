@@ -169,6 +169,17 @@ public class CreatePresenterWizard extends Wizard {
 
         CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
 
+        // TODO create package for 
+        // TODO module
+        // TODO module link in parent gin
+        // TODO presenter
+        // TODO presneter into parent slot
+        // TODO uihandlers
+        // TODO view
+        // TODO viewUi binder
+        // TODO NameTokens file
+        // TODO NameTokens field and method
+        
         // TODO
         System.out.println("finished");
     }
