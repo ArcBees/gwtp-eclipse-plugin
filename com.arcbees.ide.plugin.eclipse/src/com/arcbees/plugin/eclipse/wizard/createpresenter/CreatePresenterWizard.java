@@ -47,7 +47,7 @@ public class CreatePresenterWizard extends Wizard {
         presenterConfigModel = new PresenterConfigModel();
 
         IJavaProject project = getProjectFocusedOn();
-        presenterConfigModel.setProject(project);
+        presenterConfigModel.setJavaProject(project);
 
         createPresenterPage = new CreatePresenterPage(presenterConfigModel);
         addPage(createPresenterPage);

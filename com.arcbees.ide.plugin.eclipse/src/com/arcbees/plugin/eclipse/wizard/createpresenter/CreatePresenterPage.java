@@ -506,13 +506,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpNestedPresenterOptions.setVisible(true);
         grpPopupPresenter.setVisible(false);
         grpPresenterWidgetOptions.setVisible(false);
-
         nameToken.setEnabled(false);
         btnIsCrawlable.setEnabled(false);
     }
 
     private IType selectContentSlot() {
-        IJavaProject project = presenterConfigModel.getProject();
+        IJavaProject project = presenterConfigModel.getJavaProject();
         if (project == null) {
             // TODO notify the user that a project is not selected.
             return null;
@@ -535,7 +534,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private IType selectPopupWidget() {
-        IJavaProject project = presenterConfigModel.getProject();
+        IJavaProject project = presenterConfigModel.getJavaProject();
         if (project == null) {
             // TODO notify the user that a project is not selected.
             return null;

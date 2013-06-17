@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 public class PresenterConfigModel extends ModelObject {
-    private IJavaProject project;
+    private IJavaProject javaProject;
     private String name;
     private String path;
     private boolean nestedPresenter;
@@ -51,12 +51,12 @@ public class PresenterConfigModel extends ModelObject {
         nestedPresenter = true;
     }
 
-    public void setProject(IJavaProject project) {
-        this.project = project;
+    public void setJavaProject(IJavaProject javaProject) {
+        this.javaProject = javaProject;
     }
 
-    public IJavaProject getProject() {
-        return project;
+    public IJavaProject getJavaProject() {
+        return javaProject;
     }
 
     public String getProjectName() {
@@ -239,11 +239,15 @@ public class PresenterConfigModel extends ModelObject {
     public IPackageFragment getSelectedPackage() {
         return selectedPackage;
     }
+    
+    public String getSelectedPackageAndNameAsSubPackage() {
+        return selectedPackage.getElementName() + "." + getName().toLowerCase();
+    }
 
     @Override
     public String toString() {
         String s = "{ PresenterConfigModel: ";
-        // s += "project=" + project.toString() + " ";
+        // s += "javaProject=" + javaProject.toString() + " ";
         s += "name=" + name + " ";
         s += "path=" + path + " ";
         s += " }";
