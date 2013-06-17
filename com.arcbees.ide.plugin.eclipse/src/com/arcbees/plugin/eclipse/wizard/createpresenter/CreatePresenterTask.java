@@ -1,5 +1,12 @@
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -31,7 +38,6 @@ public class CreatePresenterTask {
     }
 
     private void run() {
-
         fetchTemplates();
 
         createPresenterPackage();
@@ -78,11 +84,12 @@ public class CreatePresenterTask {
     private void createPresenterPackage() {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
-        
+
         String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
         boolean force = true; // TODO force
         try {
-            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, force, progressMonitor);
+            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, force,
+                    progressMonitor);
         } catch (JavaModelException e) {
             // TODO
             e.printStackTrace();
@@ -121,7 +128,21 @@ public class CreatePresenterTask {
 
     private void createPresenterViewUi() {
         RenderedTemplate rendered = createdNestedPresenter.getViewui();
-        createClass(rendered, true);
+
+        IFolder folder = (IFolder) presenterCreatedPackage.getResource();
+        IFile newFile = folder.getFile(rendered.getNameAndNoExt());
+
+        byte[] bytes = rendered.getContents().getBytes();
+        InputStream source = new ByteArrayInputStream(bytes);
+        try {
+            newFile.create(source, IResource.NONE, progressMonitor);
+        } catch (CoreException e) {
+            // TODO
+            e.printStackTrace();
+        }
+
+        // TODO logger
+        System.out.println("created ui binder");
     }
 
     /**
@@ -129,7 +150,9 @@ public class CreatePresenterTask {
      */
     private void createNameTokens() {
         RenderedTemplate rendered = createdNestedPresenter.getNameTokens().getNameTokens();
-        createClass(rendered, false);
+        // createClass(rendered, false);
+        // TODO does class exist already?
+        // TODO does the class exist in another package
     }
 
     /**
