@@ -1,4 +1,4 @@
-    package com.arcbees.plugin.eclipse.wizard.createpresenter;
+package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -9,14 +9,27 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.template.create.place.CreatedNameTokens;
@@ -46,9 +59,9 @@ public class CreatePresenterTask {
     private void run() {
         fetchTemplates();
 
-        createPresenterPackage();
+        String presenterPackageName = createPresenterPackage();
         createPresenterModule();
-        createPresenterModuleLinkForGin();
+        createPresenterModuleLinkForGin(presenterPackageName);
         createPresenter();
         createPresenterLinkInParent();
         createPresenterUiHandlers();
@@ -87,7 +100,7 @@ public class CreatePresenterTask {
     /**
      * create a sub package for the presenter classes
      */
-    private void createPresenterPackage() {
+    private String createPresenterPackage() {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
 
@@ -97,11 +110,12 @@ public class CreatePresenterTask {
             presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, force,
                     progressMonitor);
         } catch (JavaModelException e) {
-            // TODO
+            // TODO display error
             e.printStackTrace();
         }
         // TODO logger
         System.out.println("Created Package: " + presenterPackageName);
+        return presenterPackageName;
     }
 
     private void createPresenterModule() {
@@ -109,51 +123,125 @@ public class CreatePresenterTask {
         createClass(rendered, true);
     }
 
-    private void createPresenterModuleLinkForGin() {
-        //TODO search out gin module - has to implement AbstractPresenterModule
-        
+    /**
+     * TODO must have better search done next <<<~~~~~~~~~~~~~~~~~
+     */
+    private void createPresenterModuleLinkForGin(String presenterPackageName) {
+        // TODO search out gin module - has to implement AbstractPresenterModule
+
         // 1. first search parent
-        ICompilationUnit unit = findPresenterModuleInParentPackage();
+        ICompilationUnit unit = findPresenterModuleInParentPackage(presenterPackageName);
+        // 2. TODO walk parent for and look for gin
+        // 3. TODO at the client level try client.gin
+        // 4. TODO search all filter by GinModule interface, this would be easy (could do this next for ease)
+
         if (unit != null) {
-            createPresenterGinlink(unit);
+            try {
+                createPresenterGinlink(unit);
+            } catch (JavaModelException | MalformedTreeException | BadLocationException e) {
+                // TODO display error
+                e.printStackTrace();
+            }
         }
-        
-        // 2. TODO search client.gin
-        // 3. TODO search all
-    }
-    
-    private void createPresenterGinlink(ICompilationUnit unit) {
-        String source = null;
-        try {
-            source = unit.getSource();
-        } catch (JavaModelException e) {
-            e.printStackTrace();
-        }
-        
-        Document document = new Document(source);
-        // TODO modify method
-        
-        // TODO logger
-        System.out.println("Added presenter gin install into " + unit.getElementName());
     }
 
-    private ICompilationUnit findPresenterModuleInParentPackage() {
+    /**
+     * TODO extract this possibly, but I think I'll wait till I get into slots
+     * before I do it see what is common.
+     */
+    private void createPresenterGinlink(ICompilationUnit unit) throws JavaModelException, MalformedTreeException,
+            BadLocationException {
+        Document document = new Document(unit.getSource());
+
+        CompilationUnit astRoot = initAstRoot(unit);
+
+        // creation of ASTRewrite
+        ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
+
+        // find the configure method
+        MethodDeclaration method = findMethod(astRoot, "configure");
+        if (method == null) {
+            // TODO throw exception
+            return;
+        }
+
+        // presenter import
+        String fileNameForModule = createdNestedPresenter.getModule().getFileName();
+        String importName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage() + "." + fileNameForModule;
+        String[] presenterPackage = importName.split("\\.");
+        ImportDeclaration importDeclaration = astRoot.getAST().newImportDeclaration();
+        importDeclaration.setName(astRoot.getAST().newName(presenterPackage));
+        ListRewrite lrw = rewrite.getListRewrite(astRoot, CompilationUnit.IMPORTS_PROPERTY);
+        lrw.insertLast(importDeclaration, null);
+
+        // presenter configure method install(new Module());
+        String moduleName = fileNameForModule + "()";
+        String installModuleStatement = "install(new " + moduleName + ");";
+
+        Block block = method.getBody();
+        ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+        ASTNode placeHolder = rewrite.createStringPlaceholder(installModuleStatement, ASTNode.EMPTY_STATEMENT);
+        listRewrite.insertFirst(placeHolder, null);
+
+        // computation of the text edits
+        TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
+
+        // computation of the new source code
+        edits.apply(document);
+        String newSource = document.get();
+
+        // update of the compilation unit and save it
+        boolean force = true;
+        IBuffer buffer = unit.getBuffer();
+        buffer.setContents(newSource);
+        buffer.save(progressMonitor, force);
+
+        // TODO logger
+        System.out.println("Added presenter gin install into " + unit.getElementName() + " " + installModuleStatement);
+    }
+
+    private MethodDeclaration findMethod(CompilationUnit astRoot, String methodName) {
+        MethodDeclaration[] methods = ((TypeDeclaration) astRoot.types().get(0)).getMethods();
+        if (methods == null) {
+            return null;
+        }
+
+        for (MethodDeclaration method : methods) {
+            if (method.getName().toString().contains(methodName)) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * creation of DOM/AST from a ICompilationUnit
+     */
+    private CompilationUnit initAstRoot(ICompilationUnit unit) {
+        ASTParser parser = ASTParser.newParser(AST.JLS4);
+        parser.setSource(unit);
+        CompilationUnit astRoot = (CompilationUnit) parser.createAST(progressMonitor);
+        return astRoot;
+    }
+
+    private ICompilationUnit findPresenterModuleInParentPackage(String presenterPackageName) {
         IPackageFragment packageSelected = presenterConfigModel.getSelectedPackage();
-        
+
         ICompilationUnit[] units = null;
         try {
             units = packageSelected.getCompilationUnits();
         } catch (JavaModelException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             // TODO display
             return null;
         }
-        
+
         String findUsedInterface = "GinModule";
         for (ICompilationUnit unit : units) {
             boolean found = findInterfaceUseInUnit(unit, findUsedInterface);
             if (found == true) {
-                return unit; 
+                return unit;
             }
         }
         return null;
