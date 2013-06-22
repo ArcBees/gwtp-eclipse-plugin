@@ -33,7 +33,7 @@ public class PackageHierarchy {
     private IProgressMonitor progressMonitor;
     private PresenterConfigModel presenterConfigModel;
     private Map<String, PackageHierarchyElement> packagesIndex;
-    
+
     public PackageHierarchy(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
         this.progressMonitor = progressMonitor;
@@ -77,7 +77,7 @@ public class PackageHierarchy {
         }
 
         String parentPackageElementName = getClientPackageElementName(packageElementName);
-        
+
         return find(parentPackageElementName);
     }
 
@@ -91,38 +91,39 @@ public class PackageHierarchy {
 
         return find(parentPackageElementName);
     }
-    
+
     /**
      * Takes the name like `tld.domain.project.client.child` and returns `tld.domain.project.client`
      */
-    public String getClientPackageElementName(String packageElementName) { {
-        if (packageElementName.matches(".*client$")) {
-            return packageElementName;
-        }
-        
-        String[] packageUnits = packageElementName.split("\\.");
-        String parentPackageElementName = "";
-        for (int i = 0; i < packageUnits.length - 1; i++) {
-            parentPackageElementName += packageUnits[i];
-            if (i < packageUnits.length - 2) {
-                parentPackageElementName += ".";
+    public String getClientPackageElementName(String packageElementName) {
+        {
+            if (packageElementName.matches(".*client$")) {
+                return packageElementName;
             }
-            
-            if (packageUnits[i].equals("client")) {
-                break;
+
+            String[] packageUnits = packageElementName.split("\\.");
+            String parentPackageElementName = "";
+            for (int i = 0; i < packageUnits.length - 1; i++) {
+                parentPackageElementName += packageUnits[i];
+                if (i < packageUnits.length - 2) {
+                    parentPackageElementName += ".";
+                }
+
+                if (packageUnits[i].equals("client")) {
+                    break;
+                }
             }
+
+            return parentPackageElementName;
         }
-        
-        return parentPackageElementName;
-    }
-        
+
     }
 
     public boolean isParentTheClientPackage(String packageElementName) {
         if (!packageElementName.contains(".")) {
             return false;
         }
-        
+
         if (packageElementName.matches(".*client$")) {
             return true;
         } else {
@@ -156,7 +157,7 @@ public class PackageHierarchy {
         }
         return foundUnit;
     }
-    
+
     public ICompilationUnit findInterfaceTypeInParentPackage(IPackageFragment packageSelected, String findTypeName) {
         ICompilationUnit[] units = null;
         try {
@@ -196,7 +197,8 @@ public class PackageHierarchy {
                 ITypeHierarchy hierarchy = type.newSupertypeHierarchy(progressMonitor);
                 IType[] interfaces = hierarchy.getAllInterfaces();
                 for (IType checkInterface : interfaces) {
-                    System.out.println("search unit checkInterface=" + checkInterface.getElementName() + " findTypeName=" + findTypeName);
+                    System.out.println("search unit checkInterface=" + checkInterface.getElementName()
+                            + " findTypeName=" + findTypeName);
                     if (checkInterface.getFullyQualifiedName('.').contains(findTypeName)) {
                         return true;
                     }
@@ -208,7 +210,7 @@ public class PackageHierarchy {
         }
         return false;
     }
-    
+
     private void startIndexing() {
         IPackageFragment[] packages = null;
         try {
