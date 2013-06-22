@@ -1,3 +1,19 @@
+/**
+ * Copyright 2013 ArcBees Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +47,8 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
+import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
+import com.arcbees.plugin.eclipse.util.PackageHierarchy;
 import com.arcbees.plugin.template.create.place.CreatedNameTokens;
 import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
 import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
@@ -50,6 +68,7 @@ public class CreatePresenterTask {
     private CreatedNestedPresenter createdNestedPresenter;
     private IPackageFragment presenterCreatedPackage;
     private boolean forceWriting;
+    private PackageHierarchy packageHierarchy;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
@@ -60,7 +79,9 @@ public class CreatePresenterTask {
         fetchTemplates();
 
         forceWriting = true;
-        
+
+        createPackageHierachyIndex();
+
         createPresenterPackage();
         createPresenterModule();
         createPresenterModuleLinkForGin();
@@ -72,8 +93,15 @@ public class CreatePresenterTask {
         createNameTokens();
         createNameTokensToken();
 
-        // TODO
+        // TODO logger
         System.out.println("finished");
+
+        // TODO focus on new presenter and open it up
+    }
+
+    private void createPackageHierachyIndex() {
+        packageHierarchy = new PackageHierarchy(presenterConfigModel, progressMonitor);
+        packageHierarchy.run();
     }
 
     private void fetchTemplates() {
@@ -125,17 +153,59 @@ public class CreatePresenterTask {
     }
 
     /**
-     * TODO must have better search done next <<<~~~~~~~~~~~~~~~~~
+     * TODO extraction of functions 
+     * TODO extract "GinModule" to constant 
+     * TODO extract "gin" to constant
      */
     private void createPresenterModuleLinkForGin() {
-        // TODO search out gin module - has to implement AbstractPresenterModule
-
         // 1. first search parent
-        ICompilationUnit unit = findPresenterModuleInParentPackage();
-        // 2. TODO walk parent for and look for gin
-        // 3. TODO at the client level try client.gin
-        // 4. TODO search all filter by GinModule interface, this would be easy (could do this next for ease)
+        ICompilationUnit unit = packageHierarchy.findInterfaceTypeInParentPackage(
+                presenterConfigModel.getSelectedPackage(), "GinModule");
 
+        // 2. next check if the parent is client and if so, scan all packages for ginModule
+        String selectedPackageElementName = presenterConfigModel.getSelectedPackage().getElementName();
+        if (unit == null && packageHierarchy.isParentTheClientPackage(selectedPackageElementName)) {
+            // first check for a gin pakcage with GinModule
+            PackageHierarchyElement hierarchyElement = packageHierarchy.findParentClientAndAddPackage(
+                    selectedPackageElementName, "gin");
+            if (hierarchyElement != null) {
+                IPackageFragment clienPackage = hierarchyElement.getPackageFragment();
+                unit = packageHierarchy.findInterfaceTypeInParentPackage(clienPackage, "GinModule");
+            }
+
+            // If no gin package check for any existence of a GinModule
+            // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
+            if (unit == null) {
+                unit = packageHierarchy.findFirstInterfaceType("GinModule");
+                // TODO logger
+                System.out
+                        .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+            }
+        }
+
+        // 3. walk up next parent for and look for gin module
+        if (unit == null) {
+            if (selectedPackageElementName.contains("client")) {
+                PackageHierarchyElement hierarchyElement = packageHierarchy.findParent(selectedPackageElementName);
+
+                if (hierarchyElement.getPackageFragment() != null) {
+                    IPackageFragment parentParentPackage = hierarchyElement.getPackageFragment();
+                    unit = packageHierarchy.findInterfaceTypeInParentPackage(parentParentPackage, "GinModule");
+                }
+            }
+        }
+
+        // 4. search all filter by GinModule interface, this would be easy
+        // If no gin package check for any existence of a GinModule
+        // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
+        if (unit == null) {
+            unit = packageHierarchy.findFirstInterfaceType("GinModule");
+            // TODO logger
+            System.out
+                    .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+        }
+
+        // (could do this next for ease)
         if (unit != null) {
             try {
                 createPresenterGinlink(unit);
@@ -143,12 +213,14 @@ public class CreatePresenterTask {
                 // TODO display error
                 e.printStackTrace();
             }
+        } else {
+            // TODO display error, wasn't able to install gin module
+            System.out.println("Error: Wasn't able to install Module");
         }
     }
 
     /**
-     * TODO extract this possibly, but I think I'll wait till I get into slots
-     * before I do it see what is common.
+     * TODO extract this possibly, but I think I'll wait till I get into slots before I do it see what is common.
      */
     private void createPresenterGinlink(ICompilationUnit unit) throws JavaModelException, MalformedTreeException,
             BadLocationException {
@@ -222,31 +294,6 @@ public class CreatePresenterTask {
         parser.setSource(unit);
         CompilationUnit astRoot = (CompilationUnit) parser.createAST(progressMonitor);
         return astRoot;
-    }
-
-    private ICompilationUnit findPresenterModuleInParentPackage() {
-        IPackageFragment packageSelected = presenterConfigModel.getSelectedPackage();
-
-        ICompilationUnit[] units = null;
-        try {
-            units = packageSelected.getCompilationUnits();
-        } catch (JavaModelException e) {
-            e.printStackTrace();
-            // TODO display error
-            return null;
-        }
-
-        String findUsedInterface = "GinModule";
-        for (ICompilationUnit unit : units) {
-            boolean found = findInterfaceUseInUnit(unit, findUsedInterface);
-            if (found == true) {
-                return unit;
-            }
-        }
-        
-        // TODO display error
-        
-        return null;
     }
 
     private boolean findInterfaceUseInUnit(ICompilationUnit unit, String findUsedInterface) {
