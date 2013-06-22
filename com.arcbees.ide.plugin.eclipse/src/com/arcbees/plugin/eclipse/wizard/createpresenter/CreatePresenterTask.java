@@ -8,7 +8,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -50,6 +49,7 @@ public class CreatePresenterTask {
     private IProgressMonitor progressMonitor;
     private CreatedNestedPresenter createdNestedPresenter;
     private IPackageFragment presenterCreatedPackage;
+    private boolean forceWriting;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
@@ -59,9 +59,11 @@ public class CreatePresenterTask {
     private void run() {
         fetchTemplates();
 
-        String presenterPackageName = createPresenterPackage();
+        forceWriting = true;
+        
+        createPresenterPackage();
         createPresenterModule();
-        createPresenterModuleLinkForGin(presenterPackageName);
+        createPresenterModuleLinkForGin();
         createPresenter();
         createPresenterLinkInParent();
         createPresenterUiHandlers();
@@ -79,7 +81,7 @@ public class CreatePresenterTask {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
         presenterOptions.setName(presenterConfigModel.getName());
-        // TODO more options...
+        // TODO add more options...
 
         if (presenterConfigModel.getNestedPresenter()) {
             fetchNestedTemplate(presenterOptions);
@@ -91,23 +93,22 @@ public class CreatePresenterTask {
     }
 
     private void fetchNestedTemplate(PresenterOptions presenterOptions) {
-        // TODO translate options
+        // TODO translate more options
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
         createdNestedPresenter = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
     }
 
     /**
-     * create a sub package for the presenter classes
+     * Create a sub package for the presenter classes
      */
     private String createPresenterPackage() {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
 
         String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
-        boolean force = true; // TODO force
         try {
-            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, force,
+            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
             // TODO display error
@@ -120,17 +121,17 @@ public class CreatePresenterTask {
 
     private void createPresenterModule() {
         RenderedTemplate rendered = createdNestedPresenter.getModule();
-        createClass(rendered, true);
+        createClass(rendered, forceWriting);
     }
 
     /**
      * TODO must have better search done next <<<~~~~~~~~~~~~~~~~~
      */
-    private void createPresenterModuleLinkForGin(String presenterPackageName) {
+    private void createPresenterModuleLinkForGin() {
         // TODO search out gin module - has to implement AbstractPresenterModule
 
         // 1. first search parent
-        ICompilationUnit unit = findPresenterModuleInParentPackage(presenterPackageName);
+        ICompilationUnit unit = findPresenterModuleInParentPackage();
         // 2. TODO walk parent for and look for gin
         // 3. TODO at the client level try client.gin
         // 4. TODO search all filter by GinModule interface, this would be easy (could do this next for ease)
@@ -191,10 +192,9 @@ public class CreatePresenterTask {
         String newSource = document.get();
 
         // update of the compilation unit and save it
-        boolean force = true;
         IBuffer buffer = unit.getBuffer();
         buffer.setContents(newSource);
-        buffer.save(progressMonitor, force);
+        buffer.save(progressMonitor, forceWriting);
 
         // TODO logger
         System.out.println("Added presenter gin install into " + unit.getElementName() + " " + installModuleStatement);
@@ -211,12 +211,11 @@ public class CreatePresenterTask {
                 return method;
             }
         }
-
         return null;
     }
 
     /**
-     * creation of DOM/AST from a ICompilationUnit
+     * Creation of DOM/AST from a ICompilationUnit.
      */
     private CompilationUnit initAstRoot(ICompilationUnit unit) {
         ASTParser parser = ASTParser.newParser(AST.JLS4);
@@ -225,7 +224,7 @@ public class CreatePresenterTask {
         return astRoot;
     }
 
-    private ICompilationUnit findPresenterModuleInParentPackage(String presenterPackageName) {
+    private ICompilationUnit findPresenterModuleInParentPackage() {
         IPackageFragment packageSelected = presenterConfigModel.getSelectedPackage();
 
         ICompilationUnit[] units = null;
@@ -233,7 +232,7 @@ public class CreatePresenterTask {
             units = packageSelected.getCompilationUnits();
         } catch (JavaModelException e) {
             e.printStackTrace();
-            // TODO display
+            // TODO display error
             return null;
         }
 
@@ -244,22 +243,25 @@ public class CreatePresenterTask {
                 return unit;
             }
         }
+        
+        // TODO display error
+        
         return null;
     }
 
     private boolean findInterfaceUseInUnit(ICompilationUnit unit, String findUsedInterface) {
         try {
             for (IType type : unit.getTypes()) {
-                ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
+                ITypeHierarchy hierarchy = type.newSupertypeHierarchy(progressMonitor);
                 IType[] interfaces = hierarchy.getAllInterfaces();
-                for (IType inter : interfaces) {
-                    System.out.println("interfac=" + inter.getElementName());
-                    if (inter.getFullyQualifiedName('.').contains(findUsedInterface)) {
+                for (IType checkInterface : interfaces) {
+                    if (checkInterface.getFullyQualifiedName('.').contains(findUsedInterface)) {
                         return true;
                     }
                 }
             }
         } catch (JavaModelException e) {
+            // TODO display error
             e.printStackTrace();
         }
         return false;
@@ -267,7 +269,7 @@ public class CreatePresenterTask {
 
     private void createPresenter() {
         RenderedTemplate rendered = createdNestedPresenter.getPresenter();
-        createClass(rendered, true);
+        createClass(rendered, forceWriting);
     }
 
     private void createPresenterLinkInParent() {
@@ -276,12 +278,12 @@ public class CreatePresenterTask {
 
     private void createPresenterUiHandlers() {
         RenderedTemplate rendered = createdNestedPresenter.getUihandlers();
-        createClass(rendered, true);
+        createClass(rendered, forceWriting);
     }
 
     private void createPresenterView() {
         RenderedTemplate rendered = createdNestedPresenter.getView();
-        createClass(rendered, true);
+        createClass(rendered, forceWriting);
     }
 
     private void createPresenterViewUi() {
@@ -295,12 +297,9 @@ public class CreatePresenterTask {
         try {
             newFile.create(source, IResource.NONE, progressMonitor);
         } catch (CoreException e) {
-            // TODO
+            // TODO or throw exception
             e.printStackTrace();
         }
-
-        // TODO logger
-        System.out.println("created ui binder");
     }
 
     /**
