@@ -16,6 +16,8 @@
 
 package com.arcbees.plugin.eclipse.wizard.createproject;
 
+import java.io.File;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -32,42 +34,39 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
-import com.arcbees.plugin.eclipse.validators.DirectoryExistsValidator;
 import com.arcbees.plugin.eclipse.validators.ModuleNameValidator;
+import com.arcbees.plugin.eclipse.validators.NewProjectArtifactIdValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
-import com.arcbees.plugin.eclipse.validators.ProjectNameValidator;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.core.databinding.beans.BeanProperties;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
-    private Text projectName;
     private Text packageName;
-    private Text workspacePath;
+    private Text newProjectPath;
     private Text moduleName;
     private Text groupId;
     private Text artifactId;
     private ProjectConfigModel projectConfigModel;
-    private Button btnWorkspaceBrowse;
 
     public CreateProjectPage(ProjectConfigModel projectConfigModel) {
         super("wizardPageCreateProject");
-        
+
         this.projectConfigModel = projectConfigModel;
-        
+
         setMessage("Create a GWT-Platform project.");
         setPageComplete(false);
 
@@ -82,40 +81,24 @@ public class CreateProjectPage extends WizardPage {
         setControl(container);
         container.setLayout(new GridLayout(1, false));
 
-        Label lblProjectName = new Label(container, SWT.NONE);
-        lblProjectName.setText("Project Name: 'My Project'");
-
-        projectName = new Text(container, SWT.BORDER);
-        projectName.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                checkProjectName();
-            }
-        });
-        GridData gd_projectName = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_projectName.widthHint = 516;
-        projectName.setLayoutData(gd_projectName);
-
-        Label lblPackageName = new Label(container, SWT.NONE);
-        lblPackageName.setText("Package Name: 'com.arcbees.project'");
-
-        packageName = new Text(container, SWT.BORDER);
-        packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-
-        Label lblNewLabel = new Label(container, SWT.NONE);
-        lblNewLabel.setText("Module Name: 'Project'");
-
-        moduleName = new Text(container, SWT.BORDER);
-        GridData gd_moduleName = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_moduleName.widthHint = 550;
-        moduleName.setLayoutData(gd_moduleName);
-
         Group grpMaven = new Group(container, SWT.NONE);
         GridData gd_grpMaven = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
         gd_grpMaven.widthHint = 571;
         grpMaven.setLayoutData(gd_grpMaven);
         grpMaven.setLayout(new GridLayout(1, false));
         grpMaven.setText("Maven");
+
+        Label lblArtifactid = new Label(grpMaven, SWT.NONE);
+        lblArtifactid.setText("ArtifactId: 'myproject'");
+
+        artifactId = new Text(grpMaven, SWT.BORDER);
+        artifactId.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                checkProjectName();
+            }
+        });
+        artifactId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
         Label lblGroupid = new Label(grpMaven, SWT.NONE);
         lblGroupid.setText("GroupId: 'com.arcbees.project'");
@@ -125,54 +108,42 @@ public class CreateProjectPage extends WizardPage {
         gd_groupId.widthHint = 556;
         groupId.setLayoutData(gd_groupId);
 
-        Label lblArtifactid = new Label(grpMaven, SWT.NONE);
-        lblArtifactid.setText("ArtifactId: 'myproject'");
+        Group grpJavaProject = new Group(container, SWT.NONE);
+        GridData gd_grpJavaProject = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_grpJavaProject.widthHint = 571;
+        grpJavaProject.setLayoutData(gd_grpJavaProject);
+        grpJavaProject.setLayout(new GridLayout(1, false));
+        grpJavaProject.setText("Java Project");
 
-        artifactId = new Text(grpMaven, SWT.BORDER);
-        artifactId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        Label lblNewLabel = new Label(grpJavaProject, SWT.NONE);
+        GridData gd_lblNewLabel = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+        gd_lblNewLabel.widthHint = 556;
+        lblNewLabel.setLayoutData(gd_lblNewLabel);
+        lblNewLabel.setText("GWT Module Name: 'Project'");
+
+        moduleName = new Text(grpJavaProject, SWT.BORDER);
+        moduleName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
+        Label lblPackageName = new Label(grpJavaProject, SWT.NONE);
+        lblPackageName.setText("Package Name: 'com.arcbees.project'");
+
+        packageName = new Text(grpJavaProject, SWT.BORDER);
+        packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
         Group grpLocation = new Group(container, SWT.NONE);
         grpLocation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-        grpLocation.setText("Location");
-        grpLocation.setLayout(new GridLayout(2, false));
+        grpLocation.setText("Workspace");
+        grpLocation.setLayout(new GridLayout(1, false));
 
-        Button cbCustomLocation = new Button(grpLocation, SWT.CHECK);
-        cbCustomLocation.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                Button cb = (Button) e.getSource();
-                boolean selected = cb.getSelection();
-                workspacePath.setEnabled(selected);
-                btnWorkspaceBrowse.setEnabled(selected);
+        Label lblNewProjectPath = new Label(grpLocation, SWT.NONE);
+        lblNewProjectPath.setText("New Project Path");
 
-                // Reset workspace path when disabled
-                if (!selected) {
-                    checkProjectName();
-                }
-            }
-        });
-        cbCustomLocation.setText("Put project in custom location:");
-        new Label(grpLocation, SWT.NONE);
+        newProjectPath = new Text(grpLocation, SWT.BORDER);
+        GridData gd_newProjectPath = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+        gd_newProjectPath.widthHint = 556;
+        newProjectPath.setLayoutData(gd_newProjectPath);
+        newProjectPath.setEnabled(false);
 
-        workspacePath = new Text(grpLocation, SWT.BORDER);
-        GridData gd_workspacePath = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_workspacePath.widthHint = 466;
-        workspacePath.setLayoutData(gd_workspacePath);
-        workspacePath.setEnabled(false);
-
-        btnWorkspaceBrowse = new Button(grpLocation, SWT.NONE);
-        btnWorkspaceBrowse.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                DirectoryDialog dirDialog = new DirectoryDialog(parent.getShell());
-                dirDialog.setText("Select a new project directory");
-                String selectedDir = dirDialog.open();
-                workspacePath.setText(selectedDir);
-            }
-        });
-        btnWorkspaceBrowse.setEnabled(false);
-        btnWorkspaceBrowse.setText("Browse");
-        
         Button btnHint = new Button(container, SWT.NONE);
         btnHint.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -191,10 +162,10 @@ public class CreateProjectPage extends WizardPage {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
         for (Object o : bindings) {
             Binding binding = (Binding) o;
-            
+
             // Validator feedback control
             ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
-            
+
             binding.getTarget().addChangeListener(new IChangeListener() {
                 @Override
                 public void handleChange(ChangeEvent event) {
@@ -205,33 +176,36 @@ public class CreateProjectPage extends WizardPage {
     }
 
     private void checkProjectName() {
-        String name = projectName.getText().trim();
+        String projectName = artifactId.getText();
 
         // No zero length property names
-        if (name.trim().length() == 0) {
+        if (projectName.trim().length() == 0) {
             return;
         }
 
+        checkIfProjectExist(projectName);
+
+        // setup the project path
+        String workspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+        String projectPath = workspacePath + File.separator + projectName;
+
+        projectConfigModel.setWorkspacePath(workspacePath);
+        projectConfigModel.setProjectPath(projectPath);
+        newProjectPath.setText(projectPath);
+    }
+
+    private boolean checkIfProjectExist(String projectName) {
         // Pre-setup the project for checking
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
         // Display error when project exists or remove error when it doesn't
         if (project.exists()) {
-            setMessage("The '" + name + "' project name already exists.", IMessageProvider.ERROR);
+            setMessage("The '" + projectName + "' project name already exists.", IMessageProvider.ERROR);
         } else {
             setMessage(null);
         }
 
-        // Convert spaces to file friendly characters
-        name = name.replace(" ", "_");
-
-        // Reflect the projects workspace path with the created project name
-        String basePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-        basePath += "/" + name;
-        workspacePath.setText(basePath);
-        
-        projectConfigModel.setWorkspacePath(basePath);
-        projectConfigModel.setLocation(ResourcesPlugin.getWorkspace().getRoot().getLocation());
+        return project.exists();
     }
 
     /**
@@ -253,61 +227,55 @@ public class CreateProjectPage extends WizardPage {
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
-    
+
     private void hintFillIn() {
-        projectName.setText("My Project");
         packageName.setText("com.arcbees.project");
         moduleName.setText("Project");
         groupId.setText("com.arcbees.project");
         artifactId.setText("myproject");
-        
-        projectConfigModel.setProjectName(projectName.getText());
+
         projectConfigModel.setPackageName(packageName.getText());
         projectConfigModel.setModuleName(moduleName.getText());
         projectConfigModel.setGroupId(groupId.getText());
         projectConfigModel.setArtifactId(artifactId.getText());
-        
+
         checkProjectName();
     }
-    
+
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
-        IObservableValue observeTextProjectNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(projectName);
-        IObservableValue bytesProjectConfigModelgetProjectNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getProjectName());
+        IObservableValue observeTextArtifactIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(artifactId);
+        IObservableValue artifactIdProjectConfigModelObserveValue = BeanProperties.value("artifactId").observe(
+                projectConfigModel);
         UpdateValueStrategy strategy = new UpdateValueStrategy();
-        strategy.setBeforeSetValidator(new ProjectNameValidator());
-        bindingContext.bindValue(observeTextProjectNameObserveWidget, bytesProjectConfigModelgetProjectNameObserveValue, strategy, null);
-        //
-        IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
-        IObservableValue bytesProjectConfigModelgetPackageNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getPackageName());
-        UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
-        strategy_1.setBeforeSetValidator(new PackageNameValidator());
-        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesProjectConfigModelgetPackageNameObserveValue, strategy_1, null);
-        //
-        IObservableValue observeTextModuleNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(moduleName);
-        IObservableValue bytesProjectConfigModelgetModuleNameObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getModuleName());
-        UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
-        strategy_2.setBeforeSetValidator(new ModuleNameValidator());
-        bindingContext.bindValue(observeTextModuleNameObserveWidget, bytesProjectConfigModelgetModuleNameObserveValue, strategy_2, null);
+        strategy.setBeforeSetValidator(new NewProjectArtifactIdValidator());
+        bindingContext.bindValue(observeTextArtifactIdObserveWidget, artifactIdProjectConfigModelObserveValue,
+                strategy, null);
         //
         IObservableValue observeTextGroupIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(groupId);
-        IObservableValue bytesProjectConfigModelgetGroupIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getGroupId());
+        IObservableValue groupIdProjectConfigModelObserveValue = BeanProperties.value("groupId").observe(
+                projectConfigModel);
+        UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
+        strategy_1.setBeforeSetValidator(new PackageNameValidator());
+        bindingContext.bindValue(observeTextGroupIdObserveWidget, groupIdProjectConfigModelObserveValue, strategy_1,
+                null);
+        //
+        IObservableValue observeTextModuleNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(moduleName);
+        IObservableValue moduleNameProjectConfigModelObserveValue = BeanProperties.value("moduleName").observe(
+                projectConfigModel);
+        UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
+        strategy_2.setBeforeSetValidator(new ModuleNameValidator());
+        bindingContext.bindValue(observeTextModuleNameObserveWidget, moduleNameProjectConfigModelObserveValue,
+                strategy_2, null);
+        //
+        IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
+        IObservableValue packageNameProjectConfigModelObserveValue = BeanProperties.value("packageName").observe(
+                projectConfigModel);
         UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
         strategy_3.setBeforeSetValidator(new PackageNameValidator());
-        bindingContext.bindValue(observeTextGroupIdObserveWidget, bytesProjectConfigModelgetGroupIdObserveValue, strategy_3, null);
-        //
-        IObservableValue observeTextArtifactIdObserveWidget = WidgetProperties.text(SWT.Modify).observe(artifactId);
-        IObservableValue bytesProjectConfigModelgetArtifactIdObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getArtifactId());
-        UpdateValueStrategy strategy_4 = new UpdateValueStrategy();
-        strategy_4.setBeforeSetValidator(new ProjectNameValidator());
-        bindingContext.bindValue(observeTextArtifactIdObserveWidget, bytesProjectConfigModelgetArtifactIdObserveValue, strategy_4, null);
-        //
-        IObservableValue observeTextWorkspacePathObserveWidget = WidgetProperties.text(SWT.Modify).observe(workspacePath);
-        IObservableValue bytesProjectConfigModelgetWorkspacePathObserveValue = PojoProperties.value("bytes").observe(projectConfigModel.getWorkspacePath());
-        UpdateValueStrategy strategy_5 = new UpdateValueStrategy();
-        strategy_5.setBeforeSetValidator(new DirectoryExistsValidator());
-        bindingContext.bindValue(observeTextWorkspacePathObserveWidget, bytesProjectConfigModelgetWorkspacePathObserveValue, strategy_5, null);
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, packageNameProjectConfigModelObserveValue, null,
+                strategy_3);
         //
         return bindingContext;
     }

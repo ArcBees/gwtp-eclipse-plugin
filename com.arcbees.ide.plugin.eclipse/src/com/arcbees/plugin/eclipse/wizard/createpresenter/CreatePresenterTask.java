@@ -92,11 +92,14 @@ public class CreatePresenterTask {
         createPresenterViewUi();
         createNameTokens();
         createNameTokensToken();
-
-        // TODO logger
-        System.out.println("finished");
+        
+        // TODO format the new source with the project settings
+        //formatUnits();
 
         // TODO focus on new presenter and open it up
+        
+        // TODO logger
+        System.out.println("finished");
     }
 
     private void createPackageHierachyIndex() {

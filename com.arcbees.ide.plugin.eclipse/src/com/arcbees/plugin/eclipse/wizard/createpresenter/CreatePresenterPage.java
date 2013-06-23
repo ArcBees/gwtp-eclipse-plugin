@@ -34,10 +34,12 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -47,7 +49,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -55,6 +56,7 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
@@ -240,11 +242,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
             }
         });
-        btnRevealcontentevent.setSelection(true);
-        btnRevealcontentevent.setBounds(10, 10, 136, 18);
+        btnRevealcontentevent.setBounds(396, 10, 136, 18);
         btnRevealcontentevent.setText("RevealContentEvent");
 
         btnRevealrootcontentevent = new Button(grpNestedPresenterOptions, SWT.RADIO);
+        btnRevealrootcontentevent.setSelection(true);
         btnRevealrootcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -253,7 +255,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
             }
         });
-        btnRevealrootcontentevent.setBounds(164, 10, 162, 18);
+        btnRevealrootcontentevent.setBounds(10, 10, 162, 18);
         btnRevealrootcontentevent.setText("RevealRootContentEvent");
 
         btnRevealrootlayoutcontentevent = new Button(grpNestedPresenterOptions, SWT.RADIO);
@@ -265,7 +267,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(true);
             }
         });
-        btnRevealrootlayoutcontentevent.setBounds(332, 10, 200, 18);
+        btnRevealrootlayoutcontentevent.setBounds(178, 10, 200, 18);
         btnRevealrootlayoutcontentevent.setText("RevealRootLayoutContentEvent");
 
         contentSlot = new Text(grpNestedPresenterOptions, SWT.BORDER);
@@ -407,18 +409,21 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnPrepareFromRequest.setBounds(224, 86, 209, 18);
         btnPrepareFromRequest.setText("Use Prepare from Request");
         m_bindingContext = initDataBindings();
-        
+
         observeBindingChanges();
+
+        // TODO disable till later - activate when I get to it
+        grpConvenienceOptions.setVisible(false);
     }
-    
+
     private void observeBindingChanges() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
         for (Object o : bindings) {
             Binding binding = (Binding) o;
-            
+
             // Validator feedback control
             ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
-            
+
             binding.getTarget().addChangeListener(new IChangeListener() {
                 @Override
                 public void handleChange(ChangeEvent event) {
@@ -427,7 +432,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             });
         }
     }
-    
+
     /**
      * Check all the bindings validators for OK status.
      */
@@ -443,22 +448,20 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 success = false;
             }
             // TODO
-            //System.out.println("istatus=" + istatus.getMessage() + " ... " + istatus.isOK() + " " + presenterConfigModel);
+            // System.out.println("istatus=" + istatus.getMessage() + " ... " + istatus.isOK() + " " +
+            // presenterConfigModel);
         }
 
         // All statuses passed, enable next button.
         setPageComplete(success);
     }
 
-    // TODO when the dialog opens up, focus on the package directory first, if
-    // its selected
     private void openPackageSelectionDialog() {
-        DirectoryDialog dirDialog = new DirectoryDialog(parent.getShell());
-        dirDialog.setText("Select a directory to put the presenter in.");
-        String selectedDir = dirDialog.open();
-        if (selectedDir != null) {
-            packageName.setText(selectedDir);
-            presenterConfigModel.setPath(selectedDir);
+        IPackageFragment selectedPackage = selectClientPackage();
+        if (selectedPackage != null) {
+            packageName.setText(selectedPackage.getElementName());
+            presenterConfigModel.setPath(selectedPackage.getElementName());
+            presenterConfigModel.setSelectedPackage(selectedPackage);
         }
     }
 
@@ -468,7 +471,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         if (selectedPackage != null) {
             name = selectedPackage.getElementName();
         }
-        
+
         if (selectedPackage != null && name.contains(".client")) {
             presenterConfigModel.setPath(name);
             presenterConfigModel.setSelectedPackage(selectedPackage);
@@ -480,7 +483,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                     IMessageProvider.ERROR);
         }
     }
-    
+
     private IPackageFragment getPackageSelection() {
         IWorkbench workbench = PlatformUI.getWorkbench();
         IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
@@ -554,29 +557,71 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
         return null;
     }
+
+    private IPackageFragment selectClientPackage() {
+        IJavaElement selectedPackage = presenterConfigModel.getSelectedPackage();
+        if (selectedPackage == null) {
+            String message = "This can't drill the available selections. To fix it, close the dialog and then " +
+            		"focus on the project by selecting any element with in the java project you want to use this tool for.";
+            MessageDialog.openError(getShell(), "Error", message);
+            return null;
+        }
+        IJavaElement ipackage = selectedPackage.getParent();
+        IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { ipackage });
+
+        IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+        int flag = PackageSelectionDialog.F_HIDE_EMPTY_INNER;
+        PackageSelectionDialog dialog = new PackageSelectionDialog(getShell(), progressService, flag, scope);
+        dialog.setFilter("*client*"); //$NON-NLS-1$
+        dialog.setIgnoreCase(false);
+        dialog.setMultipleSelection(false);
+        int status = dialog.open();
+
+        if (Window.OK == status) {
+            Object[] result = dialog.getResult();
+            if (result != null && result.length == 1) {
+                return (IPackageFragment) result[0];
+            }
+        }
+
+        return null;
+    }
+
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
         IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
-        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getPath());
+        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(
+                presenterConfigModel.getPath());
         UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
         strategy_1.setBeforeSetValidator(new PackageNameValidator());
-        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue, strategy_1, null);
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue,
+                strategy_1, null);
         //
-        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(btnNestedPresenter);
-        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget, nestedPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(
+                btnNestedPresenter);
+        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget,
+                nestedPresenterPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(btnPresenterWidget);
-        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget, presenterWidgetPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(
+                btnPresenterWidget);
+        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget,
+                presenterWidgetPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(btnPopupPresenter);
-        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget, popupPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(
+                btnPopupPresenter);
+        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget,
+                popupPresenterPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
-        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(presenterConfigModel);
+        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(
+                presenterConfigModel);
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setBeforeSetValidator(new PackageNameValidator());
         bindingContext.bindValue(observeTextNameObserveWidget, namePresenterConfigModelObserveValue, strategy, null);
