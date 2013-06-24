@@ -124,9 +124,26 @@ public class CreatePresenterTask {
     }
 
     private void fetchNestedTemplate(PresenterOptions presenterOptions) {
-        // TODO translate more options
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
+        nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
+        nestedPresenterOptions.setCrawlable(presenterConfigModel.getCrawlable());
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
+        
+        // TODO this will have to reflect the static field from 'NameTokens.field'
+        //nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
+        
+        if (presenterConfigModel.getRevealInRoot()) {
+            nestedPresenterOptions.setRevealType("Root");    
+        } else if (presenterConfigModel.getRevealInRootLayout()) {
+            nestedPresenterOptions.setRevealType("RootLayout");
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            nestedPresenterOptions.setRevealType("RootPopup");
+            // TODO
+        } else if (presenterConfigModel.getRevealInSlot()) {
+            //TODO presenterOptions.setRevealType(TODO);
+            //TODO presenterOptions.setSlot(TODO);
+        }
+        
         createdNestedPresenter = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
     }
 
@@ -242,7 +259,7 @@ public class CreatePresenterTask {
         }
 
         // presenter import
-        String fileNameForModule = createdNestedPresenter.getModule().getFileName();
+        String fileNameForModule = createdNestedPresenter.getModule().getNameAndNoExts();
         String importName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage() + "." + fileNameForModule;
         String[] presenterPackage = importName.split("\\.");
         ImportDeclaration importDeclaration = astRoot.getAST().newImportDeclaration();
@@ -297,24 +314,6 @@ public class CreatePresenterTask {
         parser.setSource(unit);
         CompilationUnit astRoot = (CompilationUnit) parser.createAST(progressMonitor);
         return astRoot;
-    }
-
-    private boolean findInterfaceUseInUnit(ICompilationUnit unit, String findUsedInterface) {
-        try {
-            for (IType type : unit.getTypes()) {
-                ITypeHierarchy hierarchy = type.newSupertypeHierarchy(progressMonitor);
-                IType[] interfaces = hierarchy.getAllInterfaces();
-                for (IType checkInterface : interfaces) {
-                    if (checkInterface.getFullyQualifiedName('.').contains(findUsedInterface)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (JavaModelException e) {
-            // TODO display error
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private void createPresenter() {

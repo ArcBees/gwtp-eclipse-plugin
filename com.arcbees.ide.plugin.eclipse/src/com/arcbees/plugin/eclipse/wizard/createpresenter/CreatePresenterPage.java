@@ -62,6 +62,7 @@ import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
+import org.eclipse.swt.layout.RowLayout;
 
 public class CreatePresenterPage extends NewTypeWizardPage {
     private DataBindingContext m_bindingContext;
@@ -88,6 +89,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnRevealrootlayoutcontentevent;
     private Button btnIsAPlace;
     private Button btnIsCrawlable;
+    private Button btnCodesplit;
+    private Button btnSelectContentSlot;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -197,14 +200,94 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnPopupPresenter.setText("Popup Presenter");
 
         grpNestedPresenterOptions = new Group(container, SWT.NONE);
-        grpNestedPresenterOptions.setLayout(null);
+        grpNestedPresenterOptions.setLayout(new GridLayout(1, false));
         GridData gd_grpNestedPresenterOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpNestedPresenterOptions.heightHint = 107;
+        gd_grpNestedPresenterOptions.heightHint = 165;
         gd_grpNestedPresenterOptions.widthHint = 562;
         grpNestedPresenterOptions.setLayoutData(gd_grpNestedPresenterOptions);
         grpNestedPresenterOptions.setText("Nested Presenter Options");
 
-        btnIsAPlace = new Button(grpNestedPresenterOptions, SWT.CHECK);
+        Group grpReveal = new Group(grpNestedPresenterOptions, SWT.NONE);
+        grpReveal.setText("Reveal In");
+        grpReveal.setLayout(null);
+        GridData gd_grpReveal = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_grpReveal.heightHint = 31;
+        gd_grpReveal.widthHint = 538;
+        grpReveal.setLayoutData(gd_grpReveal);
+
+        btnRevealrootcontentevent = new Button(grpReveal, SWT.RADIO);
+        btnRevealrootcontentevent.setBounds(10, 10, 47, 18);
+        btnRevealrootcontentevent.setSelection(true);
+        btnRevealrootcontentevent.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                btnRevealcontentevent.setSelection(false);
+                btnRevealrootcontentevent.setSelection(true);
+                btnRevealrootlayoutcontentevent.setSelection(false);
+                contentSlot.setEnabled(false);
+                btnSelectContentSlot.setEnabled(false);
+            }
+        });
+        btnRevealrootcontentevent.setText("Root");
+
+        btnRevealrootlayoutcontentevent = new Button(grpReveal, SWT.RADIO);
+        btnRevealrootlayoutcontentevent.setBounds(62, 10, 82, 18);
+        btnRevealrootlayoutcontentevent.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                btnRevealcontentevent.setSelection(false);
+                btnRevealrootcontentevent.setSelection(false);
+                btnRevealrootlayoutcontentevent.setSelection(true);
+                contentSlot.setEnabled(false);
+                btnSelectContentSlot.setEnabled(false);
+            }
+        });
+        btnRevealrootlayoutcontentevent.setText("RootLayout");
+
+        btnRevealcontentevent = new Button(grpReveal, SWT.RADIO);
+        btnRevealcontentevent.setBounds(149, 10, 42, 18);
+        btnRevealcontentevent.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                btnRevealcontentevent.setSelection(true);
+                btnRevealrootcontentevent.setSelection(false);
+                btnRevealrootlayoutcontentevent.setSelection(false);
+                contentSlot.setEnabled(true);
+                btnSelectContentSlot.setEnabled(true);
+            }
+        });
+        btnRevealcontentevent.setText("Slot");
+
+        btnSelectContentSlot = new Button(grpReveal, SWT.NONE);
+        btnSelectContentSlot.setEnabled(false);
+        btnSelectContentSlot.setBounds(441, 6, 87, 28);
+        btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                IType contentSlotType = selectContentSlot();
+                if (contentSlotType != null) {
+                    String slot = contentSlotType.getFullyQualifiedName('.');
+                    contentSlot.setText(slot);
+                }
+            }
+        });
+        btnSelectContentSlot.setText("Select Slot");
+
+        contentSlot = new Text(grpReveal, SWT.BORDER);
+        contentSlot.setEnabled(false);
+        contentSlot.setBounds(198, 10, 237, 19);
+
+        Composite composite_1 = new Composite(grpNestedPresenterOptions, SWT.NONE);
+        GridData gd_composite_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_composite_1.widthHint = 551;
+        composite_1.setLayoutData(gd_composite_1);
+
+        Group grpPlace = new Group(composite_1, SWT.NONE);
+        grpPlace.setBounds(0, 10, 449, 60);
+        grpPlace.setText("Place");
+
+        btnIsAPlace = new Button(grpPlace, SWT.CHECK);
+        btnIsAPlace.setBounds(10, 11, 71, 18);
         btnIsAPlace.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -218,78 +301,33 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 }
             }
         });
-        btnIsAPlace.setBounds(10, 68, 71, 18);
         btnIsAPlace.setText("Is a Place");
 
-        nameToken = new Text(grpNestedPresenterOptions, SWT.BORDER);
-        nameToken.setBounds(164, 68, 269, 19);
-
-        Label lblPlaceNamenametoken = new Label(grpNestedPresenterOptions, SWT.NONE);
-        lblPlaceNamenametoken.setBounds(87, 70, 72, 14);
+        Label lblPlaceNamenametoken = new Label(grpPlace, SWT.NONE);
+        lblPlaceNamenametoken.setBounds(87, 13, 72, 14);
         lblPlaceNamenametoken.setToolTipText("Name of the place.");
         lblPlaceNamenametoken.setText("NameToken:");
 
-        Button btnCodesplit = new Button(grpNestedPresenterOptions, SWT.CHECK);
-        btnCodesplit.setBounds(10, 93, 93, 18);
-        btnCodesplit.setText("CodeSplit");
+        nameToken = new Text(grpPlace, SWT.BORDER);
+        nameToken.setBounds(165, 10, 161, 19);
 
-        btnRevealcontentevent = new Button(grpNestedPresenterOptions, SWT.RADIO);
-        btnRevealcontentevent.addSelectionListener(new SelectionAdapter() {
+        btnIsCrawlable = new Button(grpPlace, SWT.CHECK);
+        btnIsCrawlable.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                btnRevealcontentevent.setSelection(true);
-                btnRevealrootcontentevent.setSelection(false);
-                btnRevealrootlayoutcontentevent.setSelection(false);
             }
         });
-        btnRevealcontentevent.setBounds(396, 10, 136, 18);
-        btnRevealcontentevent.setText("RevealContentEvent");
-
-        btnRevealrootcontentevent = new Button(grpNestedPresenterOptions, SWT.RADIO);
-        btnRevealrootcontentevent.setSelection(true);
-        btnRevealrootcontentevent.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                btnRevealcontentevent.setSelection(false);
-                btnRevealrootcontentevent.setSelection(true);
-                btnRevealrootlayoutcontentevent.setSelection(false);
-            }
-        });
-        btnRevealrootcontentevent.setBounds(10, 10, 162, 18);
-        btnRevealrootcontentevent.setText("RevealRootContentEvent");
-
-        btnRevealrootlayoutcontentevent = new Button(grpNestedPresenterOptions, SWT.RADIO);
-        btnRevealrootlayoutcontentevent.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                btnRevealcontentevent.setSelection(false);
-                btnRevealrootcontentevent.setSelection(false);
-                btnRevealrootlayoutcontentevent.setSelection(true);
-            }
-        });
-        btnRevealrootlayoutcontentevent.setBounds(178, 10, 200, 18);
-        btnRevealrootlayoutcontentevent.setText("RevealRootLayoutContentEvent");
-
-        contentSlot = new Text(grpNestedPresenterOptions, SWT.BORDER);
-        contentSlot.setBounds(10, 39, 349, 19);
-
-        Button btnSelectContentSlot = new Button(grpNestedPresenterOptions, SWT.NONE);
-        btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                IType contentSlotType = selectContentSlot();
-                if (contentSlotType != null) {
-                    String slot = contentSlotType.getFullyQualifiedName('.');
-                    contentSlot.setText(slot);
-                }
-            }
-        });
-        btnSelectContentSlot.setBounds(365, 34, 152, 28);
-        btnSelectContentSlot.setText("Select Content Slot");
-
-        btnIsCrawlable = new Button(grpNestedPresenterOptions, SWT.CHECK);
-        btnIsCrawlable.setBounds(439, 68, 93, 18);
+        btnIsCrawlable.setBounds(338, 11, 85, 18);
         btnIsCrawlable.setText("Is crawlable");
+
+        Group grpExtra = new Group(composite_1, SWT.NONE);
+        grpExtra.setText("More Options");
+        grpExtra.setBounds(455, 11, 96, 60);
+        grpExtra.setLayout(null);
+
+        btnCodesplit = new Button(grpExtra, SWT.CHECK);
+        btnCodesplit.setBounds(10, 10, 73, 18);
+        btnCodesplit.setText("CodeSplit");
 
         grpPopupPresenter = new Group(container, SWT.NONE);
         grpPopupPresenter.setLayout(null);
@@ -561,8 +599,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private IPackageFragment selectClientPackage() {
         IJavaElement selectedPackage = presenterConfigModel.getSelectedPackage();
         if (selectedPackage == null) {
-            String message = "This can't drill the available selections. To fix it, close the dialog and then " +
-            		"focus on the project by selecting any element with in the java project you want to use this tool for.";
+            String message = "This can't drill the available selections. To fix it, close the dialog and then "
+                    + "focus on the project by selecting any element with in the java project you want to use this tool for.";
             MessageDialog.openError(getShell(), "Error", message);
             return null;
         }
@@ -625,6 +663,58 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setBeforeSetValidator(new PackageNameValidator());
         bindingContext.bindValue(observeTextNameObserveWidget, namePresenterConfigModelObserveValue, strategy, null);
+        //
+        IObservableValue observeSelectionBtnRevealrootcontenteventObserveWidget = WidgetProperties.selection().observe(
+                btnRevealrootcontentevent);
+        IObservableValue revealInRootPresenterConfigModelObserveValue = BeanProperties.value("revealInRoot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootcontenteventObserveWidget,
+                revealInRootPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnRevealrootlayoutcontenteventObserveWidget = WidgetProperties.selection()
+                .observe(btnRevealrootlayoutcontentevent);
+        IObservableValue revealInRootLayoutPresenterConfigModelObserveValue = BeanProperties
+                .value("revealInRootLayout").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootlayoutcontenteventObserveWidget,
+                revealInRootLayoutPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnRevealcontenteventObserveWidget = WidgetProperties.selection().observe(
+                btnRevealcontentevent);
+        IObservableValue revealInSlotPresenterConfigModelObserveValue = BeanProperties.value("revealInSlot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealcontenteventObserveWidget,
+                revealInSlotPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeTextContentSlotObserveWidget = WidgetProperties.text(SWT.Modify).observe(contentSlot);
+        IObservableValue contentSlotPresenterConfigModelObserveValue = BeanProperties.value("contentSlot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeTextContentSlotObserveWidget, contentSlotPresenterConfigModelObserveValue,
+                null, null);
+        //
+        IObservableValue observeSelectionBtnIsAPlaceObserveWidget = WidgetProperties.selection().observe(btnIsAPlace);
+        IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, null,
+                null);
+        //
+        IObservableValue observeTextNameTokenObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameToken);
+        IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, null,
+                null);
+        //
+        IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(
+                btnIsCrawlable);
+        IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnIsCrawlableObserveWidget,
+                crawlablePresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnCodesplitObserveWidget = WidgetProperties.selection().observe(btnCodesplit);
+        IObservableValue codeSplitPresenterConfigModelObserveValue = BeanProperties.value("codeSplit").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue,
+                null, null);
         //
         return bindingContext;
     }

@@ -26,17 +26,23 @@ public class PresenterConfigModel extends ModelObject {
     private boolean nestedPresenter;
     private boolean presenterWidget;
     private boolean popupPresenter;
+    
+    // nested
     private String contentSlot;
     private boolean place;
     private String nameToken;
     private boolean crawlable;
     private boolean codeSplit;
+    private boolean revealInRoot;
+    private boolean revealInRootLayout;
+    private boolean revealInSlot;
 
+    // popup
     private boolean overridePopup;
     private String popupPanel;
 
+    // extra
     private boolean singleton;
-
     private boolean addUiHandlers;
     private boolean onBind;
     private boolean onHide;
@@ -48,7 +54,9 @@ public class PresenterConfigModel extends ModelObject {
     private IPackageFragment selectedPackage;
 
     public PresenterConfigModel() {
+        // default settings
         nestedPresenter = true;
+        revealInRoot = true;
     }
 
     public void setJavaProject(IJavaProject javaProject) {
@@ -242,6 +250,30 @@ public class PresenterConfigModel extends ModelObject {
     
     public String getSelectedPackageAndNameAsSubPackage() {
         return selectedPackage.getElementName() + "." + getName().toLowerCase();
+    }
+    
+    public boolean getRevealInRoot() {
+        return revealInRoot;
+    }
+
+    public void setRevealInRoot(boolean revealInRoot) {
+        firePropertyChange("revealInRoot", this.revealInRoot, this.revealInRoot = revealInRoot);
+    }
+
+    public boolean getRevealInRootLayout() {
+        return revealInRootLayout;
+    }
+
+    public void setRevealInRootLayout(boolean revealInRootLayout) {
+        firePropertyChange("revealInRootLayout", this.revealInRootLayout, this.revealInRootLayout = revealInRootLayout);
+    }
+
+    public boolean getRevealInSlot() {
+        return revealInSlot;
+    }
+
+    public void setRevealInSlot(boolean revealInSlot) {
+        firePropertyChange("revealInSlot", this.revealInSlot, this.revealInSlot = revealInSlot);
     }
 
     @Override
