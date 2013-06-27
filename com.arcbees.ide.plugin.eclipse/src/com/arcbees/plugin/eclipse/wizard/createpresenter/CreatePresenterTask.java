@@ -26,10 +26,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -41,14 +41,21 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
 import com.arcbees.plugin.eclipse.util.PackageHierarchy;
+import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
 import com.arcbees.plugin.template.create.place.CreatedNameTokens;
 import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
 import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
@@ -86,20 +93,25 @@ public class CreatePresenterTask {
         createPresenterModule();
         createPresenterModuleLinkForGin();
         createPresenter();
-        createPresenterLinkInParent();
         createPresenterUiHandlers();
         createPresenterView();
         createPresenterViewUi();
         createNameTokens();
         createNameTokensToken();
-        
+
         // TODO format the new source with the project settings
-        //formatUnits();
+        formatUnits();
 
         // TODO focus on new presenter and open it up
-        
+
         // TODO logger
         System.out.println("finished");
+    }
+
+    private void formatUnits() {
+        // TODO
+        // ToolFactory.createCodeFormatter(options)
+        // .format(kind, string, offset, length, indentationLevel, lineSeparator);
     }
 
     private void createPackageHierachyIndex() {
@@ -128,22 +140,21 @@ public class CreatePresenterTask {
         nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
         nestedPresenterOptions.setCrawlable(presenterConfigModel.getCrawlable());
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
-        
+
         // TODO this will have to reflect the static field from 'NameTokens.field'
-        //nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
-        
+        // nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
+
         if (presenterConfigModel.getRevealInRoot()) {
-            nestedPresenterOptions.setRevealType("Root");    
+            nestedPresenterOptions.setRevealType("Root");
         } else if (presenterConfigModel.getRevealInRootLayout()) {
             nestedPresenterOptions.setRevealType("RootLayout");
         } else if (presenterConfigModel.getPopupPresenter()) {
             nestedPresenterOptions.setRevealType("RootPopup");
-            // TODO
         } else if (presenterConfigModel.getRevealInSlot()) {
-            //TODO presenterOptions.setRevealType(TODO);
-            //TODO presenterOptions.setSlot(TODO);
+            nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlotAsString());
         }
-        
+        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
+
         createdNestedPresenter = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
     }
 
@@ -173,9 +184,7 @@ public class CreatePresenterTask {
     }
 
     /**
-     * TODO extraction of functions 
-     * TODO extract "GinModule" to constant 
-     * TODO extract "gin" to constant
+     * TODO extraction of functions TODO extract "GinModule" to constant TODO extract "gin" to constant
      */
     private void createPresenterModuleLinkForGin() {
         // 1. first search parent
@@ -319,10 +328,6 @@ public class CreatePresenterTask {
     private void createPresenter() {
         RenderedTemplate rendered = createdNestedPresenter.getPresenter();
         createClass(rendered, forceWriting);
-    }
-
-    private void createPresenterLinkInParent() {
-        // TODO slots
     }
 
     private void createPresenterUiHandlers() {

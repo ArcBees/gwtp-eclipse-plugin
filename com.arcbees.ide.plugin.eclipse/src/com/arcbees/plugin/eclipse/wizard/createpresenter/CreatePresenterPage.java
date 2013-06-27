@@ -16,6 +16,9 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -25,14 +28,23 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.ResolvedSourceField;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -40,11 +52,14 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,13 +71,12 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
-import org.eclipse.swt.layout.RowLayout;
 
 public class CreatePresenterPage extends NewTypeWizardPage {
     private DataBindingContext m_bindingContext;
@@ -226,6 +240,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
                 contentSlot.setEnabled(false);
                 btnSelectContentSlot.setEnabled(false);
+                
+                presenterConfigModel.setRevealInRoot(true);
+                presenterConfigModel.setRevealInRootLayout(false);
+                presenterConfigModel.setRevealInSlot(false);
             }
         });
         btnRevealrootcontentevent.setText("Root");
@@ -240,6 +258,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(true);
                 contentSlot.setEnabled(false);
                 btnSelectContentSlot.setEnabled(false);
+                
+                presenterConfigModel.setRevealInRoot(false);
+                presenterConfigModel.setRevealInRootLayout(true);
+                presenterConfigModel.setRevealInSlot(false);
             }
         });
         btnRevealrootlayoutcontentevent.setText("RootLayout");
@@ -254,6 +276,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
                 contentSlot.setEnabled(true);
                 btnSelectContentSlot.setEnabled(true);
+                
+                presenterConfigModel.setRevealInRoot(false);
+                presenterConfigModel.setRevealInRootLayout(false);
+                presenterConfigModel.setRevealInSlot(true);
             }
         });
         btnRevealcontentevent.setText("Slot");
@@ -264,11 +290,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                IType contentSlotType = selectContentSlot();
-                if (contentSlotType != null) {
-                    String slot = contentSlotType.getFullyQualifiedName('.');
-                    contentSlot.setText(slot);
-                }
+                selectContentSlot();
             }
         });
         btnSelectContentSlot.setText("Select Slot");
@@ -551,27 +573,91 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnIsCrawlable.setEnabled(false);
     }
 
-    private IType selectContentSlot() {
-        IJavaProject project = presenterConfigModel.getJavaProject();
-        if (project == null) {
-            // TODO notify the user that a project is not selected.
-            return null;
-        }
+    private void selectContentSlot() {
+        final List<ResolvedSourceField> contentSlots = new ArrayList<ResolvedSourceField>();
 
+        String stringPattern = "ContentSlot";
+        int searchFor = IJavaSearchConstants.ANNOTATION_TYPE;
+        int limitTo = IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE;
+        int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+        SearchPattern searchPattern = SearchPattern.createPattern(stringPattern, searchFor, limitTo, matchRule);
+
+        IJavaProject project = presenterConfigModel.getJavaProject();
         IJavaElement[] elements = new IJavaElement[] { project };
         IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
-        FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, getWizard()
-                .getContainer(), scope, IJavaSearchConstants.CLASS, new ContentSlotSelectionExtension(
-                presenterConfigModel));
-        dialog.setTitle("ContentSlot Selection");
-        dialog.setMessage("Select the Presenter's parent. Parent must implement 'HasSlots'.");
-        dialog.setInitialPattern("*Presenter");
+        SearchRequestor requestor = new SearchRequestor() {
+            public void acceptSearchMatch(SearchMatch match) {
+                // TODO
+                System.out.println(match);
 
-        if (dialog.open() == Window.OK) {
-            return (IType) dialog.getFirstResult();
+                ResolvedSourceField element = (ResolvedSourceField) match.getElement();
+                contentSlots.add(element);
+            }
+        };
+
+        SearchEngine searchEngine = new SearchEngine();
+        SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+        try {
+            searchEngine.search(searchPattern, particpant, scope, requestor, new NullProgressMonitor());
+        } catch (CoreException e) {
+            // TODO
+            e.printStackTrace();
         }
-        return null;
+
+        ResolvedSourceField[] contentListArray = new ResolvedSourceField[contentSlots.size()];
+        contentSlots.toArray(contentListArray);
+
+        ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), new ILabelProvider() {
+            @Override
+            public void removeListener(ILabelProviderListener listener) {
+            }
+
+            @Override
+            public boolean isLabelProperty(Object element, String property) {
+                return false;
+            }
+
+            @Override
+            public void dispose() {
+            }
+
+            @Override
+            public void addListener(ILabelProviderListener listener) {
+            }
+
+            @Override
+            public String getText(Object element) {
+                ResolvedSourceField rsf = (ResolvedSourceField) element;
+                String name = rsf.getElementName();
+                IType type = rsf.getDeclaringType();
+                return type.getElementName() + "." + name;
+            }
+
+            @Override
+            public Image getImage(Object element) {
+                return null;
+            }
+        });
+
+        dialog.setElements(contentListArray);
+        dialog.setTitle("Which operating system are you using");
+
+        // User pressed cancel
+        if (dialog.open() != Window.OK) {
+            contentSlot.setText("");
+            presenterConfigModel.setContentSlot(null);
+            return;
+        }
+
+        Object[] result = dialog.getResult();
+        if (result == null || result.length < 1) {
+            contentSlot.setText("");
+        } else {
+            ResolvedSourceField rsf = (ResolvedSourceField) result[0];
+            presenterConfigModel.setContentSlot(rsf);
+            contentSlot.setText(presenterConfigModel.getContentSlotAsString());
+        }
     }
 
     private IType selectPopupWidget() {

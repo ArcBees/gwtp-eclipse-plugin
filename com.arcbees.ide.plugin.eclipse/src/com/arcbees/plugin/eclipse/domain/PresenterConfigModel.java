@@ -18,6 +18,8 @@ package com.arcbees.plugin.eclipse.domain;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.core.ResolvedSourceField;
 
 public class PresenterConfigModel extends ModelObject {
     private IJavaProject javaProject;
@@ -28,7 +30,7 @@ public class PresenterConfigModel extends ModelObject {
     private boolean popupPresenter;
     
     // nested
-    private String contentSlot;
+    private ResolvedSourceField contentSlot;
     private boolean place;
     private String nameToken;
     private boolean crawlable;
@@ -111,11 +113,30 @@ public class PresenterConfigModel extends ModelObject {
         firePropertyChange("popupPresenter", this.popupPresenter, this.popupPresenter = popupPresenter);
     }
 
-    public String getContentSlot() {
+    public ResolvedSourceField getContentSlot() {
         return contentSlot;
     }
+    
+    public String getContentSlotAsString() {
+        if (contentSlot == null) {
+            return "";
+        }
+        String name = contentSlot.getElementName();
+        IType type = contentSlot.getDeclaringType();
+        String s = type.getElementName() + "." + name;
+        return s;
+    }
+    
+    public String getContentSlotImport() {
+        if (contentSlot == null) {
+            return "";
+        }
+        IType itype = contentSlot.getDeclaringType();
+        String importString = "import " + itype.getFullyQualifiedName() + ";";
+        return importString;
+    }
 
-    public void setContentSlot(String contentSlot) {
+    public void setContentSlot(ResolvedSourceField contentSlot) {
         firePropertyChange("contentSlot", this.contentSlot, this.contentSlot = contentSlot);
     }
 
