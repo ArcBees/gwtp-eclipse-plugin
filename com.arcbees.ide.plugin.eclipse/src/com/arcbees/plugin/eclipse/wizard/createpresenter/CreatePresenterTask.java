@@ -18,6 +18,7 @@ package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.ResolvedSourceType;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -56,8 +58,8 @@ import org.eclipse.text.edits.TextEdit;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.util.PackageHierarchy;
 import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
-import com.arcbees.plugin.template.create.place.CreatedNameTokens;
 import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
+import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
 import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
 import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
@@ -76,6 +78,7 @@ public class CreatePresenterTask {
     private IPackageFragment presenterCreatedPackage;
     private boolean forceWriting;
     private PackageHierarchy packageHierarchy;
+    private IPackageFragment nameTokensPackage;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
@@ -83,11 +86,13 @@ public class CreatePresenterTask {
     }
 
     private void run() {
+        createPackageHierachyIndex();
+        
+        nameTokensPackage = createNameTokensPackage();
+        
         fetchTemplates();
 
         forceWriting = true;
-
-        createPackageHierachyIndex();
 
         createPresenterPackage();
         createPresenterModule();
@@ -138,11 +143,10 @@ public class CreatePresenterTask {
     private void fetchNestedTemplate(PresenterOptions presenterOptions) {
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
         nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
+        nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
+        nestedPresenterOptions.setNameTokensPackageName(nameTokensPackage.getElementName());
         nestedPresenterOptions.setCrawlable(presenterConfigModel.getCrawlable());
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
-
-        // TODO this will have to reflect the static field from 'NameTokens.field'
-        // nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
 
         if (presenterConfigModel.getRevealInRoot()) {
             nestedPresenterOptions.setRevealType("Root");
@@ -162,20 +166,48 @@ public class CreatePresenterTask {
      * Create a sub package for the presenter classes
      */
     private String createPresenterPackage() {
+        String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
+        createPackage(presenterPackageName, forceWriting);
+        // TODO logger
+        System.out.println("Created Package: " + presenterPackageName);
+        return presenterPackageName;
+    }
+    
+    private IPackageFragment createPackage(String packageName, boolean forceWriting) {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
-
-        String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
+        
+        IPackageFragment created = null;
         try {
-            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, forceWriting,
+            created = presenterCreatedPackage = selectedPackageRoot.createPackageFragment(packageName, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
             // TODO display error
             e.printStackTrace();
         }
-        // TODO logger
-        System.out.println("Created Package: " + presenterPackageName);
-        return presenterPackageName;
+        
+        return created;
+    }
+    
+    private IPackageFragment createNameTokensPackage() {
+        IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
+        String selectedPackageString = selectedPackage.getElementName();
+        PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
+        String clientPackageString = clientPackage.getPackageFragment().getElementName();
+        
+        // name tokens pacakage ...client.place.NameTokens
+        clientPackageString += ".place";
+        
+        PackageHierarchyElement nameTokensPackageExists = packageHierarchy.find(clientPackageString);
+   
+        IPackageFragment createdNameTokensPackage = null;
+        if (nameTokensPackageExists != null && nameTokensPackageExists.getPackageFragment() != null) {
+            createdNameTokensPackage = nameTokensPackageExists.getPackageFragment();
+        } else { 
+            createdNameTokensPackage = createPackage(clientPackageString, forceWriting);
+        }
+        
+        return createdNameTokensPackage;
     }
 
     private void createPresenterModule() {
@@ -360,10 +392,36 @@ public class CreatePresenterTask {
      * create name tokens class, if it doesn't exist
      */
     private void createNameTokens() {
-        RenderedTemplate rendered = createdNestedPresenter.getNameTokens().getNameTokens();
-        // createClass(rendered, false);
-        // TODO does class exist already?
-        // TODO does the class exist in another package
+        List<ResolvedSourceType> foundNameTokens = packageHierarchy.findClassName("NameTokens");
+        if (foundNameTokens != null && foundNameTokens.size() > 0) { // exists
+            addMethodsToNameTokens(foundNameTokens);
+        } else { // exists
+            createNewNameTokens();
+        }
+    }
+
+    private void addMethodsToNameTokens(List<ResolvedSourceType> foundNameTokens) {
+        ResolvedSourceType rst = foundNameTokens.get(0);
+        
+        // TODO
+    }
+
+    private void createNewNameTokens() {
+        CreatedNameTokens createdNameTokensTemplate = createdNestedPresenter.getNameTokens();
+        RenderedTemplate rendered = createdNameTokensTemplate.getNameTokens();
+        String className = rendered.getNameAndNoExt();
+        String contents = rendered.getContents();
+
+        try {
+            nameTokensPackage.createCompilationUnit(className, contents, forceWriting, progressMonitor);
+        } catch (JavaModelException e) {
+            // TODO display error
+            System.out.println("Couldn't create className: " + className);
+            e.printStackTrace();
+        }
+        
+        // TODO
+        System.out.println("test");
     }
 
     /**
