@@ -151,6 +151,10 @@ public class PresenterConfigModel extends ModelObject {
     public String getNameToken() {
         return nameToken;
     }
+    
+    public String getNameTokenMethodName() {
+        return "get" + nameToken.substring(0,1).toUpperCase() + nameToken.substring(1);
+    }
 
     public void setNameToken(String nameToken) {
         firePropertyChange("nameToken", this.nameToken, this.nameToken = nameToken);

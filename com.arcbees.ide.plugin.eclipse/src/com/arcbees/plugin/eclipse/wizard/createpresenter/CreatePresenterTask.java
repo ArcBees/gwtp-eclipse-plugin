@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -42,13 +40,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchParticipant;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.ResolvedSourceType;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -87,9 +78,9 @@ public class CreatePresenterTask {
 
     private void run() {
         createPackageHierachyIndex();
-        
+
         nameTokensPackage = createNameTokensPackage();
-        
+
         fetchTemplates();
 
         forceWriting = true;
@@ -172,11 +163,11 @@ public class CreatePresenterTask {
         System.out.println("Created Package: " + presenterPackageName);
         return presenterPackageName;
     }
-    
+
     private IPackageFragment createPackage(String packageName, boolean forceWriting) {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
-        
+
         IPackageFragment created = null;
         try {
             created = presenterCreatedPackage = selectedPackageRoot.createPackageFragment(packageName, forceWriting,
@@ -185,28 +176,28 @@ public class CreatePresenterTask {
             // TODO display error
             e.printStackTrace();
         }
-        
+
         return created;
     }
-    
+
     private IPackageFragment createNameTokensPackage() {
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         String selectedPackageString = selectedPackage.getElementName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
         String clientPackageString = clientPackage.getPackageFragment().getElementName();
-        
+
         // name tokens pacakage ...client.place.NameTokens
         clientPackageString += ".place";
-        
+
         PackageHierarchyElement nameTokensPackageExists = packageHierarchy.find(clientPackageString);
-   
+
         IPackageFragment createdNameTokensPackage = null;
         if (nameTokensPackageExists != null && nameTokensPackageExists.getPackageFragment() != null) {
             createdNameTokensPackage = nameTokensPackageExists.getPackageFragment();
-        } else { 
+        } else {
             createdNameTokensPackage = createPackage(clientPackageString, forceWriting);
         }
-        
+
         return createdNameTokensPackage;
     }
 
@@ -226,7 +217,7 @@ public class CreatePresenterTask {
         // 2. next check if the parent is client and if so, scan all packages for ginModule
         String selectedPackageElementName = presenterConfigModel.getSelectedPackage().getElementName();
         if (unit == null && packageHierarchy.isParentTheClientPackage(selectedPackageElementName)) {
-            // first check for a gin pakcage with GinModule
+            // first check for a gin package with GinModule
             PackageHierarchyElement hierarchyElement = packageHierarchy.findParentClientAndAddPackage(
                     selectedPackageElementName, "gin");
             if (hierarchyElement != null) {
@@ -394,16 +385,60 @@ public class CreatePresenterTask {
     private void createNameTokens() {
         List<ResolvedSourceType> foundNameTokens = packageHierarchy.findClassName("NameTokens");
         if (foundNameTokens != null && foundNameTokens.size() > 0) { // exists
-            addMethodsToNameTokens(foundNameTokens);
+            try {
+                addMethodsToNameTokens(foundNameTokens);
+            } catch (JavaModelException | MalformedTreeException | BadLocationException e) {
+                e.printStackTrace();
+            }
         } else { // exists
             createNewNameTokens();
         }
     }
 
-    private void addMethodsToNameTokens(List<ResolvedSourceType> foundNameTokens) {
+    private void addMethodsToNameTokens(List<ResolvedSourceType> foundNameTokens) throws JavaModelException,
+            MalformedTreeException, BadLocationException {
         ResolvedSourceType rst = foundNameTokens.get(0);
+        ICompilationUnit unit = rst.getCompilationUnit();
+        Document document = new Document(unit.getSource());
+        CompilationUnit astRoot = initAstRoot(unit);
+
+        // creation of ASTRewrite
+        ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
+
+        // find existing method
+        MethodDeclaration method = findMethod(astRoot, presenterConfigModel.getNameTokenMethodName());
+        if (method != null) {
+            // TODO already exists, display warning
+            return;
+        }
         
-        // TODO
+        CreatedNameTokens nameTokens = createdNestedPresenter.getNameTokens();
+        List<String> fields = nameTokens.getFields();
+        List<String> methods = nameTokens.getMethods();
+        String fieldSource = fields.get(0);
+        String methodSource = methods.get(0);
+
+        List types = astRoot.types();
+        ASTNode rootNode = (ASTNode) types.get(0);
+        ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+        
+        ASTNode fieldNode = rewrite.createStringPlaceholder(fieldSource, ASTNode.EMPTY_STATEMENT);
+        ASTNode methodNode = rewrite.createStringPlaceholder(methodSource, ASTNode.EMPTY_STATEMENT);
+        
+        listRewrite.insertFirst(fieldNode, null);
+        listRewrite.insertLast(methodNode, null);
+        
+        // computation of the text edits
+        TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
+
+        // computation of the new source code
+        edits.apply(document);
+        String newSource = document.get();
+
+        // update of the compilation unit and save it
+        IBuffer buffer = unit.getBuffer();
+        buffer.setContents(newSource);
+        buffer.save(progressMonitor, forceWriting);
     }
 
     private void createNewNameTokens() {
@@ -419,7 +454,7 @@ public class CreatePresenterTask {
             System.out.println("Couldn't create className: " + className);
             e.printStackTrace();
         }
-        
+
         // TODO
         System.out.println("test");
     }
