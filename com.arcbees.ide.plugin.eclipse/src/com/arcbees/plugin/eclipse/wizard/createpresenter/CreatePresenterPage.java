@@ -77,6 +77,8 @@ import org.eclipse.ui.progress.IProgressService;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
+import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
+import com.arcbees.plugin.eclipse.validators.PlaceValidator;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -115,6 +117,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnAddOnunbind;
     private Button btnUseManualReveal;
     private Button btnPrepareFromRequest;
+    private Binding bindValueForNameToken;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -327,10 +330,13 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 if (selected) {
                     nameToken.setEnabled(true);
                     btnIsCrawlable.setEnabled(true);
+                    nameToken.setFocus();
                 } else {
                     nameToken.setEnabled(false);
                     btnIsCrawlable.setEnabled(false);
+                    nameToken.setText("");
                 }
+                bindValueForNameToken.validateTargetToModel();
             }
         });
         btnIsAPlace.setText("Is a Place");
@@ -486,12 +492,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         observeBindingChanges();
     }
 
+    /**
+     * call only once, observes changes in the ui.
+     */
     private void observeBindingChanges() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
         for (Object o : bindings) {
             Binding binding = (Binding) o;
 
-            // Validator feedback control
+            // Add validator feedback control
             ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
 
             binding.getTarget().addChangeListener(new IChangeListener() {
@@ -517,9 +526,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             if (!istatus.isOK()) {
                 success = false;
             }
-            // TODO
-            // System.out.println("istatus=" + istatus.getMessage() + " ... " + istatus.isOK() + " " +
-            // presenterConfigModel);
         }
 
         // All statuses passed, enable next button.
@@ -581,6 +587,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpPresenterWidgetOptions.setVisible(false);
         nameToken.setEnabled(false);
         btnIsCrawlable.setEnabled(false);
+        name.setFocus();
     }
 
     private void selectContentSlot() {
@@ -720,10 +727,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
-    
-    /**
-     * auto generated
-     */
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
@@ -769,11 +772,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         //
         IObservableValue observeSelectionBtnIsAPlaceObserveWidget = WidgetProperties.selection().observe(btnIsAPlace);
         IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, null, null);
+        UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
+        strategy_3.setBeforeSetValidator(new PlaceValidator());
+        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, strategy_3, null);
         //
         IObservableValue observeTextNameTokenObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameToken);
         IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(presenterConfigModel);
-        bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, null, null);
+        UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
+        strategy_2.setBeforeSetValidator(new NameTokenValidator(btnIsAPlace));
+        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, strategy_2, null);
         //
         IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(btnIsCrawlable);
         IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(presenterConfigModel);
