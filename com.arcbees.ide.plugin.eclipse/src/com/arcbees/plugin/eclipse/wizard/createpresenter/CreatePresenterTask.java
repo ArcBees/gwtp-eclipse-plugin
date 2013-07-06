@@ -1,7 +1,25 @@
+/**
+ * Copyright 2013 ArcBees Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -12,9 +30,8 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -25,14 +42,21 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.internal.core.ResolvedSourceType;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.template.create.place.CreatedNameTokens;
+import com.arcbees.plugin.eclipse.util.CodeFormattingUtil;
+import com.arcbees.plugin.eclipse.util.PackageHierarchy;
+import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
+import com.arcbees.plugin.template.create.place.CreateNameTokens;
 import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
+import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
+import com.arcbees.plugin.template.domain.place.NameToken;
+import com.arcbees.plugin.template.domain.place.NameTokenOptions;
 import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
 import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
@@ -47,36 +71,73 @@ public class CreatePresenterTask {
 
     private PresenterConfigModel presenterConfigModel;
     private IProgressMonitor progressMonitor;
-    private CreatedNestedPresenter createdNestedPresenter;
+    private CreatedNestedPresenter createdNestedPresenterTemplates;
     private IPackageFragment presenterCreatedPackage;
     private boolean forceWriting;
+    private PackageHierarchy packageHierarchy;
+    private CreatedNameTokens createdNameTokenTemplates;
+    private IPackageFragment createdNameTokensPackage;
+    private CodeFormattingUtil codeFormatter;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
         this.progressMonitor = progressMonitor;
+
+        codeFormatter = new CodeFormattingUtil(presenterConfigModel.getJavaProject(), progressMonitor);
     }
 
     private void run() {
-        fetchTemplates();
+        createPackageHierachyIndex();
+
+        createNameTokensPackage();
+        createNametokensFile();
+
+        fetchTemplatesNameTokens();
+        fetchTemplatesNestedPresenter();
 
         forceWriting = true;
-        
+
+        createNameTokensFieldAndMethods();
         createPresenterPackage();
         createPresenterModule();
         createPresenterModuleLinkForGin();
         createPresenter();
-        createPresenterLinkInParent();
         createPresenterUiHandlers();
         createPresenterView();
         createPresenterViewUi();
-        createNameTokens();
-        createNameTokensToken();
 
-        // TODO
+        // TODO focus on new presenter and open it up
+
+        // TODO logger
         System.out.println("finished");
     }
 
-    private void fetchTemplates() {
+    private void createPackageHierachyIndex() {
+        packageHierarchy = new PackageHierarchy(presenterConfigModel, progressMonitor);
+        packageHierarchy.run();
+    }
+
+    private void fetchTemplatesNameTokens() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
+        NameToken token = new NameToken();
+        token.setCrawlable(presenterConfigModel.getCrawlable());
+        token.setToken(presenterConfigModel.getNameToken());
+
+        List<NameToken> nameTokens = new ArrayList<NameToken>();
+        nameTokens.add(token);
+
+        NameTokenOptions nameTokenOptions = new NameTokenOptions();
+        nameTokenOptions.setPackageName(createdNameTokensPackage.getElementName());
+        nameTokenOptions.setNameTokens(nameTokens);
+
+        boolean processFileOnly = false;
+        createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+    }
+
+    private void fetchTemplatesNestedPresenter() {
         // Translate options from PresenterConfigModel to PresenterOptions
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
@@ -93,49 +154,134 @@ public class CreatePresenterTask {
     }
 
     private void fetchNestedTemplate(PresenterOptions presenterOptions) {
-        // TODO translate more options
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
+        nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
+        nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
+        nestedPresenterOptions.setCrawlable(presenterConfigModel.getCrawlable());
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
-        createdNestedPresenter = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        nestedPresenterOptions.setNameToken(presenterConfigModel.getNameTokenWithClass());
+        nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
+
+        if (presenterConfigModel.getRevealInRoot()) {
+            nestedPresenterOptions.setRevealType("Root");
+        } else if (presenterConfigModel.getRevealInRootLayout()) {
+            nestedPresenterOptions.setRevealType("RootLayout");
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            nestedPresenterOptions.setRevealType("RootPopup");
+        } else if (presenterConfigModel.getRevealInSlot()) {
+            nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlotAsString());
+        }
+        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
+
+        createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
     }
 
     /**
      * Create a sub package for the presenter classes
      */
     private String createPresenterPackage() {
-        IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
-        IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
-
         String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
-        try {
-            presenterCreatedPackage = selectedPackageRoot.createPackageFragment(presenterPackageName, forceWriting,
-                    progressMonitor);
-        } catch (JavaModelException e) {
-            // TODO display error
-            e.printStackTrace();
-        }
+        createPackage(presenterPackageName, forceWriting);
         // TODO logger
         System.out.println("Created Package: " + presenterPackageName);
         return presenterPackageName;
     }
 
+    private IPackageFragment createPackage(String packageName, boolean forceWriting) {
+        IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
+        IPackageFragmentRoot selectedPackageRoot = (IPackageFragmentRoot) selectedPackage.getParent();
+
+        IPackageFragment created = null;
+        try {
+            created = presenterCreatedPackage = selectedPackageRoot.createPackageFragment(packageName, forceWriting,
+                    progressMonitor);
+        } catch (JavaModelException e) {
+            // TODO display error
+            e.printStackTrace();
+        }
+
+        return created;
+    }
+
+    private void createNameTokensPackage() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
+        IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
+        String selectedPackageString = selectedPackage.getElementName();
+        PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
+        String clientPackageString = clientPackage.getPackageFragment().getElementName();
+
+        // name tokens package ...client.place.NameTokens
+        clientPackageString += ".place";
+
+        PackageHierarchyElement nameTokensPackageExists = packageHierarchy.find(clientPackageString);
+
+        if (nameTokensPackageExists != null && nameTokensPackageExists.getPackageFragment() != null) {
+            createdNameTokensPackage = nameTokensPackageExists.getPackageFragment();
+        } else {
+            createdNameTokensPackage = createPackage(clientPackageString, forceWriting);
+        }
+    }
+
     private void createPresenterModule() {
-        RenderedTemplate rendered = createdNestedPresenter.getModule();
+        RenderedTemplate rendered = createdNestedPresenterTemplates.getModule();
         createClass(rendered, forceWriting);
     }
 
     /**
-     * TODO must have better search done next <<<~~~~~~~~~~~~~~~~~
+     * TODO extraction of functions TODO extract "GinModule" to constant TODO extract "gin" to constant
      */
     private void createPresenterModuleLinkForGin() {
-        // TODO search out gin module - has to implement AbstractPresenterModule
-
         // 1. first search parent
-        ICompilationUnit unit = findPresenterModuleInParentPackage();
-        // 2. TODO walk parent for and look for gin
-        // 3. TODO at the client level try client.gin
-        // 4. TODO search all filter by GinModule interface, this would be easy (could do this next for ease)
+        ICompilationUnit unit = packageHierarchy.findInterfaceTypeInParentPackage(
+                presenterConfigModel.getSelectedPackage(), "GinModule");
 
+        // 2. next check if the parent is client and if so, scan all packages for ginModule
+        String selectedPackageElementName = presenterConfigModel.getSelectedPackage().getElementName();
+        if (unit == null && packageHierarchy.isParentTheClientPackage(selectedPackageElementName)) {
+            // first check for a gin package with GinModule
+            PackageHierarchyElement hierarchyElement = packageHierarchy.findParentClientAndAddPackage(
+                    selectedPackageElementName, "gin");
+            if (hierarchyElement != null) {
+                IPackageFragment clienPackage = hierarchyElement.getPackageFragment();
+                unit = packageHierarchy.findInterfaceTypeInParentPackage(clienPackage, "GinModule");
+            }
+
+            // If no gin package check for any existence of a GinModule
+            // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
+            if (unit == null) {
+                unit = packageHierarchy.findFirstInterfaceType("GinModule");
+                // TODO logger
+                System.out
+                        .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+            }
+        }
+
+        // 3. walk up next parent for and look for gin module
+        if (unit == null) {
+            if (selectedPackageElementName.contains("client")) {
+                PackageHierarchyElement hierarchyElement = packageHierarchy.findParent(selectedPackageElementName);
+
+                if (hierarchyElement.getPackageFragment() != null) {
+                    IPackageFragment parentParentPackage = hierarchyElement.getPackageFragment();
+                    unit = packageHierarchy.findInterfaceTypeInParentPackage(parentParentPackage, "GinModule");
+                }
+            }
+        }
+
+        // 4. search all filter by GinModule interface, this would be easy
+        // If no gin package check for any existence of a GinModule
+        // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
+        if (unit == null) {
+            unit = packageHierarchy.findFirstInterfaceType("GinModule");
+            // TODO logger
+            System.out
+                    .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+        }
+
+        // (could do this next for ease)
         if (unit != null) {
             try {
                 createPresenterGinlink(unit);
@@ -143,12 +289,14 @@ public class CreatePresenterTask {
                 // TODO display error
                 e.printStackTrace();
             }
+        } else {
+            // TODO display error, wasn't able to install gin module
+            System.out.println("Error: Wasn't able to install Module");
         }
     }
 
     /**
-     * TODO extract this possibly, but I think I'll wait till I get into slots
-     * before I do it see what is common.
+     * TODO extract this possibly, but I think I'll wait till I get into slots before I do it see what is common.
      */
     private void createPresenterGinlink(ICompilationUnit unit) throws JavaModelException, MalformedTreeException,
             BadLocationException {
@@ -167,7 +315,7 @@ public class CreatePresenterTask {
         }
 
         // presenter import
-        String fileNameForModule = createdNestedPresenter.getModule().getFileName();
+        String fileNameForModule = createdNestedPresenterTemplates.getModule().getNameAndNoExts();
         String importName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage() + "." + fileNameForModule;
         String[] presenterPackage = importName.split("\\.");
         ImportDeclaration importDeclaration = astRoot.getAST().newImportDeclaration();
@@ -224,70 +372,26 @@ public class CreatePresenterTask {
         return astRoot;
     }
 
-    private ICompilationUnit findPresenterModuleInParentPackage() {
-        IPackageFragment packageSelected = presenterConfigModel.getSelectedPackage();
-
-        ICompilationUnit[] units = null;
-        try {
-            units = packageSelected.getCompilationUnits();
-        } catch (JavaModelException e) {
-            e.printStackTrace();
-            // TODO display error
-            return null;
-        }
-
-        String findUsedInterface = "GinModule";
-        for (ICompilationUnit unit : units) {
-            boolean found = findInterfaceUseInUnit(unit, findUsedInterface);
-            if (found == true) {
-                return unit;
-            }
-        }
-        
-        // TODO display error
-        
-        return null;
-    }
-
-    private boolean findInterfaceUseInUnit(ICompilationUnit unit, String findUsedInterface) {
-        try {
-            for (IType type : unit.getTypes()) {
-                ITypeHierarchy hierarchy = type.newSupertypeHierarchy(progressMonitor);
-                IType[] interfaces = hierarchy.getAllInterfaces();
-                for (IType checkInterface : interfaces) {
-                    if (checkInterface.getFullyQualifiedName('.').contains(findUsedInterface)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (JavaModelException e) {
-            // TODO display error
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     private void createPresenter() {
-        RenderedTemplate rendered = createdNestedPresenter.getPresenter();
+        RenderedTemplate rendered = createdNestedPresenterTemplates.getPresenter();
         createClass(rendered, forceWriting);
     }
 
-    private void createPresenterLinkInParent() {
-        // TODO slots
-    }
-
     private void createPresenterUiHandlers() {
-        RenderedTemplate rendered = createdNestedPresenter.getUihandlers();
+        if (!presenterConfigModel.getUseUiHandlers()) {
+            return;
+        }
+        RenderedTemplate rendered = createdNestedPresenterTemplates.getUihandlers();
         createClass(rendered, forceWriting);
     }
 
     private void createPresenterView() {
-        RenderedTemplate rendered = createdNestedPresenter.getView();
+        RenderedTemplate rendered = createdNestedPresenterTemplates.getView();
         createClass(rendered, forceWriting);
     }
 
     private void createPresenterViewUi() {
-        RenderedTemplate rendered = createdNestedPresenter.getViewui();
+        RenderedTemplate rendered = createdNestedPresenterTemplates.getViewui();
 
         IFolder folder = (IFolder) presenterCreatedPackage.getResource();
         IFile newFile = folder.getFile(rendered.getNameAndNoExt());
@@ -302,34 +406,138 @@ public class CreatePresenterTask {
         }
     }
 
-    /**
-     * create name tokens class, if it doesn't exist
-     */
-    private void createNameTokens() {
-        RenderedTemplate rendered = createdNestedPresenter.getNameTokens().getNameTokens();
-        // createClass(rendered, false);
-        // TODO does class exist already?
-        // TODO does the class exist in another package
+    private void createNametokensFile() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
+        // look for existing name tokens first.
+        List<ResolvedSourceType> foundNameTokens = packageHierarchy.findClassName("NameTokens");
+
+        ICompilationUnit unitNameTokens = null;
+        if (foundNameTokens != null && foundNameTokens.size() > 0) {
+            ResolvedSourceType foundNameTokensSource = foundNameTokens.get(0);
+            unitNameTokens = foundNameTokensSource.getCompilationUnit();
+        } else {
+            unitNameTokens = createNewNameTokensFile();
+        }
+
+        if (unitNameTokens == null) {
+            // TODO display error that NameTokens could not be created.
+            return;
+        }
+
+        // used for import string
+        presenterConfigModel.setNameTokenUnit(unitNameTokens);
     }
 
     /**
-     * create fields and methods for name tokens
+     * create name tokens class, if it doesn't exist
      */
-    private void createNameTokensToken() {
-        CreatedNameTokens createdNameTokens = createdNestedPresenter.getNameTokens();
-        // TODO
+    private void createNameTokensFieldAndMethods() {
+        ICompilationUnit unitNameTokens = presenterConfigModel.getNameTokenUnit();
+        if (unitNameTokens == null) {
+            // TODO nothing to do
+            return;
+        }
+
+        try {
+            addMethodsToNameTokens(unitNameTokens);
+        } catch (JavaModelException | MalformedTreeException | BadLocationException e) {
+            // TODO display error
+            e.printStackTrace();
+        }
+    }
+
+    private void addMethodsToNameTokens(ICompilationUnit unit) throws JavaModelException, MalformedTreeException,
+            BadLocationException {
+        Document document = new Document(unit.getSource());
+        CompilationUnit astRoot = initAstRoot(unit);
+
+        // creation of ASTRewrite
+        ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
+
+        // find existing method
+        MethodDeclaration method = findMethod(astRoot, presenterConfigModel.getNameTokenMethodName());
+        if (method != null) {
+            // TODO already exists, display warning
+            return;
+        }
+
+        List<String> fields = createdNameTokenTemplates.getFields();
+        List<String> methods = createdNameTokenTemplates.getMethods();
+        String fieldSource = fields.get(0);
+        String methodSource = methods.get(0);
+
+        List types = astRoot.types();
+        ASTNode rootNode = (ASTNode) types.get(0);
+        ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+
+        ASTNode fieldNode = rewrite.createStringPlaceholder(fieldSource, ASTNode.EMPTY_STATEMENT);
+        ASTNode methodNode = rewrite.createStringPlaceholder(methodSource, ASTNode.EMPTY_STATEMENT);
+
+        listRewrite.insertFirst(fieldNode, null);
+        listRewrite.insertLast(methodNode, null);
+
+        // computation of the text edits
+        TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
+
+        // computation of the new source code
+        edits.apply(document);
+
+        // format code
+        String newSource = codeFormatter.formatCodeJavaClass(document);
+
+        // update of the compilation unit and save it
+        IBuffer buffer = unit.getBuffer();
+        buffer.setContents(newSource);
+        buffer.save(progressMonitor, forceWriting);
+    }
+
+    private ICompilationUnit createNewNameTokensFile() {
+        boolean processFileOnly = true;
+        NameTokenOptions nameTokenOptions = new NameTokenOptions();
+        nameTokenOptions.setPackageName(createdNameTokensPackage.getElementName());
+        CreatedNameTokens createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+
+        RenderedTemplate rendered = createdNameToken.getNameTokensFile();
+        String className = rendered.getNameAndNoExt();
+        String contents = rendered.getContents();
+
+        ICompilationUnit nameTokenUnit = null;
+        try {
+            nameTokenUnit = createdNameTokensPackage.createCompilationUnit(className, contents, forceWriting,
+                    progressMonitor);
+        } catch (JavaModelException e) {
+            // TODO display error
+            System.out.println("Couldn't create className: " + className);
+            e.printStackTrace();
+        }
+
+        return nameTokenUnit;
     }
 
     private void createClass(RenderedTemplate rendered, boolean force) {
         String className = rendered.getNameAndNoExt();
         String contents = rendered.getContents();
 
+        ICompilationUnit unit = null;
         try {
-            presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
+            unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
             // TODO display error
             System.out.println("Couldn't create className: " + className);
             e.printStackTrace();
+            return;
         }
+
+        try {
+            codeFormatter.formatCodeJavaClassAndSaveIt(unit, forceWriting);
+        } catch (JavaModelException e) {
+            // TODO display code formatter error
+            e.printStackTrace();
+        }
+
+        codeFormatter.organizeImports(unit);
     }
 }
