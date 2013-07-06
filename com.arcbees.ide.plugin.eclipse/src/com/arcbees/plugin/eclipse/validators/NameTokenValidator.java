@@ -22,27 +22,40 @@ import java.util.regex.Pattern;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.swt.widgets.Button;
 
-public class PackageNameValidator implements IValidator {
+import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
+
+public class NameTokenValidator implements IValidator {
+    private Button btnIsAPlace;
+
+    public NameTokenValidator(Button btnIsAPlace) {
+        this.btnIsAPlace = btnIsAPlace;
+    }
+
     @Override
     public IStatus validate(Object value) {
+        // only use name token when its a place
+        if (!btnIsAPlace.getSelection()) {
+            return ValidationStatus.ok();
+        }
+        System.out.println("NameToken ok try");
         if (value instanceof String) {
             String name = ((String) value).trim();
-            boolean passes = validatePattern(name);
+            boolean passes = name.length() > 0;
             if (passes) {
                 return ValidationStatus.ok();
             } else {
-                String message = "The package format doesn't follow the Java language specification.";
+                String message = "";
+                if (name.isEmpty()) {
+                    message = "Name is empty.";
+                } else {
+                    message = "The name contians invalid charaters. " +
+                    		"Start with a letter then it can contain, lettersm numbers, underscore and spaces.";
+                }
                 return ValidationStatus.error(message);
             }
         }
         return ValidationStatus.error("Name is not a String.");
-    }
-
-    private boolean validatePattern(String name) {
-        Pattern pattern = Pattern.compile("([\\p{L}_$][\\p{L}\\p{N}_$]*\\.)*[\\p{L}_$][\\p{L}\\p{N}_$]*",
-                Pattern.UNICODE_CHARACTER_CLASS);
-        Matcher matcher = pattern.matcher(name);
-        return matcher.find();
     }
 }
