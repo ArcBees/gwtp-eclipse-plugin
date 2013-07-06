@@ -16,37 +16,27 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
-import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
-import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
-import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
-import com.arcbees.plugin.template.utils.FetchTemplate;
-import com.arcbees.plugin.template.utils.FetchTemplates;
 
 public class CreatePresenterWizard extends Wizard {
-
     private CreatePresenterPage createPresenterPage;
     private PresenterConfigModel presenterConfigModel;
 
@@ -58,8 +48,7 @@ public class CreatePresenterWizard extends Wizard {
     public void addPages() {
         presenterConfigModel = new PresenterConfigModel();
 
-        IJavaProject project = getProjectFocusedOn();
-        presenterConfigModel.setProject(project);
+        initProjectFocusedOn();
 
         createPresenterPage = new CreatePresenterPage(presenterConfigModel);
         addPage(createPresenterPage);
@@ -67,8 +56,7 @@ public class CreatePresenterWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        // TODO add finish logic
-        boolean canBeFinished = true;
+        boolean canBeFinished = createPresenterPage.isPageComplete();
         if (canBeFinished) {
             runGenerate();
         } else {
@@ -80,34 +68,53 @@ public class CreatePresenterWizard extends Wizard {
     /**
      * When focused on the project, save that for use when creating units.
      */
-    private IJavaProject getProjectFocusedOn() {
+    private void initProjectFocusedOn() {
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
-        IJavaProject project = null;
         try {
-            project = getProject(window);
+            initProjectFromSelectedFocus(window);
         } catch (Exception e) {
+            // TODO display failed init
+            e.printStackTrace();
         }
-
-        return project;
     }
 
-    private IJavaProject getProject(IWorkbenchWindow window) {
+    private void initProjectFromSelectedFocus(IWorkbenchWindow window) {
         if (window == null) {
-            return null;
+            // TODO init error
+            return;
         }
+
         IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
         Object firstElement = selection.getFirstElement();
         IJavaProject project = null;
-
+        IPackageFragment selectedPackage = null;
         if (firstElement instanceof IPackageFragment) {
             // when focused on a package in the project
-            IPackageFragment packageFrag = (IPackageFragment) firstElement;
-            project = packageFrag.getJavaProject();
+            selectedPackage = (IPackageFragment) firstElement;
+            project = selectedPackage.getJavaProject();
         } else if (firstElement instanceof ICompilationUnit) {
+            // when focused on class, project comes back this way
             ICompilationUnit compilationUnit = (ICompilationUnit) firstElement;
-            // TODO verify
             project = compilationUnit.getJavaProject();
+
+            IPackageDeclaration declaration = null;
+            try {
+                declaration = compilationUnit.getPackageDeclarations()[0];
+            } catch (JavaModelException e) {
+                e.printStackTrace();
+            }
+
+            if (declaration != null) {
+                try {
+                    IPath path = declaration.getPath();
+                    path = path.removeLastSegments(1);
+                    selectedPackage = project.findPackageFragment(path);
+                } catch (JavaModelException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("test");
         } else if (firstElement instanceof IAdaptable) {
             // when focused on the root, project comes back
             IProject iproject = (IProject) ((IAdaptable) firstElement).getAdapter(IProject.class);
@@ -115,7 +122,13 @@ public class CreatePresenterWizard extends Wizard {
                 project = JavaCore.create(iproject);
             }
         }
-        return project;
+
+        if (selectedPackage == null) {
+            // TODO warn about focus on package before presenter creation
+        }
+
+        presenterConfigModel.setJavaProject(project);
+        presenterConfigModel.setSelectedPackage(selectedPackage);
     }
 
     public void runGenerate() {
@@ -130,51 +143,6 @@ public class CreatePresenterWizard extends Wizard {
     }
 
     private void generate(IProgressMonitor monitor) {
-        try {
-            createDir();
-        } catch (IOException e) {
-            // TODO display error
-            e.printStackTrace();
-            return;
-        }
-
-        processTemplates();
-    }
-
-    private void processTemplates() {
-        PresenterOptions presenterOptions = new PresenterOptions();
-        presenterOptions.setPackageName(getPackageName());
-        presenterOptions.setName(presenterConfigModel.getName());
-        // TODO more options...
-
-        if (presenterConfigModel.getNestedPresenter()) {
-            processNestedPresenter(presenterOptions);
-        } else if (presenterConfigModel.getPresenterWidget()) {
-            // TODO
-        } else if (presenterConfigModel.getPopupPresenter()) {
-            // TODO
-        }
-    }
-
-    private void createDir() throws IOException {
-        // TODO dir property is missing, fix
-        String dir = presenterConfigModel.getPath();
-        FileUtils.forceMkdir(new File(dir));
-    }
-
-    private void processNestedPresenter(PresenterOptions presenterOptions) {
-        // TODO translate options
-        NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
-        nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
-
-        CreatedNestedPresenter created = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
-
-        // TODO
-        System.out.println("finished");
-    }
-
-    private String getPackageName() {
-        String packageName = presenterConfigModel.getPath().replace("[/\\]", ".");
-        return packageName;
+        CreatePresenterTask.run(presenterConfigModel, monitor);
     }
 }
