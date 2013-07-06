@@ -16,6 +16,11 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -25,7 +30,9 @@ import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -33,6 +40,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.ResolvedSourceField;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -40,30 +52,35 @@ import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISelectionService;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.eclipse.filter.ContentSlotSelectionExtension;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
+import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
-import org.eclipse.swt.layout.RowLayout;
+import com.arcbees.plugin.eclipse.validators.PlaceValidator;
 
+/**
+ * All of the UI is generated from Eclipse JFace Editor
+ */
 public class CreatePresenterPage extends NewTypeWizardPage {
     private DataBindingContext m_bindingContext;
     private PresenterConfigModel presenterConfigModel;
@@ -91,6 +108,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnIsCrawlable;
     private Button btnCodesplit;
     private Button btnSelectContentSlot;
+    private Button btnAddUihandlers;
+    private Button btnAddOnbind;
+    private Button btnAddOnhide;
+    private Button btnAddOnreset;
+    private Button btnAddOnunbind;
+    private Button btnUseManualReveal;
+    private Button btnPrepareFromRequest;
+    private Binding bindValueForNameToken;
+    private Link link;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -105,8 +131,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
+        setPackageNameViaWizardSelectedFocus();
         setDefaults();
-        setPackageName();
     }
 
     public void createControl(Composite parent) {
@@ -199,6 +225,18 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnPopupPresenter.setBounds(273, 10, 109, 18);
         btnPopupPresenter.setText("Popup Presenter");
 
+        link = new Link(grpPresenterType, SWT.NONE);
+        link.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String surl = "https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Presenter-Creation";
+                gotoUrl(surl);
+            }
+        });
+        link.setToolTipText("Find more help on presenter creation");
+        link.setBounds(403, 12, 159, 15);
+        link.setText("<a>Presenter Creation Help</a>");
+
         grpNestedPresenterOptions = new Group(container, SWT.NONE);
         grpNestedPresenterOptions.setLayout(new GridLayout(1, false));
         GridData gd_grpNestedPresenterOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
@@ -226,6 +264,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
                 contentSlot.setEnabled(false);
                 btnSelectContentSlot.setEnabled(false);
+
+                presenterConfigModel.setRevealInRoot(true);
+                presenterConfigModel.setRevealInRootLayout(false);
+                presenterConfigModel.setRevealInSlot(false);
             }
         });
         btnRevealrootcontentevent.setText("Root");
@@ -240,6 +282,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(true);
                 contentSlot.setEnabled(false);
                 btnSelectContentSlot.setEnabled(false);
+
+                presenterConfigModel.setRevealInRoot(false);
+                presenterConfigModel.setRevealInRootLayout(true);
+                presenterConfigModel.setRevealInSlot(false);
             }
         });
         btnRevealrootlayoutcontentevent.setText("RootLayout");
@@ -254,6 +300,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 btnRevealrootlayoutcontentevent.setSelection(false);
                 contentSlot.setEnabled(true);
                 btnSelectContentSlot.setEnabled(true);
+
+                presenterConfigModel.setRevealInRoot(false);
+                presenterConfigModel.setRevealInRootLayout(false);
+                presenterConfigModel.setRevealInSlot(true);
             }
         });
         btnRevealcontentevent.setText("Slot");
@@ -264,11 +314,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                IType contentSlotType = selectContentSlot();
-                if (contentSlotType != null) {
-                    String slot = contentSlotType.getFullyQualifiedName('.');
-                    contentSlot.setText(slot);
-                }
+                selectContentSlot();
             }
         });
         btnSelectContentSlot.setText("Select Slot");
@@ -295,10 +341,13 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 if (selected) {
                     nameToken.setEnabled(true);
                     btnIsCrawlable.setEnabled(true);
+                    nameToken.setFocus();
                 } else {
                     nameToken.setEnabled(false);
                     btnIsCrawlable.setEnabled(false);
+                    nameToken.setText("");
                 }
+                bindValueForNameToken.validateTargetToModel();
             }
         });
         btnIsAPlace.setText("Is a Place");
@@ -377,7 +426,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpConvenienceOptions.setLayoutData(gd_grpConvenienceOptions);
         grpConvenienceOptions.setText("Extra Options");
 
-        Button btnAddUihandlers = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnAddUihandlers = new Button(grpConvenienceOptions, SWT.CHECK);
         btnAddUihandlers.setBounds(10, 30, 105, 18);
         btnAddUihandlers.setText("Add UiHandlers");
 
@@ -385,11 +434,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblPresenterLifecycleMethods.setBounds(10, 66, 153, 14);
         lblPresenterLifecycleMethods.setText("Presenter Lifecycle Methods");
 
-        Button btnAddOnbind = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnAddOnbind = new Button(grpConvenienceOptions, SWT.CHECK);
         btnAddOnbind.setBounds(10, 86, 91, 18);
         btnAddOnbind.setText("Add onBind()");
 
-        Button btnAddOnhide = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnAddOnhide = new Button(grpConvenienceOptions, SWT.CHECK);
         btnAddOnhide.setBounds(10, 110, 92, 18);
         btnAddOnhide.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -398,11 +447,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnAddOnhide.setText("Add onHide()");
 
-        Button btnAddOnreset = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnAddOnreset = new Button(grpConvenienceOptions, SWT.CHECK);
         btnAddOnreset.setBounds(10, 134, 97, 18);
         btnAddOnreset.setText("Add onReset()");
 
-        Button btnAddOnunbind = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnAddOnunbind = new Button(grpConvenienceOptions, SWT.CHECK);
         btnAddOnunbind.setBounds(9, 158, 106, 18);
         btnAddOnunbind.setText("Add onUnbind()");
 
@@ -411,22 +460,25 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblEvents.setText("Events");
 
         Label lblSecurity = new Label(grpConvenienceOptions, SWT.NONE);
+        lblSecurity.setVisible(false);
         lblSecurity.setBounds(224, 132, 192, 14);
         lblSecurity.setText("Gatekeeper Security");
 
         gateKeeper = new Text(grpConvenienceOptions, SWT.BORDER);
+        gateKeeper.setVisible(false);
         gateKeeper.setBounds(224, 151, 192, 19);
 
-        Button btnNewButton = new Button(grpConvenienceOptions, SWT.NONE);
-        btnNewButton.addSelectionListener(new SelectionAdapter() {
+        Button btnSelectGatekeeper = new Button(grpConvenienceOptions, SWT.NONE);
+        btnSelectGatekeeper.setVisible(false);
+        btnSelectGatekeeper.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
             }
         });
-        btnNewButton.setBounds(422, 148, 122, 28);
-        btnNewButton.setText("Select Gatekeeper");
+        btnSelectGatekeeper.setBounds(422, 148, 122, 28);
+        btnSelectGatekeeper.setText("Select Gatekeeper");
 
-        Button btnUseManualReveal = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnUseManualReveal = new Button(grpConvenienceOptions, SWT.CHECK);
         btnUseManualReveal.setBounds(224, 30, 153, 18);
         btnUseManualReveal.setText("Use Manual Reveal");
 
@@ -438,7 +490,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblQuerystring.setBounds(224, 66, 77, 14);
         lblQuerystring.setText("Querystring");
 
-        Button btnPrepareFromRequest = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnPrepareFromRequest = new Button(grpConvenienceOptions, SWT.CHECK);
         btnPrepareFromRequest.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -449,17 +501,31 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         m_bindingContext = initDataBindings();
 
         observeBindingChanges();
-
-        // TODO disable till later - activate when I get to it
-        grpConvenienceOptions.setVisible(false);
     }
 
+    /**
+     * Open url in default external browser
+     */
+    private void gotoUrl(String surl) {
+        try {
+            URL url = new URL(surl);
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+        } catch (PartInitException ex) {
+            ex.printStackTrace();
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * call only once, observes changes in the ui.
+     */
     private void observeBindingChanges() {
         IObservableList bindings = m_bindingContext.getValidationStatusProviders();
         for (Object o : bindings) {
             Binding binding = (Binding) o;
 
-            // Validator feedback control
+            // Add validator feedback control
             ControlDecorationSupport.create(binding, SWT.TOP | SWT.LEFT);
 
             binding.getTarget().addChangeListener(new IChangeListener() {
@@ -485,9 +551,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             if (!istatus.isOK()) {
                 success = false;
             }
-            // TODO
-            // System.out.println("istatus=" + istatus.getMessage() + " ... " + istatus.isOK() + " " +
-            // presenterConfigModel);
         }
 
         // All statuses passed, enable next button.
@@ -503,8 +566,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
     }
 
-    private void setPackageName() {
-        IPackageFragment selectedPackage = getPackageSelection();
+    /**
+     * Selected package originates in the wizard on initialization.
+     */
+    private void setPackageNameViaWizardSelectedFocus() {
+        IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
+
         String name = "";
         if (selectedPackage != null) {
             name = selectedPackage.getElementName();
@@ -522,56 +589,100 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
     }
 
-    private IPackageFragment getPackageSelection() {
-        IWorkbench workbench = PlatformUI.getWorkbench();
-        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-        ISelectionService selectionservice = window.getSelectionService();
-        if (selectionservice == null) {
-            return null;
-        }
-
-        TreeSelection selection = (TreeSelection) selectionservice.getSelection();
-        if (selection == null) {
-            return null;
-        }
-
-        IPackageFragment selectedPackage = null;
-        try {
-            selectedPackage = (IPackageFragment) selection.getFirstElement();
-        } catch (Exception e) {
-        }
-        return selectedPackage;
-    }
-
     private void setDefaults() {
         grpNestedPresenterOptions.setVisible(true);
         grpPopupPresenter.setVisible(false);
         grpPresenterWidgetOptions.setVisible(false);
         nameToken.setEnabled(false);
         btnIsCrawlable.setEnabled(false);
+        name.setFocus();
     }
 
-    private IType selectContentSlot() {
-        IJavaProject project = presenterConfigModel.getJavaProject();
-        if (project == null) {
-            // TODO notify the user that a project is not selected.
-            return null;
-        }
+    private void selectContentSlot() {
+        final List<ResolvedSourceField> contentSlots = new ArrayList<ResolvedSourceField>();
 
+        String stringPattern = "ContentSlot";
+        int searchFor = IJavaSearchConstants.ANNOTATION_TYPE;
+        int limitTo = IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE;
+        int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+        SearchPattern searchPattern = SearchPattern.createPattern(stringPattern, searchFor, limitTo, matchRule);
+
+        IJavaProject project = presenterConfigModel.getJavaProject();
         IJavaElement[] elements = new IJavaElement[] { project };
         IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
-        FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getShell(), false, getWizard()
-                .getContainer(), scope, IJavaSearchConstants.CLASS, new ContentSlotSelectionExtension(
-                presenterConfigModel));
-        dialog.setTitle("ContentSlot Selection");
-        dialog.setMessage("Select the Presenter's parent. Parent must implement 'HasSlots'.");
-        dialog.setInitialPattern("*Presenter");
+        SearchRequestor requestor = new SearchRequestor() {
+            public void acceptSearchMatch(SearchMatch match) {
+                // TODO
+                System.out.println(match);
 
-        if (dialog.open() == Window.OK) {
-            return (IType) dialog.getFirstResult();
+                ResolvedSourceField element = (ResolvedSourceField) match.getElement();
+                contentSlots.add(element);
+            }
+        };
+
+        SearchEngine searchEngine = new SearchEngine();
+        SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+        try {
+            searchEngine.search(searchPattern, particpant, scope, requestor, new NullProgressMonitor());
+        } catch (CoreException e) {
+            // TODO
+            e.printStackTrace();
         }
-        return null;
+
+        ResolvedSourceField[] contentListArray = new ResolvedSourceField[contentSlots.size()];
+        contentSlots.toArray(contentListArray);
+
+        ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), new ILabelProvider() {
+            @Override
+            public void removeListener(ILabelProviderListener listener) {
+            }
+
+            @Override
+            public boolean isLabelProperty(Object element, String property) {
+                return false;
+            }
+
+            @Override
+            public void dispose() {
+            }
+
+            @Override
+            public void addListener(ILabelProviderListener listener) {
+            }
+
+            @Override
+            public String getText(Object element) {
+                ResolvedSourceField rsf = (ResolvedSourceField) element;
+                String name = rsf.getElementName();
+                IType type = rsf.getDeclaringType();
+                return type.getElementName() + "." + name;
+            }
+
+            @Override
+            public Image getImage(Object element) {
+                return null;
+            }
+        });
+
+        dialog.setElements(contentListArray);
+        dialog.setTitle("Which operating system are you using");
+
+        // User pressed cancel
+        if (dialog.open() != Window.OK) {
+            contentSlot.setText("");
+            presenterConfigModel.setContentSlot(null);
+            return;
+        }
+
+        Object[] result = dialog.getResult();
+        if (result == null || result.length < 1) {
+            contentSlot.setText("");
+        } else {
+            ResolvedSourceField rsf = (ResolvedSourceField) result[0];
+            presenterConfigModel.setContentSlot(rsf);
+            contentSlot.setText(presenterConfigModel.getContentSlotAsString());
+        }
     }
 
     private IType selectPopupWidget() {
@@ -694,14 +805,18 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         IObservableValue observeSelectionBtnIsAPlaceObserveWidget = WidgetProperties.selection().observe(btnIsAPlace);
         IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(
                 presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, null,
-                null);
+        UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
+        strategy_3.setBeforeSetValidator(new PlaceValidator());
+        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue,
+                strategy_3, null);
         //
         IObservableValue observeTextNameTokenObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameToken);
         IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(
                 presenterConfigModel);
-        bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, null,
-                null);
+        UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
+        strategy_2.setBeforeSetValidator(new NameTokenValidator(btnIsAPlace));
+        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget,
+                nameTokenPresenterConfigModelObserveValue, strategy_2, null);
         //
         IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(
                 btnIsCrawlable);
@@ -715,6 +830,53 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 presenterConfigModel);
         bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue,
                 null, null);
+        //
+        IObservableValue observeSelectionBtnAddOnbindObserveWidget = WidgetProperties.selection().observe(btnAddOnbind);
+        IObservableValue javaProjectPresenterConfigModelObserveValue = BeanProperties.value("javaProject").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget,
+                javaProjectPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnAddOnhideObserveWidget = WidgetProperties.selection().observe(btnAddOnhide);
+        IObservableValue onHidePresenterConfigModelObserveValue = BeanProperties.value("onHide").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnhideObserveWidget, onHidePresenterConfigModelObserveValue,
+                null, null);
+        //
+        IObservableValue observeSelectionBtnAddOnresetObserveWidget = WidgetProperties.selection().observe(
+                btnAddOnreset);
+        IObservableValue onResetPresenterConfigModelObserveValue = BeanProperties.value("onReset").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnresetObserveWidget, onResetPresenterConfigModelObserveValue,
+                null, null);
+        //
+        IObservableValue observeSelectionBtnAddOnunbindObserveWidget = WidgetProperties.selection().observe(
+                btnAddOnunbind);
+        IObservableValue onUnbindPresenterConfigModelObserveValue = BeanProperties.value("onUnbind").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnunbindObserveWidget, onUnbindPresenterConfigModelObserveValue,
+                null, null);
+        //
+        IObservableValue observeSelectionBtnUseManualRevealObserveWidget = WidgetProperties.selection().observe(
+                btnUseManualReveal);
+        IObservableValue useManualRevealPresenterConfigModelObserveValue = BeanProperties.value("useManualReveal")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnUseManualRevealObserveWidget,
+                useManualRevealPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnPrepareFromRequestObserveWidget = WidgetProperties.selection().observe(
+                btnPrepareFromRequest);
+        IObservableValue usePrepareFromRequestPresenterConfigModelObserveValue = BeanProperties.value(
+                "usePrepareFromRequest").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPrepareFromRequestObserveWidget,
+                usePrepareFromRequestPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnAddUihandlersObserveWidget = WidgetProperties.selection().observe(
+                btnAddUihandlers);
+        IObservableValue useUiHandlersPresenterConfigModelObserveValue = BeanProperties.value("useUiHandlers").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddUihandlersObserveWidget,
+                useUiHandlersPresenterConfigModelObserveValue, null, null);
         //
         return bindingContext;
     }
