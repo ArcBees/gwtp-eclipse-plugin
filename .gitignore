@@ -1,1 +1,3 @@
 bin
+com.arcbees.ide.plugin.eclipse/resources_idetemplates**
+com.arcbees.ide.plugin.eclipse/**
