@@ -47,7 +47,7 @@ public class PresenterConfigModel extends ModelObject {
 
     // extra
     private boolean singleton;
-    private boolean addUiHandlers;
+    private boolean useUiHandlers;
     private boolean onBind;
     private boolean onHide;
     private boolean onReset;
@@ -203,12 +203,12 @@ public class PresenterConfigModel extends ModelObject {
         firePropertyChange("singleton", this.singleton, this.singleton = singleton);
     }
 
-    public boolean getAddUiHandlers() {
-        return addUiHandlers;
+    public boolean getUseUiHandlers() {
+        return useUiHandlers;
     }
 
-    public void setAddUiHandlers(boolean addUiHandlers) {
-        firePropertyChange("addUiHandlers", this.addUiHandlers, this.addUiHandlers = addUiHandlers);
+    public void setUseUiHandlers(boolean addUiHandlers) {
+        firePropertyChange("useUiHandlers", this.useUiHandlers, this.useUiHandlers = addUiHandlers);
     }
 
     public boolean getOnBind() {
