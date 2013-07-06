@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -48,6 +49,7 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
+import com.arcbees.plugin.eclipse.util.CodeFormattingUtil;
 import com.arcbees.plugin.eclipse.util.PackageHierarchy;
 import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
 import com.arcbees.plugin.template.create.place.CreateNameTokens;
@@ -75,10 +77,13 @@ public class CreatePresenterTask {
     private PackageHierarchy packageHierarchy;
     private CreatedNameTokens createdNameTokenTemplates;
     private IPackageFragment createdNameTokensPackage;
+    private CodeFormattingUtil codeFormatter;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
         this.progressMonitor = progressMonitor;
+
+        codeFormatter = new CodeFormattingUtil(presenterConfigModel.getJavaProject(), progressMonitor);
     }
 
     private void run() {
@@ -101,19 +106,10 @@ public class CreatePresenterTask {
         createPresenterView();
         createPresenterViewUi();
 
-        // TODO format the new source with the project settings
-        formatUnits();
-
         // TODO focus on new presenter and open it up
 
         // TODO logger
         System.out.println("finished");
-    }
-
-    private void formatUnits() {
-        // TODO
-        // ToolFactory.createCodeFormatter(options)
-        // .format(kind, string, offset, length, indentationLevel, lineSeparator);
     }
 
     private void createPackageHierachyIndex() {
@@ -122,6 +118,10 @@ public class CreatePresenterTask {
     }
 
     private void fetchTemplatesNameTokens() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
         NameToken token = new NameToken();
         token.setCrawlable(presenterConfigModel.getCrawlable());
         token.setToken(presenterConfigModel.getNameToken());
@@ -204,6 +204,10 @@ public class CreatePresenterTask {
     }
 
     private void createNameTokensPackage() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         String selectedPackageString = selectedPackage.getElementName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
@@ -374,6 +378,9 @@ public class CreatePresenterTask {
     }
 
     private void createPresenterUiHandlers() {
+        if (!presenterConfigModel.getUseUiHandlers()) {
+            return;
+        }
         RenderedTemplate rendered = createdNestedPresenterTemplates.getUihandlers();
         createClass(rendered, forceWriting);
     }
@@ -400,6 +407,10 @@ public class CreatePresenterTask {
     }
 
     private void createNametokensFile() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
+
         // look for existing name tokens first.
         List<ResolvedSourceType> foundNameTokens = packageHierarchy.findClassName("NameTokens");
 
@@ -473,7 +484,9 @@ public class CreatePresenterTask {
 
         // computation of the new source code
         edits.apply(document);
-        String newSource = document.get();
+
+        // format code
+        String newSource = codeFormatter.formatCodeJavaClass(document);
 
         // update of the compilation unit and save it
         IBuffer buffer = unit.getBuffer();
@@ -508,12 +521,23 @@ public class CreatePresenterTask {
         String className = rendered.getNameAndNoExt();
         String contents = rendered.getContents();
 
+        ICompilationUnit unit = null;
         try {
-            presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
+            unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
             // TODO display error
             System.out.println("Couldn't create className: " + className);
             e.printStackTrace();
+            return;
         }
+
+        try {
+            codeFormatter.formatCodeJavaClassAndSaveIt(unit, forceWriting);
+        } catch (JavaModelException e) {
+            // TODO display code formatter error
+            e.printStackTrace();
+        }
+
+        codeFormatter.organizeImports(unit);
     }
 }
