@@ -50,7 +50,7 @@ public class ContentSlotSelectionExtension extends TypeSelectionExtension {
     }
 
     protected boolean canSelect(ITypeInfoRequestor requestor) throws JavaModelException {
-        IType type = presenterConfigModel.getProject().findType(
+        IType type = presenterConfigModel.getJavaProject().findType(
                 requestor.getPackageName() + "." + requestor.getTypeName());
         if (type == null || !type.exists()) {
             return false;
