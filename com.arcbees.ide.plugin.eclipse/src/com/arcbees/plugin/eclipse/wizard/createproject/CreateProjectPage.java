@@ -17,11 +17,13 @@
 package com.arcbees.plugin.eclipse.wizard.createproject;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -34,6 +36,8 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -42,16 +46,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
 
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.plugin.eclipse.validators.ModuleNameValidator;
 import com.arcbees.plugin.eclipse.validators.NewProjectArtifactIdValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.core.databinding.beans.BeanProperties;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -144,7 +148,13 @@ public class CreateProjectPage extends WizardPage {
         newProjectPath.setLayoutData(gd_newProjectPath);
         newProjectPath.setEnabled(false);
 
-        Button btnHint = new Button(container, SWT.NONE);
+        Composite composite = new Composite(container, SWT.NONE);
+        GridData gd_composite = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        gd_composite.widthHint = 582;
+        composite.setLayoutData(gd_composite);
+
+        Button btnHint = new Button(composite, SWT.NONE);
+        btnHint.setBounds(10, 10, 55, 28);
         btnHint.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -152,10 +162,35 @@ public class CreateProjectPage extends WizardPage {
             }
         });
         btnHint.setText("Hint");
+
+        Link link = new Link(composite, SWT.NONE);
+        link.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String surl = "https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Project-Creation";
+                gotoUrl(surl);
+            }
+        });
+        link.setBounds(452, 16, 120, 15);
+        link.setText("<a>Project Creation Help</a>");
         m_bindingContext = initDataBindings();
 
         // Observe input changes and add validator decorators
         observeBindingChanges();
+    }
+
+    /**
+     * Open url in default external browser
+     */
+    private void gotoUrl(String surl) {
+        try {
+            URL url = new URL(surl);
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+        } catch (PartInitException ex) {
+            ex.printStackTrace();
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void observeBindingChanges() {
