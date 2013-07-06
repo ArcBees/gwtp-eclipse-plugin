@@ -16,9 +16,11 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ResolvedSourceField;
 
 public class PresenterConfigModel extends ModelObject {
@@ -28,7 +30,7 @@ public class PresenterConfigModel extends ModelObject {
     private boolean nestedPresenter;
     private boolean presenterWidget;
     private boolean popupPresenter;
-    
+
     // nested
     private ResolvedSourceField contentSlot;
     private boolean place;
@@ -54,6 +56,7 @@ public class PresenterConfigModel extends ModelObject {
     private boolean usePrepareFromRequest;
     private String gatekeeper;
     private IPackageFragment selectedPackage;
+    private ICompilationUnit nameTokenUnit;
 
     public PresenterConfigModel() {
         // default settings
@@ -116,7 +119,7 @@ public class PresenterConfigModel extends ModelObject {
     public ResolvedSourceField getContentSlot() {
         return contentSlot;
     }
-    
+
     public String getContentSlotAsString() {
         if (contentSlot == null) {
             return "";
@@ -126,7 +129,7 @@ public class PresenterConfigModel extends ModelObject {
         String s = type.getElementName() + "." + name;
         return s;
     }
-    
+
     public String getContentSlotImport() {
         if (contentSlot == null) {
             return "";
@@ -151,9 +154,9 @@ public class PresenterConfigModel extends ModelObject {
     public String getNameToken() {
         return nameToken;
     }
-    
+
     public String getNameTokenMethodName() {
-        return "get" + nameToken.substring(0,1).toUpperCase() + nameToken.substring(1);
+        return "get" + nameToken.substring(0, 1).toUpperCase() + nameToken.substring(1);
     }
 
     public void setNameToken(String nameToken) {
@@ -264,19 +267,19 @@ public class PresenterConfigModel extends ModelObject {
     public void setGatekeeper(String gatekeeper) {
         firePropertyChange("gatekeeper", this.gatekeeper, this.gatekeeper = gatekeeper);
     }
-    
+
     public void setSelectedPackage(IPackageFragment selectedPackage) {
         this.selectedPackage = selectedPackage;
     }
-    
+
     public IPackageFragment getSelectedPackage() {
         return selectedPackage;
     }
-    
+
     public String getSelectedPackageAndNameAsSubPackage() {
         return selectedPackage.getElementName() + "." + getName().toLowerCase();
     }
-    
+
     public boolean getRevealInRoot() {
         return revealInRoot;
     }
@@ -299,6 +302,39 @@ public class PresenterConfigModel extends ModelObject {
 
     public void setRevealInSlot(boolean revealInSlot) {
         firePropertyChange("revealInSlot", this.revealInSlot, this.revealInSlot = revealInSlot);
+    }
+
+    public void setNameTokenUnit(ICompilationUnit nameTokenunit) {
+        this.nameTokenUnit = nameTokenunit;
+    }
+
+    public String getNameTokenUnitImport() {
+        if (nameTokenUnit == null) {
+            return "";
+        }
+
+        IType itype = null;
+        try {
+            itype = nameTokenUnit.getTypes()[0];
+        } catch (JavaModelException e) {
+            e.printStackTrace();
+            return "";
+        }
+        String importString = "import " + itype.getFullyQualifiedName() + ";";
+        return importString;
+    }
+
+    public String getNameTokenWithClass() {
+        if (nameTokenUnit == null) {
+            return "";
+        }
+
+        String s = nameTokenUnit.getElementName().replace(".java", "") + "." + nameToken;
+        return s;
+    }
+
+    public ICompilationUnit getNameTokenUnit() {
+        return nameTokenUnit;
     }
 
     @Override
