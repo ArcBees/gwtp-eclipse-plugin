@@ -16,7 +16,6 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
-import org.eclipse.core.runtime.IPath;
 
 public class ProjectConfigModel extends ModelObject {
     private String projectName;
@@ -24,19 +23,11 @@ public class ProjectConfigModel extends ModelObject {
     private String moduleName;
     private String groupId;
     private String artifactId;
-    private String workspacePath;
+    private String projectPath;
     private Archetype archetypeSelected;
-    private IPath location;
+    private String workspacePath;
     
     public ProjectConfigModel() {
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        firePropertyChange("projectName", this.projectName, this.projectName = projectName);
     }
 
     public String getPackageName() {
@@ -71,12 +62,12 @@ public class ProjectConfigModel extends ModelObject {
         firePropertyChange("artifactId", this.artifactId, this.artifactId = artifactId);
     }
 
-    public String getWorkspacePath() {
-        return workspacePath;
+    public String getProjectPath() {
+        return projectPath;
     }
 
-    public void setWorkspacePath(String workspacePath) {
-        firePropertyChange("workspacePath", this.workspacePath, this.workspacePath = workspacePath);
+    public void setProjectPath(String projectPath) {
+        firePropertyChange("projectPath", this.projectPath, this.projectPath = projectPath);
     }
     
     public Archetype getArchetypeSelected() {
@@ -95,7 +86,7 @@ public class ProjectConfigModel extends ModelObject {
         s += "moduleName=" + moduleName + " ";
         s += "groupId=" + groupId + " ";
         s += "artifactId=" + artifactId + " ";
-        s += "workspacePath=" + workspacePath + " ";
+        s += "projectPath=" + projectPath + " ";
         s += "archetypeSelected=" + archetypeSelected + " ";
         s += " }"; 
         return s;
@@ -111,15 +102,15 @@ public class ProjectConfigModel extends ModelObject {
         return "This project was genereted by ArcBees Eclipse plugin.";
     }
 
-    public void setLocation(IPath location) {
-        this.location = location;
-    }
-    
-    public IPath getLocation() {
-        return location;
-    }
-
     public boolean canBeFinished() {
         return archetypeSelected != null;
+    }
+
+    public void setWorkspacePath(String workspacePath) {
+        this.workspacePath = workspacePath;
+    }
+    
+    public String getWorkspacePath() {
+        return workspacePath;
     }
 }
