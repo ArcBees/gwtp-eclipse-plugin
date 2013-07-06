@@ -39,7 +39,7 @@ class GatekeeperSelectionExtension extends TypeSelectionExtension {
             @Override
             public boolean select(ITypeInfoRequestor requestor) {
                 try {
-                    IType type = presenterConfigModel.getProject().findType(
+                    IType type = presenterConfigModel.getJavaProject().findType(
                             requestor.getPackageName() + "." + requestor.getTypeName());
                     if (type == null || !type.exists()) {
                         return false;
