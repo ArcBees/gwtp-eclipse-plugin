@@ -16,16 +16,30 @@
 
 package com.arcbees.plugin.eclipse.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.ResolvedSourceType;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 
@@ -113,7 +127,11 @@ public class PackageHierarchy {
                     break;
                 }
             }
-
+            
+            if (parentPackageElementName.matches(".*\\.$")) {
+                parentPackageElementName = parentPackageElementName.replaceAll("\\.$", "");
+            }
+            
             return parentPackageElementName;
         }
 
@@ -232,5 +250,36 @@ public class PackageHierarchy {
         for (ICompilationUnit unit : packageFragment.getCompilationUnits()) {
             packageIndex.addUnit(unit);
         }
+    }
+    
+    public List<ResolvedSourceType> findClassName(String name) {
+        int searchFor = IJavaSearchConstants.CLASS;
+        int limitTo = IJavaSearchConstants.TYPE;
+        int matchRule = SearchPattern.R_EXACT_MATCH;
+        SearchPattern searchPattern = SearchPattern.createPattern(name, searchFor, limitTo, matchRule);
+
+        IJavaProject project = presenterConfigModel.getJavaProject();
+        IJavaElement[] elements = new IJavaElement[] { project };
+        IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+
+        final List<ResolvedSourceType> found = new ArrayList<ResolvedSourceType>();
+        SearchRequestor requestor = new SearchRequestor() {
+            public void acceptSearchMatch(SearchMatch match) {
+                // TODO
+                System.out.println(match);
+                Object element = match.getElement();
+                found.add((ResolvedSourceType) element);
+            }
+        };
+
+        SearchEngine searchEngine = new SearchEngine();
+        SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+        try {
+            searchEngine.search(searchPattern, particpant, scope, requestor, new NullProgressMonitor());
+        } catch (CoreException e) {
+            // TODO
+            e.printStackTrace();
+        } 
+        return found;
     }
 }

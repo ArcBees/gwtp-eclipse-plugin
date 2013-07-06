@@ -16,8 +16,12 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.ResolvedSourceField;
 
 public class PresenterConfigModel extends ModelObject {
     private IJavaProject javaProject;
@@ -26,9 +30,9 @@ public class PresenterConfigModel extends ModelObject {
     private boolean nestedPresenter;
     private boolean presenterWidget;
     private boolean popupPresenter;
-    
+
     // nested
-    private String contentSlot;
+    private ResolvedSourceField contentSlot;
     private boolean place;
     private String nameToken;
     private boolean crawlable;
@@ -43,7 +47,7 @@ public class PresenterConfigModel extends ModelObject {
 
     // extra
     private boolean singleton;
-    private boolean addUiHandlers;
+    private boolean useUiHandlers;
     private boolean onBind;
     private boolean onHide;
     private boolean onReset;
@@ -52,6 +56,7 @@ public class PresenterConfigModel extends ModelObject {
     private boolean usePrepareFromRequest;
     private String gatekeeper;
     private IPackageFragment selectedPackage;
+    private ICompilationUnit nameTokenUnit;
 
     public PresenterConfigModel() {
         // default settings
@@ -111,11 +116,30 @@ public class PresenterConfigModel extends ModelObject {
         firePropertyChange("popupPresenter", this.popupPresenter, this.popupPresenter = popupPresenter);
     }
 
-    public String getContentSlot() {
+    public ResolvedSourceField getContentSlot() {
         return contentSlot;
     }
 
-    public void setContentSlot(String contentSlot) {
+    public String getContentSlotAsString() {
+        if (contentSlot == null) {
+            return "";
+        }
+        String name = contentSlot.getElementName();
+        IType type = contentSlot.getDeclaringType();
+        String s = type.getElementName() + "." + name;
+        return s;
+    }
+
+    public String getContentSlotImport() {
+        if (contentSlot == null) {
+            return "";
+        }
+        IType itype = contentSlot.getDeclaringType();
+        String importString = "import " + itype.getFullyQualifiedName() + ";";
+        return importString;
+    }
+
+    public void setContentSlot(ResolvedSourceField contentSlot) {
         firePropertyChange("contentSlot", this.contentSlot, this.contentSlot = contentSlot);
     }
 
@@ -129,6 +153,10 @@ public class PresenterConfigModel extends ModelObject {
 
     public String getNameToken() {
         return nameToken;
+    }
+
+    public String getNameTokenMethodName() {
+        return "get" + nameToken.substring(0, 1).toUpperCase() + nameToken.substring(1);
     }
 
     public void setNameToken(String nameToken) {
@@ -175,12 +203,12 @@ public class PresenterConfigModel extends ModelObject {
         firePropertyChange("singleton", this.singleton, this.singleton = singleton);
     }
 
-    public boolean getAddUiHandlers() {
-        return addUiHandlers;
+    public boolean getUseUiHandlers() {
+        return useUiHandlers;
     }
 
-    public void setAddUiHandlers(boolean addUiHandlers) {
-        firePropertyChange("addUiHandlers", this.addUiHandlers, this.addUiHandlers = addUiHandlers);
+    public void setUseUiHandlers(boolean addUiHandlers) {
+        firePropertyChange("useUiHandlers", this.useUiHandlers, this.useUiHandlers = addUiHandlers);
     }
 
     public boolean getOnBind() {
@@ -239,19 +267,19 @@ public class PresenterConfigModel extends ModelObject {
     public void setGatekeeper(String gatekeeper) {
         firePropertyChange("gatekeeper", this.gatekeeper, this.gatekeeper = gatekeeper);
     }
-    
+
     public void setSelectedPackage(IPackageFragment selectedPackage) {
         this.selectedPackage = selectedPackage;
     }
-    
+
     public IPackageFragment getSelectedPackage() {
         return selectedPackage;
     }
-    
+
     public String getSelectedPackageAndNameAsSubPackage() {
         return selectedPackage.getElementName() + "." + getName().toLowerCase();
     }
-    
+
     public boolean getRevealInRoot() {
         return revealInRoot;
     }
@@ -274,6 +302,39 @@ public class PresenterConfigModel extends ModelObject {
 
     public void setRevealInSlot(boolean revealInSlot) {
         firePropertyChange("revealInSlot", this.revealInSlot, this.revealInSlot = revealInSlot);
+    }
+
+    public void setNameTokenUnit(ICompilationUnit nameTokenunit) {
+        this.nameTokenUnit = nameTokenunit;
+    }
+
+    public String getNameTokenUnitImport() {
+        if (nameTokenUnit == null) {
+            return "";
+        }
+
+        IType itype = null;
+        try {
+            itype = nameTokenUnit.getTypes()[0];
+        } catch (JavaModelException e) {
+            e.printStackTrace();
+            return "";
+        }
+        String importString = "import " + itype.getFullyQualifiedName() + ";";
+        return importString;
+    }
+
+    public String getNameTokenWithClass() {
+        if (nameTokenUnit == null) {
+            return "";
+        }
+
+        String s = nameTokenUnit.getElementName().replace(".java", "") + "." + nameToken;
+        return s;
+    }
+
+    public ICompilationUnit getNameTokenUnit() {
+        return nameTokenUnit;
     }
 
     @Override
