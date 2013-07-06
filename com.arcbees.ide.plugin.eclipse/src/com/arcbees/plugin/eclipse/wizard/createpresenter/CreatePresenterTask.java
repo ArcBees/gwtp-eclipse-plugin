@@ -82,7 +82,7 @@ public class CreatePresenterTask {
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
         this.progressMonitor = progressMonitor;
-        
+
         codeFormatter = new CodeFormattingUtil(presenterConfigModel.getJavaProject(), progressMonitor);
     }
 
@@ -121,7 +121,7 @@ public class CreatePresenterTask {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
-        
+
         NameToken token = new NameToken();
         token.setCrawlable(presenterConfigModel.getCrawlable());
         token.setToken(presenterConfigModel.getNameToken());
@@ -207,7 +207,7 @@ public class CreatePresenterTask {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
-        
+
         IPackageFragment selectedPackage = presenterConfigModel.getSelectedPackage();
         String selectedPackageString = selectedPackage.getElementName();
         PackageHierarchyElement clientPackage = packageHierarchy.findParentClient(selectedPackageString);
@@ -410,7 +410,7 @@ public class CreatePresenterTask {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
-        
+
         // look for existing name tokens first.
         List<ResolvedSourceType> foundNameTokens = packageHierarchy.findClassName("NameTokens");
 
@@ -484,10 +484,10 @@ public class CreatePresenterTask {
 
         // computation of the new source code
         edits.apply(document);
-        
+
         // format code
         String newSource = codeFormatter.formatCodeJavaClass(document);
-        
+
         // update of the compilation unit and save it
         IBuffer buffer = unit.getBuffer();
         buffer.setContents(newSource);
@@ -523,7 +523,7 @@ public class CreatePresenterTask {
 
         ICompilationUnit unit = null;
         try {
-            unit  = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
+            unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
             // TODO display error
             System.out.println("Couldn't create className: " + className);
@@ -537,7 +537,7 @@ public class CreatePresenterTask {
             // TODO display code formatter error
             e.printStackTrace();
         }
-        
+
         codeFormatter.organizeImports(unit);
     }
 }
