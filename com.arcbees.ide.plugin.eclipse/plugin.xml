@@ -4,13 +4,8 @@
 
    <extension
          point="org.eclipse.ui.commands">
-      <category
-            name="Sample Category"
-            id="com.arcbees.plugin.eclipse.commands.category">
-      </category>
       <command
             name="Create Project"
-            categoryId="com.arcbees.plugin.eclipse.commands.category"
             id="com.arcbees.plugin.eclipse.commands.createProject">
       </command>
       <command
@@ -19,7 +14,6 @@
             name="referenceToMenuId">
       </command>
       <command
-            categoryId="com.arcbees.plugin.eclipse.commands.category"
             id="com.arcbees.plugin.eclipse.commands.createPresenter"
             name="Create Presenter">
       </command>
@@ -34,15 +28,6 @@
             class="com.arcbees.plugin.eclipse.handlers.CreatePresenterHandler"
             commandId="com.arcbees.plugin.eclipse.commands.createPresenter">
       </handler>
-   </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="com.arcbees.plugin.eclipse.commands.createProject"
-            contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </key>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
