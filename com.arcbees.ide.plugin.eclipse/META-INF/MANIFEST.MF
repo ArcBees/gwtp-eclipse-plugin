@@ -99,3 +99,4 @@ Export-Package: com.jayway.restassured,
  com.jayway.restassured.response,
  com.jayway.restassured.specification,
  com.jayway.restassured.spi
+Import-Package: junit.framework
