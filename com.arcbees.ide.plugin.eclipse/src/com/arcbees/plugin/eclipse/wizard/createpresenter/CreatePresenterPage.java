@@ -16,6 +16,8 @@
 
 package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +65,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
@@ -112,6 +116,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnUseManualReveal;
     private Button btnPrepareFromRequest;
     private Binding bindValueForNameToken;
+    private Link link;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -219,6 +224,18 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnPopupPresenter.setBounds(273, 10, 109, 18);
         btnPopupPresenter.setText("Popup Presenter");
+
+        link = new Link(grpPresenterType, SWT.NONE);
+        link.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String surl = "https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Presenter-Creation";
+                gotoUrl(surl);
+            }
+        });
+        link.setToolTipText("Find more help on presenter creation");
+        link.setBounds(403, 12, 159, 15);
+        link.setText("<a>Presenter Creation Help</a>");
 
         grpNestedPresenterOptions = new Group(container, SWT.NONE);
         grpNestedPresenterOptions.setLayout(new GridLayout(1, false));
@@ -484,6 +501,20 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         m_bindingContext = initDataBindings();
 
         observeBindingChanges();
+    }
+
+    /**
+     * Open url in default external browser
+     */
+    private void gotoUrl(String surl) {
+        try {
+            URL url = new URL(surl);
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+        } catch (PartInitException ex) {
+            ex.printStackTrace();
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
