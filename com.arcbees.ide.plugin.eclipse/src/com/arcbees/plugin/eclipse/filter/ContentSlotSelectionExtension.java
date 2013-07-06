@@ -40,31 +40,34 @@ public class ContentSlotSelectionExtension extends TypeSelectionExtension {
             @Override
             public boolean select(ITypeInfoRequestor requestor) {
                 try {
-                    IType type = presenterConfigModel.getJavaProject().findType(
-                            requestor.getPackageName() + "." + requestor.getTypeName());
-                    if (type == null || !type.exists()) {
-                        return false;
-                    }
-
-                    ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
-                    IType[] interfaces = hierarchy.getAllInterfaces();
-
-                    for (IType inter : interfaces) {
-                        if (inter.getFullyQualifiedName('.').equals("com.gwtplatform.mvp.client.HasSlots")) {
-                            for (IField field : type.getFields()) {
-                                if (field.getAnnotation("ContentSlot").exists()) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-
-                    return false;
+                    return canSelect(requestor);
                 } catch (JavaModelException e) {
                     return false;
                 }
             }
         };
         return extension;
+    }
+
+    protected boolean canSelect(ITypeInfoRequestor requestor) throws JavaModelException {
+        IType type = presenterConfigModel.getJavaProject().findType(
+                requestor.getPackageName() + "." + requestor.getTypeName());
+        if (type == null || !type.exists()) {
+            return false;
+        }
+
+        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(new NullProgressMonitor());
+        IType[] interfaces = hierarchy.getAllInterfaces();
+
+        for (IType inter : interfaces) {
+            if (inter.getFullyQualifiedName('.').equals("com.gwtplatform.mvp.client.HasSlots")) {
+                for (IField field : type.getFields()) {
+                    if (field.getAnnotation("ContentSlot").exists()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
