@@ -23,7 +23,7 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-public class PackageNameValidator implements IValidator {
+public class NewProjectArtifactIdValidator implements IValidator {
     @Override
     public IStatus validate(Object value) {
         if (value instanceof String) {
