@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>com.arcbees.ide.plugin.eclipse</groupId>
     <artifactId>eclipse-plugin-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>com.arcbees.ide.plugin.eclipse</module>
         <module>com.arcbees.ide.plugin.eclipse.feature</module>
@@ -15,8 +15,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     </modules>
 
     <properties>
-        <tycho.version>0.16.0</tycho.version>
-        <tycho-extras.version>0.16.0</tycho-extras.version>
+        <tycho.version>0.17.0</tycho.version>
+        <tycho-extras.version>0.17.0</tycho-extras.version>
 
         <juno-repo.url>http://download.eclipse.org/releases/juno</juno-repo.url>
         <tycho-repo.url>https://oss.sonatype.org/content/groups/public/</tycho-repo.url>
@@ -107,6 +107,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho.version}</version>
+                    <!-- <configuration>
+                        <pomDependencies>consider</pomDependencies>
+                    </configuration> -->
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
