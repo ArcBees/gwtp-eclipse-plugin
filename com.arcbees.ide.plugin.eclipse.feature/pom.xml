@@ -9,6 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>eclipse-plugin</artifactId>
-    <packaging>eclipse-plugin</packaging>
-</project>
+    <artifactId>eclipse-plugin-feature</artifactId>
+    <packaging>eclipse-feature</packaging>
+
+</project> 
