@@ -17,18 +17,22 @@
     <properties>
         <tycho.version>0.17.0</tycho.version>
         <tycho-extras.version>0.17.0</tycho-extras.version>
-
         <juno-repo.url>http://download.eclipse.org/releases/juno</juno-repo.url>
         <tycho-repo.url>https://oss.sonatype.org/content/groups/public/</tycho-repo.url>
     </properties>
 
     <repositories>
         <repository>
+            <id>sonatype.snapshots</id>
+            <name>Sonatype snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
             <id>juno</id>
             <url>${juno-repo.url}</url>
             <layout>p2</layout>
         </repository>
-
     </repositories>
 
     <pluginRepositories>
@@ -41,6 +45,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>reficio</id>
+            <url>http://repo.reficio.org/maven/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -99,6 +107,92 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <!-- https://github.com/reficio/p2-maven-plugin -->
+            <!-- mvn p2:site -->
+            <plugin>
+                <groupId>org.reficio</groupId>
+                <artifactId>p2-maven-plugin</artifactId>
+                <version>1.0.1-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <!-- QUICK-START EXAMPLE -->
+                        <!--
+                        This is the default quick-start configuration.
+
+                        Expected behavior:
+                          - specified dependencies will be fetched
+                          - transitive dependencies will be fetched (no default exclusions)
+                          - jars containing source source code will NOT be fetched
+                          - jars that are NOT OSGi bundles will be "bundled" using bnd tool,
+                            if you specify instructions for these jars they will be APPLIED
+                          - jars that are OSGi bundles will be simply included
+                            if you specify instructions for these jars they will be IGNORED (see <override> option)
+                          - p2 site will be generated
+
+                        How the instructions works:
+                          - instructions are applied only to the root artifact that you specify!
+                          - instructions are not applied to the TRANSITIVE dependencies!
+                          - transitive dependencies are never overridden (see <override> option)
+                          - transitive dependencies are bundled using the default instructions:
+                              <instructions>
+                                  <Import-Package>*;resolution:=optional</Import-Package>
+                                  <Export-Package>*</Export-Package>
+                              </instructions>
+                          - other instructions, such as, Bundle-SymbolicName, Bundle-Name, Bundle-Version, etc.
+                            are calculated according to the following rules:
+                            http://felix.apache.org/site/apache-felix-maven-bundle-plugin-bnd.html
+                          - if you specify any instructions they will be applied only if
+                            the jar is not already an OSGi bundle - otherwise you have to use the override
+                            option - please see the /examples/override/pom.xml example
+
+                        The following definition of an artifact:
+                            <artifact>
+                                <id>commons-io:commons-io:2.1</id>
+                            </artifact>
+
+                        is an equivalent of the following definition:
+                            <artifact>
+                                <id>commons-io:commons-io:2.1</id>
+                                <transitive>true</transitive>
+                                <source>false</source>
+                                <override>false</override>
+                                <instructions>
+                                    <Import-Package>*;resolution:=optional</Import-Package>
+                                    <Export-Package>*</Export-Package>
+                                </instructions>
+                                <excludes/>
+                            </artifact>
+
+                        To run the example please invoke: mvn p2:site
+                        -->
+                        <configuration>
+                            <artifacts>
+                                <artifact><id>com.jayway.restassured:rest-assured:1.8.1</id></artifact>
+                                <artifact><id>com.google.code.gson:gson:2.2.4</id></artifact>
+                                <artifact><id>org.apache.commons:commons-io:1.3.2</id></artifact>
+                                <!-- TODO: Install templates to local repo, until release -->
+                                <artifact><id>com.arcbees.ide:templates:1.0.0-SNAPSHOT</id></artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- mvn jetty:run -->
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>8.1.5.v20120716</version>
+                <configuration>
+                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <webAppSourceDirectory>${basedir}/target/repository/</webAppSourceDirectory>
+                    <webApp>
+                        <contextPath>/site</contextPath>
+                    </webApp>
+                </configuration>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -107,9 +201,6 @@
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho.version}</version>
-                    <!-- <configuration>
-                        <pomDependencies>consider</pomDependencies>
-                    </configuration> -->
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -193,4 +284,6 @@
         </pluginManagement>
     </build>
 
+    <!-- Do not include any dependencies in pom. Use p2-maven-plugin. -->
+    <dependencies/>
 </project>
