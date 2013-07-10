@@ -109,7 +109,8 @@
             </plugin>
             
             <!-- https://github.com/reficio/p2-maven-plugin -->
-            <!-- mvn p2:site -->
+            <!-- Run 1 then 2 for building OSGI bundles -->
+            <!-- 1. mvn p2:site -->
             <plugin>
                 <groupId>org.reficio</groupId>
                 <artifactId>p2-maven-plugin</artifactId>
@@ -130,7 +131,7 @@
                 </executions>
             </plugin>
             
-            <!-- mvn jetty:run -->
+            <!-- 2. mvn jetty:run -->
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
