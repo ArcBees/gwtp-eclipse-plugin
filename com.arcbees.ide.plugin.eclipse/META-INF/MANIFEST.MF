@@ -740,12 +740,3 @@ Export-Package: antlr;
    org.objectweb.asm.tree,
    org.objectweb.asm.tree.analysis",
  templates
-Import-Package: com.arcbees.plugin.template.create.place,
- com.arcbees.plugin.template.create.presenter,
- com.arcbees.plugin.template.domain.place,
- com.arcbees.plugin.template.domain.presenter,
- com.arcbees.plugin.template.place,
- com.arcbees.plugin.template.presenter,
- com.arcbees.plugin.template.presenter.nested,
- com.arcbees.plugin.template.util,
- com.arcbees.plugin.template.utils
