@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="eclipse4_rcp" sequenceNumber="0">
+<locations>
+<location id="com.google.gdt.eclipse.designer.editor.feature" path="${eclipse_home}" type="Feature"/>
+<location id="com.google.gdt.eclipse.designer.gpe.feature" path="${eclipse_home}" type="Feature"/>
+<location id="com.google.gdt.eclipse.designer.hosted.feature" path="${eclipse_home}" type="Feature"/>
+<location id="com.google.gdt.eclipse.mobile.android.feature" path="${eclipse_home}" type="Feature"/>
+<location id="com.google.gdt.eclipse.suite.e42.feature" path="${eclipse_home}" type="Feature"/>
+</locations>
+</target>
