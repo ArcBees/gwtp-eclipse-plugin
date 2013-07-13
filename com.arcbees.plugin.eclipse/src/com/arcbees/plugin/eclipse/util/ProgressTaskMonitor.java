@@ -22,12 +22,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
 
-public class ProgressMonitor implements IProgressMonitor {
-    private ProgressBar progressBar;
+public class ProgressTaskMonitor implements IProgressMonitor {
+    private ProgressBar progressBarUi;
 
-    public ProgressMonitor(Composite parent) {
-        progressBar = new ProgressBar(parent, SWT.SMOOTH);
-        progressBar.setBounds(100, 10, 200, 20);
+    public ProgressTaskMonitor(ProgressBar progressBarUi) {
+        this.progressBarUi = progressBarUi;
     }
 
     @Override
@@ -35,10 +34,10 @@ public class ProgressMonitor implements IProgressMonitor {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                if (progressBar.getSelection() >= 100) {
-                    progressBar.setSelection(0);
+                if (progressBarUi.getSelection() >= 100) {
+                    progressBarUi.setSelection(0);
                 } else {
-                    progressBar.setSelection(progressBar.getSelection() + work);
+                    progressBarUi.setSelection(progressBarUi.getSelection() + work);
                 }
             }
         });
@@ -48,7 +47,7 @@ public class ProgressMonitor implements IProgressMonitor {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                progressBar.setSelection(0);
+                progressBarUi.setSelection(0);
             }
         });
     }
@@ -83,8 +82,8 @@ public class ProgressMonitor implements IProgressMonitor {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                progressBar.setMaximum(totalWork);
-                progressBar.setToolTipText(name);
+                progressBarUi.setMaximum(totalWork);
+                progressBarUi.setToolTipText(name);
             }
         });
     }
@@ -93,7 +92,7 @@ public class ProgressMonitor implements IProgressMonitor {
         Display.getDefault().syncExec(new Runnable() {
             @Override
             public void run() {
-                progressBar.setVisible(visible);
+                progressBarUi.setVisible(visible);
             }
         });
     }
