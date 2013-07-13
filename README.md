@@ -21,7 +21,7 @@ It is best viewed in full screen. (Or watch it on [YouTube](http://www.youtube.c
 * Juno, Kepler or later. 
 
 ## Previous Version
-[[Previous-Versions]] update site and source notes. 
+[Previous Versions](https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Previous-Versions) update site and source notes. 
 
 ##Thanks to
 [![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
