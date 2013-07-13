@@ -19,7 +19,7 @@
 
    <url>
       <update label="GWTP Eclipse Plugin" url="http://gwtp-eclipse-plugin.github.io/update-site"/>
-      <discovery label="GWTP Eclipse Plugin" url="http://gwtp-eclipse-plugin.github.io/update-site"/>
+      <discovery label="GWTP Eclipse Plugin" url="http://arcbees.github.io/gwtp-eclipse-plugin/"/>
    </url>
 
    <includes
