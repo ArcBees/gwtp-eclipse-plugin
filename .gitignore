@@ -1,3 +1,9 @@
+build
 bin
-com.arcbees.ide.plugin.eclipse/resources_idetemplates**
-com.arcbees.ide.plugin.eclipse/**
+
+# Mac
+.DS_Store
+
+# IDE-Templates source
+**/src_idetemplates**
+**/resources_idetemplates**

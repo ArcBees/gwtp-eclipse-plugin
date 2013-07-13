@@ -40,7 +40,7 @@ public class ModuleNameValidator implements IValidator {
     }
 
     private boolean validatePattern(String name) {
-        Pattern pattern = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]+)", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile("([\\p{L}][\\p{L}\\p{N}_]+)", Pattern.UNICODE_CASE);
         Matcher matcher = pattern.matcher(name);
         return matcher.find();
     }

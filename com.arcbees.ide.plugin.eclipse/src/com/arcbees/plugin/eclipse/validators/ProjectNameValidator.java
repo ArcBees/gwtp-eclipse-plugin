@@ -46,7 +46,7 @@ public class ProjectNameValidator implements IValidator {
     }
 
     private boolean validatePattern(String name) {
-        Pattern pattern = Pattern.compile("([\\p{L}_$][\\p{L}\\p{N}_\040]+)", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile("([\\p{L}_$][\\p{L}\\p{N}_\040]+)", Pattern.UNICODE_CASE);
         Matcher matcher = pattern.matcher(name);
         return matcher.find();
     }

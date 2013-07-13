@@ -285,8 +285,14 @@ public class CreatePresenterTask {
         if (unit != null) {
             try {
                 createPresenterGinlink(unit);
-            } catch (JavaModelException | MalformedTreeException | BadLocationException e) {
-                // TODO display error
+            } catch (JavaModelException e) {
+                // TODO 
+                e.printStackTrace();
+            } catch (MalformedTreeException e) {
+                // TODO 
+                e.printStackTrace();
+            } catch (BadLocationException e) {
+                // TODO 
                 e.printStackTrace();
             }
         } else {
@@ -443,8 +449,14 @@ public class CreatePresenterTask {
 
         try {
             addMethodsToNameTokens(unitNameTokens);
-        } catch (JavaModelException | MalformedTreeException | BadLocationException e) {
-            // TODO display error
+        } catch (JavaModelException e) {
+            // TODO 
+            e.printStackTrace();
+        } catch (MalformedTreeException e) {
+            // TODO 
+            e.printStackTrace();
+        } catch (BadLocationException e) {
+            // TODO 
             e.printStackTrace();
         }
     }
