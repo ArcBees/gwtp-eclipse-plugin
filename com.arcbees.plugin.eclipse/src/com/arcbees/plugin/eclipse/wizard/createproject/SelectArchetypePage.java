@@ -44,13 +44,14 @@ import com.arcbees.plugin.eclipse.domain.ArchetypeCollection;
 import com.arcbees.plugin.eclipse.domain.Category;
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.plugin.eclipse.domain.Tag;
-import com.arcbees.plugin.eclipse.util.ProgressMonitor;
+import com.arcbees.plugin.eclipse.util.ProgressTaskMonitor;
+import org.eclipse.swt.widgets.ProgressBar;
 
 public class SelectArchetypePage extends WizardPage {
     private ProjectConfigModel projectConfigModel;
     private Table table;
     private TableViewer tableViewer;
-    private ProgressMonitor fetchMonitor;
+    private ProgressTaskMonitor fetchMonitor;
     private boolean loading;
 
     public SelectArchetypePage(ProjectConfigModel projectConfigModel) {
@@ -71,7 +72,7 @@ public class SelectArchetypePage extends WizardPage {
         
         setPageComplete(false);
 
-        fetchMonitor.setVisible(true);
+        //fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }
@@ -102,7 +103,7 @@ public class SelectArchetypePage extends WizardPage {
                 
                 if (!loading) {
                     fetchMonitor.reset();
-                    fetchMonitor.setVisible(false);
+                    //fetchMonitor.setVisible(false);
                 }
 
                 return Status.OK_STATUS;
@@ -147,7 +148,7 @@ public class SelectArchetypePage extends WizardPage {
         tableViewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
         tableViewer.setContentProvider(ArrayContentProvider.getInstance());
         table = tableViewer.getTable();
-        table.setLayoutData(new RowData(567, 259));
+        table.setLayoutData(new RowData(567, 429));
         table.setLinesVisible(true);
         table.setHeaderVisible(true);
 
@@ -165,8 +166,11 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
+        
+        ProgressBar progressBarUi = new ProgressBar(container, SWT.SMOOTH);
+        progressBarUi.setLayoutData(new RowData(585, SWT.DEFAULT));
 
-        fetchMonitor = new ProgressMonitor(container);
+        fetchMonitor = new ProgressTaskMonitor(progressBarUi);
 
         tableViewerColumn.setLabelProvider(new ColumnLabelProvider() {
             @Override
