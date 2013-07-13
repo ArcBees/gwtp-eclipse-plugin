@@ -16,6 +16,11 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 * Google Eclipse Plugin (GPE) with the GWT features. 
 * Juno, Kepler or later. 
 
+##Download
+Alpha can be retreived from update site here: (Testing still goign on)
+
+* Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
+
 ## Previous Version
 [Previous Versions](https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Previous-Versions) update site and source notes. 
 
