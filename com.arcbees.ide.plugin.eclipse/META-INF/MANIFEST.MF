@@ -32,8 +32,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.m2e.scm;bundle-version="1.4.0",
  org.eclipse.jdt;bundle-version="3.8.1",
  org.eclipse.jdt.core;bundle-version="3.8.3",
- org.eclipse.jdt.ui;bundle-version="3.8.2"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+ org.eclipse.jdt.ui;bundle-version="3.8.2",
+ org.eclipse.jface.text;bundle-version="3.8.100"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/antlr-2.7.7.jar,
@@ -59,8 +60,16 @@ Bundle-ClassPath: .,
  swing2swt.jar,
  lib/velocity-1.7-dep.jar,
  lib/velocity-1.7.jar,
- lib/commons-io-2.4.jar
-Export-Package: com.jayway.restassured,
+ lib/commons-io-2.4.jar,
+ lib/commons-configuration-1.9.jar,
+ lib/ide-templates.jar
+Export-Package: com.arcbees.plugin.template.create.place,
+ com.arcbees.plugin.template.create.presenter,
+ com.arcbees.plugin.template.domain.place,
+ com.arcbees.plugin.template.domain.presenter,
+ com.arcbees.plugin.template.util,
+ com.arcbees.plugin.template.utils,
+ com.jayway.restassured,
  com.jayway.restassured.assertion,
  com.jayway.restassured.authentication,
  com.jayway.restassured.builder,
