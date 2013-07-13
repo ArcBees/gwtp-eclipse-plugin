@@ -16,57 +16,83 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ArchetypeCollection {
-  
-  private String nextPageToken;
-  private int total;
-  private String kind;
-  private String etag;
-  private List<Archetype> archetypes;
-  
-  public ArchetypeCollection() {
-  }
 
-  public String getNextPageToken() {
-    return nextPageToken;
-  }
+    private String nextPageToken;
+    private int total;
+    private String kind;
+    private String etag;
+    private List<Archetype> archetypes;
 
-  public void setNextPageToken(String nextPageToken) {
-    this.nextPageToken = nextPageToken;
-  }
+    public ArchetypeCollection() {
+    }
 
-  public int getTotal() {
-    return total;
-  }
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
 
-  public void setTotal(int total) {
-    this.total = total;
-  }
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
+    }
 
-  public String getKind() {
-    return kind;
-  }
+    public int getTotal() {
+        return total;
+    }
 
-  public void setKind(String kind) {
-    this.kind = kind;
-  }
+    public void setTotal(int total) {
+        this.total = total;
+    }
 
-  public String getEtag() {
-    return etag;
-  }
+    public String getKind() {
+        return kind;
+    }
 
-  public void setEtag(String etag) {
-    this.etag = etag;
-  }
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
 
-  public List<Archetype> getArchetypes() {
-    return archetypes;
-  }
+    public String getEtag() {
+        return etag;
+    }
 
-  public void setArchetypes(List<Archetype> archetypes) {
-    this.archetypes = archetypes;
-  }
-  
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
+
+    public List<Archetype> getArchetypes() {
+        // TODO tmp sort until I get it setup on server
+        if (archetypes != null) {
+            Collections.sort(archetypes, new Comparator<Archetype>() {
+                @Override
+                public int compare(Archetype o1, Archetype o2) {
+                    List<Category> listLeft = o1.getCategories();
+                    List<Category> listRight = o2.getCategories();
+                    if (listLeft == null || listRight == null || listLeft.size() == 0 || listRight.size() == 0) {
+                        return 0;
+                    }
+                    
+                    Category item1Left = listLeft.get(0);
+                    Category item1Right = listRight.get(0);
+                    
+                    if (item1Left.getName() == null || item1Right == null) {
+                        return 0;
+                    }
+                    
+                    // reverse sort gwtp first
+                    return item1Left.getName().compareTo(item1Right.getName()) * -1;
+                }
+            });
+        }
+        
+        return archetypes;
+    }
+
+    public void setArchetypes(List<Archetype> archetypes) {
+        this.archetypes = archetypes;
+    }
+
 }
