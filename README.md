@@ -1,4 +1,4 @@
-##GWTP Eclipse Plugin
+##GWT-Platform Eclipse Plugin
 The GWTP Eclipse plugin provides tools for GWTP in Eclipse. 
 
 ###About the Plugin
