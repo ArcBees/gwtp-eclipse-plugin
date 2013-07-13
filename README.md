@@ -17,7 +17,7 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 * Juno, Kepler or later. 
 
 ##Download
-Alpha can be retreived from update site here: (Testing still goign on)
+Alpha can be retreived from update site here: (Testing still going on)
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
 
