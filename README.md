@@ -2,7 +2,8 @@
 The [GWTP](https://github.com/ArcBees/GWTP) Eclipse plugin provides tools for GWTP framework in Eclipse. 
 
 ###About the Plugin
-This page describes the GWTP Eclipse Plugin that provides simple wizard to create new GWTP project and 
+This page describes the The [GWTP](https://github.com/ArcBees/GWTP) Eclipse Plugin that provides simple wizard to create new 
+The [GWTP](https://github.com/ArcBees/GWTP) project and 
 various classes such as Presenter/View pairs, Action/ActionHandler pairs, Event/Handler pairs or simple model classes.
 
 ###GWTP
