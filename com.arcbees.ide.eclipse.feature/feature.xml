@@ -6,15 +6,15 @@
       provider-name="ARCBEES">
 
    <description url="https://github.com/ArcBees/gwtp-eclipse-plugin/wiki">
-      
+      GWT-Platform tools
    </description>
 
    <copyright url="https://github.com/ArcBees/gwtp-eclipse-plugin/blob/1.0.0/COPYRIGHT.md">
-      
+      Copyright ArcBees 2013
    </copyright>
 
    <license url="https://github.com/ArcBees/gwtp-eclipse-plugin/blob/1.0.0/LICENSE.md">
-      
+      GWTP is freely distributable under the http://www.apache.org/licenses/LICENSE-2.0.html.
    </license>
 
    <url>
