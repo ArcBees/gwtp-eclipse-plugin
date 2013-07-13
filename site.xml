@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="GWTP Eclipse Plugin" url="http://arcbees.github.io/gwtp-eclipse-plugin/">
+      GWT-Platform Eclipse Plugin tools.
+   </description>
+   <feature url="features/com.arcbees.ide.eclipse.feature_1.0.0.qualifier.jar" id="com.arcbees.ide.eclipse.feature" version="1.0.0.qualifier"/>
+</site>
