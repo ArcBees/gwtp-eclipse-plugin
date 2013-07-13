@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.arcbees.ide.eclipse.feature"
+      label="GWTP"
+      version="1.0.0.qualifier"
+      provider-name="ARCBEES">
+
+   <description url="https://github.com/ArcBees/gwtp-eclipse-plugin/wiki">
+      GWT-Platform tools
+   </description>
+
+   <copyright url="https://github.com/ArcBees/gwtp-eclipse-plugin/blob/1.0.0/COPYRIGHT.md">
+      Copyright ArcBees 2013
+   </copyright>
+
+   <license url="https://github.com/ArcBees/gwtp-eclipse-plugin/blob/1.0.0/LICENSE.md">
+      GWTP is freely distributable under the http://www.apache.org/licenses/LICENSE-2.0.html.
+   </license>
+
+   <url>
+      <update label="GWTP Eclipse Plugin" url="http://gwtp-eclipse-plugin.github.io/update-site"/>
+      <discovery label="GWTP Eclipse Plugin" url="http://gwtp-eclipse-plugin.github.io/update-site"/>
+   </url>
+
+   <plugin
+         id="com.arcbees.plugin.eclipse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
