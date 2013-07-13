@@ -14,7 +14,7 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 
 ##Requirements
 * Google Eclipse Plugin (GPE) with the GWT features. 
-* Juno, Kepler or later. 
+* Juno, Kepler or newer. 
 
 ##Download
 Alpha can be retreived from update site here: (Testing still going on)
