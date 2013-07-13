@@ -1,5 +1,7 @@
+# Project
 build
 bin
+target
 
 # Mac
 .DS_Store
