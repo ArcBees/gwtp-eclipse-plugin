@@ -17,7 +17,7 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 * Kepler or newer. 
 
 ##Download
-Alpha can be retreived from update site here: (Testing still going on)
+Alpha can be retreived from update site here: (Testing still going on, bugs exists, working them out...)
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
 
