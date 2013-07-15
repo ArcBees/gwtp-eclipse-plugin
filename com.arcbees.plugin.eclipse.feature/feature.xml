@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.arcbees.ide.eclipse.feature"
+      id="com.arcbees.plugin.eclipse.feature"
       label="GWT-Platform Tools (GWTP)"
-      version="1.0.0.qualifier"
+      version="1.0.3.alpha"
       provider-name="ARCBEES">
 
    <description url="https://github.com/ArcBees/gwtp-eclipse-plugin/wiki">

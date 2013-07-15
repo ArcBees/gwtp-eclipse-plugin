@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.arcbees.ide.eclipse.feature_1.0.0.qualifier.jar" id="com.arcbees.ide.eclipse.feature" version="1.0.0.qualifier"/>
+   <bundle id="com.arcbees.plugin.eclipse" version="1.0.3.alpha">
+      <category name="gwtp-tools"/>
+   </bundle>
    <category-def name="gwtp-tools" label="GWT-Platform Tools"/>
 </site>
