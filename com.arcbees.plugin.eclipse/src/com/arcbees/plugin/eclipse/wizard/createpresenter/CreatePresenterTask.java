@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -63,6 +64,8 @@ import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 
 public class CreatePresenterTask {
+    public final static Logger logger = Logger.getLogger(CreatePresenterTask.class.getName());
+    
     public static CreatePresenterTask run(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         CreatePresenterTask createPresenterTask = new CreatePresenterTask(presenterConfigModel, progressMonitor);
         createPresenterTask.run();
@@ -87,6 +90,8 @@ public class CreatePresenterTask {
     }
 
     private void run() {
+        logger.info("Creating presenter started...");
+        
         createPackageHierachyIndex();
 
         createNameTokensPackage();
