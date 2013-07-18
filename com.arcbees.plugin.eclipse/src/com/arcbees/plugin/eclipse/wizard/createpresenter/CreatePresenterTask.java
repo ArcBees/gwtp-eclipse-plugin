@@ -18,6 +18,9 @@ package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,7 +35,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.ResolvedSourceType;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -98,7 +101,7 @@ public class CreatePresenterTask {
         try {
             createNametokensFile();
         } catch (Exception e) {
-            // TODO
+            log("CreateNameTokens Error", e);
             e.printStackTrace();
             return;
         }
@@ -106,14 +109,14 @@ public class CreatePresenterTask {
         try {
             fetchTemplatesNameTokens();
         } catch (Exception e) {
-            // TODO
+            log("fetchTemplatesNameTokens Error", e);
             e.printStackTrace();
             return;
         }
         try {
             fetchTemplatesNestedPresenter();
         } catch (Exception e) {
-            // TODO
+            log("fetchTemplatesNestedPresenter Error", e);
             e.printStackTrace();
             return;
         }
@@ -133,6 +136,15 @@ public class CreatePresenterTask {
 
         // TODO logger
         System.out.println("finished");
+    }
+    
+    private void log(String msg, Exception e) {
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e.printStackTrace(printWriter);
+        String s = writer.toString();
+        
+        MessageDialog.openError(presenterConfigModel.getShell(), "Error", msg + " " + s);
     }
 
     private void createPackageHierachyIndex() {

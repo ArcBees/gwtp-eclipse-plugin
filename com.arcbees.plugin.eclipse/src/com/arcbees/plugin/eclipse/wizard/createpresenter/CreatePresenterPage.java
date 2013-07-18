@@ -122,6 +122,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         super(true, "wizardPageCreatePresenter");
 
         this.presenterConfigModel = presenterConfigModel;
+        this.presenterConfigModel.setShell(getShell());
 
         setTitle("Create Presenter");
         setDescription("Create a presenter for the project.");
