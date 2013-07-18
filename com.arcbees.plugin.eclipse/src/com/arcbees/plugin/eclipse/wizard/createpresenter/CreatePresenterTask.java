@@ -95,10 +95,28 @@ public class CreatePresenterTask {
         createPackageHierachyIndex();
 
         createNameTokensPackage();
-        createNametokensFile();
+        try {
+            createNametokensFile();
+        } catch (Exception e) {
+            // TODO
+            e.printStackTrace();
+            return;
+        }
 
-        fetchTemplatesNameTokens();
-        fetchTemplatesNestedPresenter();
+        try {
+            fetchTemplatesNameTokens();
+        } catch (Exception e) {
+            // TODO
+            e.printStackTrace();
+            return;
+        }
+        try {
+            fetchTemplatesNestedPresenter();
+        } catch (Exception e) {
+            // TODO
+            e.printStackTrace();
+            return;
+        }
 
         forceWriting = true;
 
@@ -122,7 +140,7 @@ public class CreatePresenterTask {
         packageHierarchy.run();
     }
 
-    private void fetchTemplatesNameTokens() {
+    private void fetchTemplatesNameTokens() throws Exception {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
@@ -139,10 +157,14 @@ public class CreatePresenterTask {
         nameTokenOptions.setNameTokens(nameTokens);
 
         boolean processFileOnly = false;
-        createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        try {
+            createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
-    private void fetchTemplatesNestedPresenter() {
+    private void fetchTemplatesNestedPresenter() throws Exception {
         // Translate options from PresenterConfigModel to PresenterOptions
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
@@ -158,7 +180,7 @@ public class CreatePresenterTask {
         }
     }
 
-    private void fetchNestedTemplate(PresenterOptions presenterOptions) {
+    private void fetchNestedTemplate(PresenterOptions presenterOptions) throws Exception {
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
         nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
         nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
@@ -178,7 +200,11 @@ public class CreatePresenterTask {
         }
         nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
-        createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        try {
+            createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     /**
@@ -417,7 +443,7 @@ public class CreatePresenterTask {
         }
     }
 
-    private void createNametokensFile() {
+    private void createNametokensFile() throws Exception {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
@@ -511,11 +537,16 @@ public class CreatePresenterTask {
         buffer.save(progressMonitor, forceWriting);
     }
 
-    private ICompilationUnit createNewNameTokensFile() {
+    private ICompilationUnit createNewNameTokensFile() throws Exception {
         boolean processFileOnly = true;
         NameTokenOptions nameTokenOptions = new NameTokenOptions();
         nameTokenOptions.setPackageName(createdNameTokensPackage.getElementName());
-        CreatedNameTokens createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        CreatedNameTokens createdNameToken;
+        try {
+            createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        } catch (Exception e1) {
+            throw e1;
+        }
 
         RenderedTemplate rendered = createdNameToken.getNameTokensFile();
         String className = rendered.getNameAndNoExt();
