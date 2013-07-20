@@ -197,6 +197,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnNestedPresenter.setText("Nested Presenter");
 
         btnPresenterWidget = new Button(grpPresenterType, SWT.RADIO);
+        btnPresenterWidget.setEnabled(false);
         btnPresenterWidget.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -212,6 +213,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnPresenterWidget.setText("Presenter Widget");
 
         btnPopupPresenter = new Button(grpPresenterType, SWT.RADIO);
+        btnPopupPresenter.setEnabled(false);
         btnPopupPresenter.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
