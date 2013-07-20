@@ -101,7 +101,7 @@ public class CreatePresenterTask {
         try {
             createNametokensFile();
         } catch (Exception e) {
-            log("CreateNameTokens Error", e);
+            // TODO
             e.printStackTrace();
             return;
         }
@@ -109,14 +109,14 @@ public class CreatePresenterTask {
         try {
             fetchTemplatesNameTokens();
         } catch (Exception e) {
-            log("fetchTemplatesNameTokens Error", e);
+            // TODO
             e.printStackTrace();
             return;
         }
         try {
             fetchTemplatesNestedPresenter();
         } catch (Exception e) {
-            log("fetchTemplatesNestedPresenter Error", e);
+            // TODO
             e.printStackTrace();
             return;
         }
@@ -136,15 +136,6 @@ public class CreatePresenterTask {
 
         // TODO logger
         System.out.println("finished");
-    }
-    
-    private void log(String msg, Exception e) {
-        Writer writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        e.printStackTrace(printWriter);
-        String s = writer.toString();
-        
-        MessageDialog.openError(presenterConfigModel.getShell(), "Error", msg + " " + s);
     }
 
     private void createPackageHierachyIndex() {
