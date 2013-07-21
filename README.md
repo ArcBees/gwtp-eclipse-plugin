@@ -9,6 +9,9 @@ various classes such as Presenter/View pairs, Action/ActionHandler pairs, Event/
 ###GWTP
 A complete model-view-presenter framework to simplify your next GWT project. Find out here here https://github.com/ArcBees/GWTP.
 
+###Videos
+* [Project Creation](http://www.youtube.com/watch?v=qqiTaPKhB_8)
+
 ##News
 * 07/13/2013 - Prepping for new release.
 
