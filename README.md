@@ -30,7 +30,7 @@ Eclipse install. This prevents many headaches.
 * Note: if you have any problems with Eclipse always try a fresh Eclipse install with a fresh new workspace!
 
 ##Download - Update Site
-Install the requirements first then the GWTP plugin can be retreived from update site here:
+Install the requirements first then the GWTP plugin can be installed by using update site.
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
 
