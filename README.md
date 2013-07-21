@@ -1,4 +1,4 @@
-##GWT-Platform Eclipse Plugin
+##GWT-Platform (GWTP) Eclipse Plugin
 The [GWTP](https://github.com/ArcBees/GWTP) Eclipse plugin provides tools for GWTP framework in Eclipse. 
 
 ###About the Plugin
