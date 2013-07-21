@@ -13,8 +13,9 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 * 07/13/2013 - Prepping for new release.
 
 ##Requirements
+* Kepler or newer.
 * Google Eclipse Plugin (GPE) with the GWT features. 
-* Kepler or newer. 
+* m2e. I suggest downloading Kepler Java EE, which comes with everything but the GPE plugin. 
 
 ##Download
 Alpha can be retreived from update site here: (Testing still going on, bugs exists, working them out...)
