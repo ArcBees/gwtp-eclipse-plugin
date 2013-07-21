@@ -25,16 +25,4 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>resources_idetemplates</name>
-			<type>2</type>
-			<location>/Users/branflake2267/git/IDE-Templates/src/main/resources</location>
-		</link>
-		<link>
-			<name>src_idetemplates</name>
-			<type>2</type>
-			<location>/Users/branflake2267/git/IDE-Templates/src/main/java</location>
-		</link>
-	</linkedResources>
 </projectDescription>
