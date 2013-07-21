@@ -27,7 +27,7 @@ Eclipse install. This prevents many headaches.
 * Note: if you have any problems with Eclipse always try a fresh Eclipse install with a fresh new workspace!
 
 ##Download - Update Site
-Alpha can be retreived from update site here: (Testing still going on, bugs exists, working them out...)
+Install the requirements first then the GWTP plugin can be retreived from update site here:
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
 
