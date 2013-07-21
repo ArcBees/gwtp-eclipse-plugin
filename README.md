@@ -26,7 +26,7 @@ Eclipse install. This prevents many headaches.
 
 * Note: if you have any problems with Eclipse always try a fresh Eclipse install with a fresh new workspace!
 
-##Download
+##Download - Update Site
 Alpha can be retreived from update site here: (Testing still going on, bugs exists, working them out...)
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
