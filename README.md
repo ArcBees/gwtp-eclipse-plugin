@@ -11,6 +11,7 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 
 ###Videos
 * [Project Creation](http://www.youtube.com/watch?v=qqiTaPKhB_8)
+* [Nested Presenter Creation](https://www.youtube.com/watch?v=lyl-mujn1tQ)
 
 ##News
 * 07/21/2013 - Producing release docs and testing release. 
