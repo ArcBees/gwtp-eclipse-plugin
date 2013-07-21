@@ -13,6 +13,7 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 * [Project Creation](http://www.youtube.com/watch?v=qqiTaPKhB_8)
 
 ##News
+* 07/21/2013 - Producing release docs and testing release. 
 * 07/13/2013 - Prepping for new release.
 
 ##Eclipse Requirements
