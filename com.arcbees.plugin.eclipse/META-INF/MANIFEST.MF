@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GWT-Platform Eclipse Plugin (GWTP)
 Bundle-SymbolicName: com.arcbees.plugin.eclipse;singleton:=true
-Bundle-Version: 1.0.9.alpha
+Bundle-Version: 1.1.2.alpha
 Bundle-Activator: com.arcbees.plugin.eclipse.Activator
 Bundle-Vendor: ARCBEES
 Require-Bundle: org.eclipse.ui,
@@ -257,13 +257,10 @@ Export-Package: antlr,
  org.apache.oro.text.regex,
  org.apache.oro.util,
  org.apache.velocity,
- org.apache.velocity.anakia,
  org.apache.velocity.app,
  org.apache.velocity.app.event,
  org.apache.velocity.app.event.implement,
- org.apache.velocity.app.tools,
  org.apache.velocity.context,
- org.apache.velocity.convert,
  org.apache.velocity.exception,
  org.apache.velocity.io,
  org.apache.velocity.runtime,
@@ -275,10 +272,6 @@ Export-Package: antlr,
  org.apache.velocity.runtime.resource.loader,
  org.apache.velocity.runtime.resource.util,
  org.apache.velocity.runtime.visitor,
- org.apache.velocity.servlet,
- org.apache.velocity.texen,
- org.apache.velocity.texen.ant,
- org.apache.velocity.texen.util,
  org.apache.velocity.util,
  org.apache.velocity.util.introspection,
  org.ccil.cowan.tagsoup,

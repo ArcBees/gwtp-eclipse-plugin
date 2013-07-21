@@ -18,9 +18,6 @@ package com.arcbees.plugin.eclipse.wizard.createpresenter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -49,6 +46,7 @@ import org.eclipse.jdt.internal.core.ResolvedSourceType;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -68,7 +66,7 @@ import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 
 public class CreatePresenterTask {
     public final static Logger logger = Logger.getLogger(CreatePresenterTask.class.getName());
-    
+
     public static CreatePresenterTask run(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         CreatePresenterTask createPresenterTask = new CreatePresenterTask(presenterConfigModel, progressMonitor);
         createPresenterTask.run();
@@ -94,14 +92,14 @@ public class CreatePresenterTask {
 
     private void run() {
         logger.info("Creating presenter started...");
-        
+
         createPackageHierachyIndex();
 
         createNameTokensPackage();
         try {
             createNametokensFile();
         } catch (Exception e) {
-            log("CreateNameTokens Error", e);
+            warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
             e.printStackTrace();
             return;
         }
@@ -109,14 +107,14 @@ public class CreatePresenterTask {
         try {
             fetchTemplatesNameTokens();
         } catch (Exception e) {
-            log("fetchTemplatesNameTokens Error", e);
+            warn("Could not fetch NameTokens templates: Error: " + e.toString());
             e.printStackTrace();
             return;
         }
         try {
             fetchTemplatesNestedPresenter();
         } catch (Exception e) {
-            log("fetchTemplatesNestedPresenter Error", e);
+            warn("Could not fetch the ntested presenter templates: Error: " + e.toString());
             e.printStackTrace();
             return;
         }
@@ -137,14 +135,13 @@ public class CreatePresenterTask {
         // TODO logger
         System.out.println("finished");
     }
-    
-    private void log(String msg, Exception e) {
-        Writer writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        e.printStackTrace(printWriter);
-        String s = writer.toString();
-        
-        MessageDialog.openError(presenterConfigModel.getShell(), "Error", msg + " " + s);
+
+    private void warn(final String message) {
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                MessageDialog.openWarning(presenterConfigModel.getShell(), "Warning", message);
+            }
+        });
     }
 
     private void createPackageHierachyIndex() {
@@ -239,7 +236,7 @@ public class CreatePresenterTask {
             created = presenterCreatedPackage = selectedPackageRoot.createPackageFragment(packageName, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
+            warn("Could not create packageName=" + packageName + ": Error: " + e.toString());
             e.printStackTrace();
         }
 
@@ -329,18 +326,19 @@ public class CreatePresenterTask {
             try {
                 createPresenterGinlink(unit);
             } catch (JavaModelException e) {
-                // TODO 
+                warn("Could not create gin link. Error1: " + e.toString());
                 e.printStackTrace();
             } catch (MalformedTreeException e) {
-                // TODO 
+                warn("Could not create gin link. Error2: " + e.toString());
                 e.printStackTrace();
             } catch (BadLocationException e) {
-                // TODO 
+                warn("Could not create gin link. Error3: " + e.toString());
                 e.printStackTrace();
             }
         } else {
             // TODO display error, wasn't able to install gin module
             System.out.println("Error: Wasn't able to install Module");
+            warn("Could not create install module.");
         }
     }
 
@@ -450,7 +448,7 @@ public class CreatePresenterTask {
         try {
             newFile.create(source, IResource.NONE, progressMonitor);
         } catch (CoreException e) {
-            // TODO or throw exception
+            warn("Could not create source createPresenterViewUi(). Error: " + e.toString());
             e.printStackTrace();
         }
     }
@@ -472,7 +470,7 @@ public class CreatePresenterTask {
         }
 
         if (unitNameTokens == null) {
-            // TODO display error that NameTokens could not be created.
+            warn("Could not create NameTokens.java");
             return;
         }
 
@@ -493,13 +491,13 @@ public class CreatePresenterTask {
         try {
             addMethodsToNameTokens(unitNameTokens);
         } catch (JavaModelException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error1: " + e.toString());
             e.printStackTrace();
         } catch (MalformedTreeException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error2: " + e.toString());
             e.printStackTrace();
         } catch (BadLocationException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error3: " + e.toString());
             e.printStackTrace();
         }
     }
@@ -515,7 +513,7 @@ public class CreatePresenterTask {
         // find existing method
         MethodDeclaration method = findMethod(astRoot, presenterConfigModel.getNameTokenMethodName());
         if (method != null) {
-            // TODO already exists, display warning
+            warn("FYI: the method in nameTokens already exists." + method.toString());
             return;
         }
 
@@ -569,8 +567,8 @@ public class CreatePresenterTask {
             nameTokenUnit = createdNameTokensPackage.createCompilationUnit(className, contents, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
             System.out.println("Couldn't create className: " + className);
+            warn("Could not createNameTokensFile Error: " + e.toString());
             e.printStackTrace();
         }
 
@@ -585,7 +583,7 @@ public class CreatePresenterTask {
         try {
             unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
+            warn("Could create class. " + className + " Error: " + e.toString());
             System.out.println("Couldn't create className: " + className);
             e.printStackTrace();
             return;
@@ -594,7 +592,7 @@ public class CreatePresenterTask {
         try {
             codeFormatter.formatCodeJavaClassAndSaveIt(unit, forceWriting);
         } catch (JavaModelException e) {
-            // TODO display code formatter error
+            warn("Could format class. " + className + " Error: " + e.toString());
             e.printStackTrace();
         }
 
