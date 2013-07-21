@@ -12,15 +12,25 @@ A complete model-view-presenter framework to simplify your next GWT project. Fin
 ##News
 * 07/13/2013 - Prepping for new release.
 
-##Requirements
+##Eclipse Requirements
 * Kepler or newer.
 * Google Eclipse Plugin (GPE) with the GWT features. 
 * m2e. I suggest downloading Kepler Java EE, which comes with everything but the GPE plugin. 
+
+###Eclipse Notes
+I recommend installing Eclipse Kepler Java EE because it comes with everything but the GPE plugin. 
+I also recommend if upgrading from juno that you try kepler out with its own workspace which
+can help prevent updating the previous workspace until you are ready. 
+If you have any problems with GPE plugin I always recommend creating a new workspace and starting with a fresh
+Eclipse install. This prevents many headaches. 
+
+* Note: if you have any problems with Eclipse always try a fresh Eclipse install with a fresh new workspace!
 
 ##Download
 Alpha can be retreived from update site here: (Testing still going on, bugs exists, working them out...)
 
 * Update site: http://arcbees.github.io/gwtp-eclipse-plugin/
+
 
 ## Previous Version
 [Previous Versions](https://github.com/ArcBees/gwtp-eclipse-plugin/wiki/Previous-Versions) update site and source notes. 
