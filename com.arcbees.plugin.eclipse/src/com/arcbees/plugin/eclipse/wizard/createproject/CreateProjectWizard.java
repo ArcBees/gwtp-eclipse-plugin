@@ -89,7 +89,7 @@ public class CreateProjectWizard extends Wizard {
         
         // TODO have m2e update project
         
-        // TODO add entrypoint to google plugin settings for project
+        // TODO add entrypoint to GWT plugin settings for project
     }
 
     private void createProject(IProgressMonitor monitor) {
