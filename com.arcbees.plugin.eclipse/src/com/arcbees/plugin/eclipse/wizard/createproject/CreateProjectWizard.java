@@ -16,8 +16,10 @@
 
 package com.arcbees.plugin.eclipse.wizard.createproject;
 
+import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +45,8 @@ public class CreateProjectWizard extends Wizard {
     private CreateProjectPage createProjectPage;
     private SelectArchetypePage selectArchetypePage;
     private ProjectConfigModel projectConfigModel;
+    private IProjectConfigurationManager mavenProjectConfig;
+    private IProgressMonitor monitor;
 
     public CreateProjectWizard() {
         super();
@@ -85,14 +89,22 @@ public class CreateProjectWizard extends Wizard {
     }
 
     private void generate(IProgressMonitor monitor) {
-        createProject(monitor);
+        this.monitor = monitor;
         
-        // TODO have m2e update project
+        List<IProject> projects = null;
+        try {
+            projects = createProject();
+        } catch (CoreException e) {
+            return;
+        }
+        
+        // update projects
+        updateMavenConfigurationFor(projects);
         
         // TODO add entrypoint to GWT plugin settings for project
     }
 
-    private void createProject(IProgressMonitor monitor) {
+    private List<IProject> createProject() throws CoreException {
         // project path is set in workspace.
         IPath location = new Path(projectConfigModel.getWorkspacePath());
 
@@ -110,15 +122,37 @@ public class CreateProjectWizard extends Wizard {
         properties.put("module", projectConfigModel.getModuleName());
         archetype.setProperties(properties);
 
-        ProjectImportConfiguration configuration = new ProjectImportConfiguration();
-
         // create project
-        IProjectConfigurationManager projectConfig = MavenPlugin.getProjectConfigurationManager();
+        ProjectImportConfiguration configuration = new ProjectImportConfiguration();
+        mavenProjectConfig = MavenPlugin.getProjectConfigurationManager();
+        List<IProject> projects = null;
         try {
-            projectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage,
+            projects = mavenProjectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage,
                     properties, configuration, monitor);
         } catch (CoreException e) {
             warn("Could not create maven project. Error: " + e.toString());
+            e.printStackTrace();
+            throw e;
+        }
+        
+        return projects;
+    }
+    
+    private void updateMavenConfigurationFor(List<IProject> projects) {
+        if (projects == null || projects.size() == 0) { 
+            return;
+        }
+        
+        for (IProject project : projects) {
+            updateMavenConfigurationFor(project);
+        }
+    }
+
+    private void updateMavenConfigurationFor(IProject project) {
+        try {
+            mavenProjectConfig.updateProjectConfiguration(project, monitor);
+        } catch (CoreException e) {
+            warn("Couldn't update the new project Maven configuration. Error: " + e.toString());
             e.printStackTrace();
         }
     }
