@@ -98,7 +98,7 @@ public class CreateProjectWizard extends Wizard {
             return;
         }
         
-        // update projects
+        // update projects - get rid of redx after new project creation
         updateMavenConfigurationFor(projects);
         
         // TODO add entrypoint to GWT plugin settings for project
