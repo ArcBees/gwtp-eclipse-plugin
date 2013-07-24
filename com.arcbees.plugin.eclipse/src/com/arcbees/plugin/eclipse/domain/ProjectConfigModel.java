@@ -18,7 +18,6 @@ package com.arcbees.plugin.eclipse.domain;
 
 import org.eclipse.swt.widgets.Shell;
 
-
 public class ProjectConfigModel extends ModelObject {
     private Shell shell;
     private String projectName;
