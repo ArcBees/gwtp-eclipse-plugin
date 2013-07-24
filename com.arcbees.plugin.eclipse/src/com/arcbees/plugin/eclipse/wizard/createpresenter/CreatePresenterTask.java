@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -43,8 +43,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.ResolvedSourceType;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -63,6 +65,8 @@ import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 
 public class CreatePresenterTask {
+    public final static Logger logger = Logger.getLogger(CreatePresenterTask.class.getName());
+
     public static CreatePresenterTask run(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         CreatePresenterTask createPresenterTask = new CreatePresenterTask(presenterConfigModel, progressMonitor);
         createPresenterTask.run();
@@ -87,13 +91,33 @@ public class CreatePresenterTask {
     }
 
     private void run() {
+        logger.info("Creating presenter started...");
+
         createPackageHierachyIndex();
 
         createNameTokensPackage();
-        createNametokensFile();
+        try {
+            createNametokensFile();
+        } catch (Exception e) {
+            warn("Could not create or find the name tokens file 'NameTokens.java': Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
 
-        fetchTemplatesNameTokens();
-        fetchTemplatesNestedPresenter();
+        try {
+            fetchTemplatesNameTokens();
+        } catch (Exception e) {
+            warn("Could not fetch NameTokens templates: Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
+        try {
+            fetchTemplatesNestedPresenter();
+        } catch (Exception e) {
+            warn("Could not fetch the ntested presenter templates: Error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
 
         forceWriting = true;
 
@@ -112,12 +136,20 @@ public class CreatePresenterTask {
         System.out.println("finished");
     }
 
+    private void warn(final String message) {
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                MessageDialog.openWarning(presenterConfigModel.getShell(), "Warning", message);
+            }
+        });
+    }
+
     private void createPackageHierachyIndex() {
         packageHierarchy = new PackageHierarchy(presenterConfigModel, progressMonitor);
         packageHierarchy.run();
     }
 
-    private void fetchTemplatesNameTokens() {
+    private void fetchTemplatesNameTokens() throws Exception {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
@@ -134,10 +166,14 @@ public class CreatePresenterTask {
         nameTokenOptions.setNameTokens(nameTokens);
 
         boolean processFileOnly = false;
-        createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        try {
+            createdNameTokenTemplates = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
-    private void fetchTemplatesNestedPresenter() {
+    private void fetchTemplatesNestedPresenter() throws Exception {
         // Translate options from PresenterConfigModel to PresenterOptions
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
@@ -153,7 +189,7 @@ public class CreatePresenterTask {
         }
     }
 
-    private void fetchNestedTemplate(PresenterOptions presenterOptions) {
+    private void fetchNestedTemplate(PresenterOptions presenterOptions) throws Exception {
         NestedPresenterOptions nestedPresenterOptions = new NestedPresenterOptions();
         nestedPresenterOptions.setPlace(presenterConfigModel.getPlace());
         nestedPresenterOptions.setNameToken(presenterConfigModel.getNameToken());
@@ -173,7 +209,11 @@ public class CreatePresenterTask {
         }
         nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
-        createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        try {
+            createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     /**
@@ -196,7 +236,7 @@ public class CreatePresenterTask {
             created = presenterCreatedPackage = selectedPackageRoot.createPackageFragment(packageName, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
+            warn("Could not create packageName=" + packageName + ": Error: " + e.toString());
             e.printStackTrace();
         }
 
@@ -286,18 +326,19 @@ public class CreatePresenterTask {
             try {
                 createPresenterGinlink(unit);
             } catch (JavaModelException e) {
-                // TODO 
+                warn("Could not create gin link. Error1: " + e.toString());
                 e.printStackTrace();
             } catch (MalformedTreeException e) {
-                // TODO 
+                warn("Could not create gin link. Error2: " + e.toString());
                 e.printStackTrace();
             } catch (BadLocationException e) {
-                // TODO 
+                warn("Could not create gin link. Error3: " + e.toString());
                 e.printStackTrace();
             }
         } else {
             // TODO display error, wasn't able to install gin module
             System.out.println("Error: Wasn't able to install Module");
+            warn("Could not create install module.");
         }
     }
 
@@ -407,12 +448,12 @@ public class CreatePresenterTask {
         try {
             newFile.create(source, IResource.NONE, progressMonitor);
         } catch (CoreException e) {
-            // TODO or throw exception
+            warn("Could not create source createPresenterViewUi(). Error: " + e.toString());
             e.printStackTrace();
         }
     }
 
-    private void createNametokensFile() {
+    private void createNametokensFile() throws Exception {
         if (!presenterConfigModel.getPlace()) {
             return;
         }
@@ -429,7 +470,7 @@ public class CreatePresenterTask {
         }
 
         if (unitNameTokens == null) {
-            // TODO display error that NameTokens could not be created.
+            warn("Could not create NameTokens.java");
             return;
         }
 
@@ -450,13 +491,13 @@ public class CreatePresenterTask {
         try {
             addMethodsToNameTokens(unitNameTokens);
         } catch (JavaModelException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error1: " + e.toString());
             e.printStackTrace();
         } catch (MalformedTreeException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error2: " + e.toString());
             e.printStackTrace();
         } catch (BadLocationException e) {
-            // TODO 
+            warn("Could not createnNameTokenFieldAndMethods Error3: " + e.toString());
             e.printStackTrace();
         }
     }
@@ -472,7 +513,7 @@ public class CreatePresenterTask {
         // find existing method
         MethodDeclaration method = findMethod(astRoot, presenterConfigModel.getNameTokenMethodName());
         if (method != null) {
-            // TODO already exists, display warning
+            warn("FYI: the method in nameTokens already exists." + method.toString());
             return;
         }
 
@@ -506,11 +547,16 @@ public class CreatePresenterTask {
         buffer.save(progressMonitor, forceWriting);
     }
 
-    private ICompilationUnit createNewNameTokensFile() {
+    private ICompilationUnit createNewNameTokensFile() throws Exception {
         boolean processFileOnly = true;
         NameTokenOptions nameTokenOptions = new NameTokenOptions();
         nameTokenOptions.setPackageName(createdNameTokensPackage.getElementName());
-        CreatedNameTokens createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        CreatedNameTokens createdNameToken;
+        try {
+            createdNameToken = CreateNameTokens.run(nameTokenOptions, true, processFileOnly);
+        } catch (Exception e1) {
+            throw e1;
+        }
 
         RenderedTemplate rendered = createdNameToken.getNameTokensFile();
         String className = rendered.getNameAndNoExt();
@@ -521,8 +567,8 @@ public class CreatePresenterTask {
             nameTokenUnit = createdNameTokensPackage.createCompilationUnit(className, contents, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
             System.out.println("Couldn't create className: " + className);
+            warn("Could not createNameTokensFile Error: " + e.toString());
             e.printStackTrace();
         }
 
@@ -537,7 +583,7 @@ public class CreatePresenterTask {
         try {
             unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
-            // TODO display error
+            warn("Could create class. " + className + " Error: " + e.toString());
             System.out.println("Couldn't create className: " + className);
             e.printStackTrace();
             return;
@@ -546,7 +592,7 @@ public class CreatePresenterTask {
         try {
             codeFormatter.formatCodeJavaClassAndSaveIt(unit, forceWriting);
         } catch (JavaModelException e) {
-            // TODO display code formatter error
+            warn("Could format class. " + className + " Error: " + e.toString());
             e.printStackTrace();
         }
 
