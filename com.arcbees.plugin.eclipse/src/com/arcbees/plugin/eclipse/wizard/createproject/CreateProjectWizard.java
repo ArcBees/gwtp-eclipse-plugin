@@ -38,8 +38,7 @@ import com.arcbees.plugin.eclipse.domain.Archetype;
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 
 /**
- * TODO add required archetype properties to directory TODO setup the debugging for GWTP, add the default module to the
- * GPE plugin debugger
+ * Create project
  */
 public class CreateProjectWizard extends Wizard {
     private CreateProjectPage createProjectPage;
