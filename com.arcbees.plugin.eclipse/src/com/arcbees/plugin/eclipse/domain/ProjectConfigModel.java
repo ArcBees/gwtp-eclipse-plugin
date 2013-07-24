@@ -16,8 +16,11 @@
 
 package com.arcbees.plugin.eclipse.domain;
 
+import org.eclipse.swt.widgets.Shell;
+
 
 public class ProjectConfigModel extends ModelObject {
+    private Shell shell;
     private String projectName;
     private String packageName;
     private String moduleName;
@@ -27,7 +30,8 @@ public class ProjectConfigModel extends ModelObject {
     private Archetype archetypeSelected;
     private String workspacePath;
     
-    public ProjectConfigModel() {
+    public ProjectConfigModel(Shell shell) {
+        this.shell = shell;
     }
 
     public String getPackageName() {
@@ -112,5 +116,9 @@ public class ProjectConfigModel extends ModelObject {
     
     public String getWorkspacePath() {
         return workspacePath;
+    }
+    
+    public Shell getShell() {
+        return shell;
     }
 }

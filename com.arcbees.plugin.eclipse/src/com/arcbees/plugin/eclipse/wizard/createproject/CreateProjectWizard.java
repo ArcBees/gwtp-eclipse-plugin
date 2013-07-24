@@ -1,5 +1,5 @@
 /**
-  * Copyright 2013 ArcBees Inc.
+ * Copyright 2013 ArcBees Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,17 +25,19 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
+import org.eclipse.swt.widgets.Display;
 
 import com.arcbees.plugin.eclipse.domain.Archetype;
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 
 /**
- * TODO add required archetype properties to directory
- * TODO setup the debugging for GWTP, add the default module to the GPE plugin debugger
+ * TODO add required archetype properties to directory TODO setup the debugging for GWTP, add the default module to the
+ * GPE plugin debugger
  */
 public class CreateProjectWizard extends Wizard {
     private CreateProjectPage createProjectPage;
@@ -44,18 +46,18 @@ public class CreateProjectWizard extends Wizard {
 
     public CreateProjectWizard() {
         super();
-        
+
         setNeedsProgressMonitor(true);
         setWindowTitle("Create GWTP Project");
     }
 
     @Override
     public void addPages() {
-        projectConfigModel = new ProjectConfigModel();
-        
+        projectConfigModel = new ProjectConfigModel(getShell());
+
         createProjectPage = new CreateProjectPage(projectConfigModel);
         selectArchetypePage = new SelectArchetypePage(projectConfigModel);
-        
+
         addPage(createProjectPage);
         addPage(selectArchetypePage);
     }
@@ -66,11 +68,11 @@ public class CreateProjectWizard extends Wizard {
         if (canBeFinished) {
             runGenerate();
         } else {
-            // TODO status or display why
+            warn("Looks like the form isn't completely filled out. Fill it out and hit finish.");
         }
         return canBeFinished;
     }
-    
+
     public void runGenerate() {
         Job job = new Job("Generate Project") {
             @Override
@@ -83,52 +85,66 @@ public class CreateProjectWizard extends Wizard {
     }
 
     private void generate(IProgressMonitor monitor) {
-        // project path is set in workspace.
-        // In the future, when wanting to import from non workspace path, import path will have to change... 
-        IPath location = new Path(projectConfigModel.getWorkspacePath());
+        createProject(monitor);
         
+        // TODO have m2e update project
+        
+        // TODO add entrypoint to google plugin settings for project
+    }
+
+    private void createProject(IProgressMonitor monitor) {
+        // project path is set in workspace.
+        IPath location = new Path(projectConfigModel.getWorkspacePath());
+
         // import archetype
         org.apache.maven.archetype.catalog.Archetype archetype = getArchetype();
-        
+
         // project settings
         String groupId = projectConfigModel.getGroupId();
         String artifactId = projectConfigModel.getArtifactId();
         String version = projectConfigModel.getVersion();
         String javaPackage = projectConfigModel.getPackageName();
-        
+
         // config
         Properties properties = new Properties();
-
-        // TODO need to get from directory and add to directory the required properties.
         properties.put("module", projectConfigModel.getModuleName());
         archetype.setProperties(properties);
-        // TODO 
-        
+
         ProjectImportConfiguration configuration = new ProjectImportConfiguration();
 
+        // create project
         IProjectConfigurationManager projectConfig = MavenPlugin.getProjectConfigurationManager();
         try {
             projectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage,
                     properties, configuration, monitor);
         } catch (CoreException e) {
-            // TODO display error
+            warn("Could not create maven project. Error: " + e.toString());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Convert this project Archetype to maven archetype object
+     */
     private org.apache.maven.archetype.catalog.Archetype getArchetype() {
         Archetype selected = projectConfigModel.getArchetypeSelected();
-        
-        org.apache.maven.archetype.catalog.Archetype archetype = new org.apache.maven.archetype.catalog.Archetype();
 
+        org.apache.maven.archetype.catalog.Archetype archetype = new org.apache.maven.archetype.catalog.Archetype();
         archetype.setGroupId(selected.getGroupId());
         archetype.setArtifactId(selected.getArtifactId());
         archetype.setRepository(selected.getRepository());
         archetype.setVersion(selected.getVersion());
-
         archetype.setModelEncoding("UTF-8");
         archetype.setDescription(projectConfigModel.getDescription());
 
         return archetype;
+    }
+
+    private void warn(final String message) {
+        Display.getDefault().asyncExec(new Runnable() {
+            public void run() {
+                MessageDialog.openWarning(getShell(), "Warning", message);
+            }
+        });
     }
 }
