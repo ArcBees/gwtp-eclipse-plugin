@@ -77,6 +77,10 @@ import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
 import com.arcbees.plugin.eclipse.validators.PlaceValidator;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -122,6 +126,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         super(true, "wizardPageCreatePresenter");
 
         this.presenterConfigModel = presenterConfigModel;
+        this.presenterConfigModel.setShell(getShell());
 
         setTitle("Create Presenter");
         setDescription("Create a presenter for the project.");
@@ -144,35 +149,42 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         container.setLayout(new GridLayout(1, false));
 
         Label lblName = new Label(container, SWT.NONE);
+        lblName.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         lblName.setText("Name: 'AppHome'");
 
         name = new Text(container, SWT.BORDER);
-        name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        name.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        GridData gd_name = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+        gd_name.widthHint = 563;
+        name.setLayoutData(gd_name);
 
         Label lblPackage = new Label(container, SWT.NONE);
+        lblPackage.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         lblPackage.setText("Package: 'com.arcbees.project.client'");
 
         Composite composite = new Composite(container, SWT.NONE);
-        GridData gd_composite = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
+        GridData gd_composite = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
         gd_composite.heightHint = 28;
-        gd_composite.widthHint = 568;
+        gd_composite.widthHint = 571;
         composite.setLayoutData(gd_composite);
 
         packageName = new Text(composite, SWT.NONE);
-        packageName.setBounds(0, 4, 422, 19);
+        packageName.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        packageName.setBounds(0, 5, 422, 16);
 
         Button btnSelectPackage = new Button(composite, SWT.NONE);
+        btnSelectPackage.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         btnSelectPackage.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 openPackageSelectionDialog();
             }
         });
-        btnSelectPackage.setBounds(438, 0, 120, 28);
+        btnSelectPackage.setBounds(438, -1, 120, 28);
         btnSelectPackage.setText("Select Package");
 
         Group grpPresenterType = new Group(container, SWT.NONE);
-        grpPresenterType.setLayout(null);
+        grpPresenterType.setLayout(new FormLayout());
         GridData gd_grpPresenterType = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_grpPresenterType.heightHint = 31;
         gd_grpPresenterType.widthHint = 562;
@@ -180,6 +192,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpPresenterType.setText("Presenter Type");
 
         btnNestedPresenter = new Button(grpPresenterType, SWT.RADIO);
+        btnNestedPresenter.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnNestedPresenter = new FormData();
+        fd_btnNestedPresenter.top = new FormAttachment(0, 5);
+        fd_btnNestedPresenter.left = new FormAttachment(0, 5);
+        btnNestedPresenter.setLayoutData(fd_btnNestedPresenter);
         btnNestedPresenter.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -192,10 +209,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             }
         });
         btnNestedPresenter.setSelection(true);
-        btnNestedPresenter.setBounds(10, 10, 113, 18);
         btnNestedPresenter.setText("Nested Presenter");
 
         btnPresenterWidget = new Button(grpPresenterType, SWT.RADIO);
+        btnPresenterWidget.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnPresenterWidget = new FormData();
+        fd_btnPresenterWidget.top = new FormAttachment(0, 5);
+        fd_btnPresenterWidget.left = new FormAttachment(0, 138);
+        btnPresenterWidget.setLayoutData(fd_btnPresenterWidget);
+        btnPresenterWidget.setEnabled(false);
         btnPresenterWidget.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -207,10 +229,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 }
             }
         });
-        btnPresenterWidget.setBounds(143, 10, 112, 18);
         btnPresenterWidget.setText("Presenter Widget");
 
         btnPopupPresenter = new Button(grpPresenterType, SWT.RADIO);
+        btnPopupPresenter.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnPopupPresenter = new FormData();
+        fd_btnPopupPresenter.top = new FormAttachment(0, 5);
+        fd_btnPopupPresenter.left = new FormAttachment(0, 268);
+        btnPopupPresenter.setLayoutData(fd_btnPopupPresenter);
+        btnPopupPresenter.setEnabled(false);
         btnPopupPresenter.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -222,10 +249,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 }
             }
         });
-        btnPopupPresenter.setBounds(273, 10, 109, 18);
         btnPopupPresenter.setText("Popup Presenter");
 
         link = new Link(grpPresenterType, SWT.NONE);
+        link.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_link = new FormData();
+        fd_link.right = new FormAttachment(0, 557);
+        fd_link.top = new FormAttachment(0, 7);
+        fd_link.left = new FormAttachment(0, 398);
+        link.setLayoutData(fd_link);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -234,7 +266,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             }
         });
         link.setToolTipText("Find more help on presenter creation");
-        link.setBounds(403, 12, 159, 15);
         link.setText("<a>Presenter Creation Help</a>");
 
         grpNestedPresenterOptions = new Group(container, SWT.NONE);
@@ -247,14 +278,18 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         Group grpReveal = new Group(grpNestedPresenterOptions, SWT.NONE);
         grpReveal.setText("Reveal In");
-        grpReveal.setLayout(null);
+        grpReveal.setLayout(new FormLayout());
         GridData gd_grpReveal = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_grpReveal.heightHint = 31;
         gd_grpReveal.widthHint = 538;
         grpReveal.setLayoutData(gd_grpReveal);
 
         btnRevealrootcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealrootcontentevent.setBounds(10, 10, 47, 18);
+        btnRevealrootcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnRevealrootcontentevent = new FormData();
+        fd_btnRevealrootcontentevent.top = new FormAttachment(0, 5);
+        fd_btnRevealrootcontentevent.left = new FormAttachment(0, 5);
+        btnRevealrootcontentevent.setLayoutData(fd_btnRevealrootcontentevent);
         btnRevealrootcontentevent.setSelection(true);
         btnRevealrootcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -273,7 +308,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnRevealrootcontentevent.setText("Root");
 
         btnRevealrootlayoutcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealrootlayoutcontentevent.setBounds(62, 10, 82, 18);
+        btnRevealrootlayoutcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnRevealrootlayoutcontentevent = new FormData();
+        fd_btnRevealrootlayoutcontentevent.top = new FormAttachment(0, 5);
+        fd_btnRevealrootlayoutcontentevent.left = new FormAttachment(0, 57);
+        btnRevealrootlayoutcontentevent.setLayoutData(fd_btnRevealrootlayoutcontentevent);
         btnRevealrootlayoutcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -291,7 +330,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnRevealrootlayoutcontentevent.setText("RootLayout");
 
         btnRevealcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealcontentevent.setBounds(149, 10, 42, 18);
+        btnRevealcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnRevealcontentevent = new FormData();
+        fd_btnRevealcontentevent.top = new FormAttachment(0, 5);
+        fd_btnRevealcontentevent.left = new FormAttachment(0, 144);
+        btnRevealcontentevent.setLayoutData(fd_btnRevealcontentevent);
         btnRevealcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -309,8 +352,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnRevealcontentevent.setText("Slot");
 
         btnSelectContentSlot = new Button(grpReveal, SWT.NONE);
+        btnSelectContentSlot.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnSelectContentSlot = new FormData();
+        fd_btnSelectContentSlot.top = new FormAttachment(0, 1);
+        fd_btnSelectContentSlot.left = new FormAttachment(0, 436);
+        btnSelectContentSlot.setLayoutData(fd_btnSelectContentSlot);
         btnSelectContentSlot.setEnabled(false);
-        btnSelectContentSlot.setBounds(441, 6, 87, 28);
         btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -320,20 +367,36 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnSelectContentSlot.setText("Select Slot");
 
         contentSlot = new Text(grpReveal, SWT.BORDER);
+        contentSlot.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_contentSlot = new FormData();
+        fd_contentSlot.right = new FormAttachment(0, 430);
+        fd_contentSlot.top = new FormAttachment(0, 5);
+        fd_contentSlot.left = new FormAttachment(0, 193);
+        contentSlot.setLayoutData(fd_contentSlot);
         contentSlot.setEnabled(false);
-        contentSlot.setBounds(198, 10, 237, 19);
 
         Composite composite_1 = new Composite(grpNestedPresenterOptions, SWT.NONE);
+        composite_1.setLayout(new FormLayout());
         GridData gd_composite_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_composite_1.widthHint = 551;
         composite_1.setLayoutData(gd_composite_1);
 
         Group grpPlace = new Group(composite_1, SWT.NONE);
-        grpPlace.setBounds(0, 10, 449, 60);
+        FormData fd_grpPlace = new FormData();
+        fd_grpPlace.bottom = new FormAttachment(0, 70);
+        fd_grpPlace.right = new FormAttachment(0, 449);
+        fd_grpPlace.top = new FormAttachment(0, 10);
+        fd_grpPlace.left = new FormAttachment(0);
+        grpPlace.setLayoutData(fd_grpPlace);
         grpPlace.setText("Place");
+        grpPlace.setLayout(new FormLayout());
 
         btnIsAPlace = new Button(grpPlace, SWT.CHECK);
-        btnIsAPlace.setBounds(10, 11, 71, 18);
+        btnIsAPlace.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnIsAPlace = new FormData();
+        fd_btnIsAPlace.top = new FormAttachment(0, 6);
+        fd_btnIsAPlace.left = new FormAttachment(0, 5);
+        btnIsAPlace.setLayoutData(fd_btnIsAPlace);
         btnIsAPlace.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -353,46 +416,80 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnIsAPlace.setText("Is a Place");
 
         Label lblPlaceNamenametoken = new Label(grpPlace, SWT.NONE);
-        lblPlaceNamenametoken.setBounds(87, 13, 72, 14);
+        lblPlaceNamenametoken.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_lblPlaceNamenametoken = new FormData();
+        fd_lblPlaceNamenametoken.top = new FormAttachment(0, 8);
+        fd_lblPlaceNamenametoken.left = new FormAttachment(0, 82);
+        lblPlaceNamenametoken.setLayoutData(fd_lblPlaceNamenametoken);
         lblPlaceNamenametoken.setToolTipText("Name of the place.");
         lblPlaceNamenametoken.setText("NameToken:");
 
         nameToken = new Text(grpPlace, SWT.BORDER);
-        nameToken.setBounds(165, 10, 161, 19);
+        nameToken.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_nameToken = new FormData();
+        fd_nameToken.right = new FormAttachment(0, 321);
+        fd_nameToken.top = new FormAttachment(0, 5);
+        fd_nameToken.left = new FormAttachment(0, 160);
+        nameToken.setLayoutData(fd_nameToken);
 
         btnIsCrawlable = new Button(grpPlace, SWT.CHECK);
+        btnIsCrawlable.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnIsCrawlable = new FormData();
+        fd_btnIsCrawlable.top = new FormAttachment(0, 6);
+        fd_btnIsCrawlable.left = new FormAttachment(0, 333);
+        btnIsCrawlable.setLayoutData(fd_btnIsCrawlable);
         btnIsCrawlable.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
             }
         });
-        btnIsCrawlable.setBounds(338, 11, 85, 18);
         btnIsCrawlable.setText("Is crawlable");
 
         Group grpExtra = new Group(composite_1, SWT.NONE);
+        FormData fd_grpExtra = new FormData();
+        fd_grpExtra.bottom = new FormAttachment(0, 71);
+        fd_grpExtra.right = new FormAttachment(0, 551);
+        fd_grpExtra.top = new FormAttachment(0, 11);
+        fd_grpExtra.left = new FormAttachment(0, 455);
+        grpExtra.setLayoutData(fd_grpExtra);
         grpExtra.setText("More Options");
-        grpExtra.setBounds(455, 11, 96, 60);
-        grpExtra.setLayout(null);
+        grpExtra.setLayout(new FormLayout());
 
         btnCodesplit = new Button(grpExtra, SWT.CHECK);
-        btnCodesplit.setBounds(10, 10, 73, 18);
+        btnCodesplit.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnCodesplit = new FormData();
+        fd_btnCodesplit.top = new FormAttachment(0, 5);
+        fd_btnCodesplit.left = new FormAttachment(0, 5);
+        btnCodesplit.setLayoutData(fd_btnCodesplit);
         btnCodesplit.setText("CodeSplit");
 
         grpPopupPresenter = new Group(container, SWT.NONE);
-        grpPopupPresenter.setLayout(null);
+        grpPopupPresenter.setLayout(new FormLayout());
         GridData gd_grpPopupPresenter = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_grpPopupPresenter.widthHint = 562;
         grpPopupPresenter.setLayoutData(gd_grpPopupPresenter);
         grpPopupPresenter.setText("Popup Presenter Options");
 
         Button btnOverrideDefaultPopup = new Button(grpPopupPresenter, SWT.CHECK);
-        btnOverrideDefaultPopup.setBounds(10, 10, 179, 18);
+        FormData fd_btnOverrideDefaultPopup = new FormData();
+        fd_btnOverrideDefaultPopup.right = new FormAttachment(0, 184);
+        fd_btnOverrideDefaultPopup.top = new FormAttachment(0, 5);
+        fd_btnOverrideDefaultPopup.left = new FormAttachment(0, 5);
+        btnOverrideDefaultPopup.setLayoutData(fd_btnOverrideDefaultPopup);
         btnOverrideDefaultPopup.setText("Override default Popup Panel");
 
         overridePopupPanel = new Text(grpPopupPresenter, SWT.BORDER);
-        overridePopupPanel.setBounds(195, 10, 184, 19);
+        FormData fd_overridePopupPanel = new FormData();
+        fd_overridePopupPanel.right = new FormAttachment(0, 374);
+        fd_overridePopupPanel.top = new FormAttachment(0, 5);
+        fd_overridePopupPanel.left = new FormAttachment(0, 190);
+        overridePopupPanel.setLayoutData(fd_overridePopupPanel);
 
         Button btnSelectPanel = new Button(grpPopupPresenter, SWT.NONE);
+        FormData fd_btnSelectPanel = new FormData();
+        fd_btnSelectPanel.top = new FormAttachment(0, 1);
+        fd_btnSelectPanel.left = new FormAttachment(0, 380);
+        btnSelectPanel.setLayoutData(fd_btnSelectPanel);
         btnSelectPanel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -403,43 +500,61 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 }
             }
         });
-        btnSelectPanel.setBounds(385, 6, 95, 28);
         btnSelectPanel.setText("Select Panel");
 
         grpPresenterWidgetOptions = new Group(container, SWT.NONE);
+        grpPresenterWidgetOptions.setLayout(new FormLayout());
         GridData gd_grpPresenterWidgetOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_grpPresenterWidgetOptions.heightHint = 25;
         gd_grpPresenterWidgetOptions.widthHint = 562;
         grpPresenterWidgetOptions.setLayoutData(gd_grpPresenterWidgetOptions);
         grpPresenterWidgetOptions.setText("Presenter Widget Options");
-        grpPresenterWidgetOptions.setLayout(null);
 
         Button btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
-        btnIsASingleton.setBounds(10, 10, 94, 18);
+        FormData fd_btnIsASingleton = new FormData();
+        fd_btnIsASingleton.top = new FormAttachment(0, 5);
+        fd_btnIsASingleton.left = new FormAttachment(0, 5);
+        btnIsASingleton.setLayoutData(fd_btnIsASingleton);
         btnIsASingleton.setText("Is a Singleton");
 
         Group grpConvenienceOptions = new Group(container, SWT.NONE);
-        grpConvenienceOptions.setLayout(null);
+        grpConvenienceOptions.setLayout(new FormLayout());
         GridData gd_grpConvenienceOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
         gd_grpConvenienceOptions.heightHint = 170;
-        gd_grpConvenienceOptions.widthHint = 562;
+        gd_grpConvenienceOptions.widthHint = 559;
         grpConvenienceOptions.setLayoutData(gd_grpConvenienceOptions);
         grpConvenienceOptions.setText("Extra Options");
 
         btnAddUihandlers = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddUihandlers.setBounds(10, 30, 105, 18);
+        btnAddUihandlers.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnAddUihandlers = new FormData();
+        fd_btnAddUihandlers.top = new FormAttachment(0, 25);
+        fd_btnAddUihandlers.left = new FormAttachment(0, 5);
+        btnAddUihandlers.setLayoutData(fd_btnAddUihandlers);
         btnAddUihandlers.setText("Add UiHandlers");
 
         Label lblPresenterLifecycleMethods = new Label(grpConvenienceOptions, SWT.NONE);
-        lblPresenterLifecycleMethods.setBounds(10, 66, 153, 14);
+        lblPresenterLifecycleMethods.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_lblPresenterLifecycleMethods = new FormData();
+        fd_lblPresenterLifecycleMethods.top = new FormAttachment(0, 61);
+        fd_lblPresenterLifecycleMethods.left = new FormAttachment(0, 5);
+        lblPresenterLifecycleMethods.setLayoutData(fd_lblPresenterLifecycleMethods);
         lblPresenterLifecycleMethods.setText("Presenter Lifecycle Methods");
 
         btnAddOnbind = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnbind.setBounds(10, 86, 91, 18);
+        btnAddOnbind.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnAddOnbind = new FormData();
+        fd_btnAddOnbind.top = new FormAttachment(0, 81);
+        fd_btnAddOnbind.left = new FormAttachment(0, 5);
+        btnAddOnbind.setLayoutData(fd_btnAddOnbind);
         btnAddOnbind.setText("Add onBind()");
 
         btnAddOnhide = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnhide.setBounds(10, 110, 92, 18);
+        btnAddOnhide.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnAddOnhide = new FormData();
+        fd_btnAddOnhide.top = new FormAttachment(0, 105);
+        fd_btnAddOnhide.left = new FormAttachment(0, 5);
+        btnAddOnhide.setLayoutData(fd_btnAddOnhide);
         btnAddOnhide.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -448,55 +563,100 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddOnhide.setText("Add onHide()");
 
         btnAddOnreset = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnreset.setBounds(10, 134, 97, 18);
+        btnAddOnreset.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnAddOnreset = new FormData();
+        fd_btnAddOnreset.top = new FormAttachment(0, 129);
+        fd_btnAddOnreset.left = new FormAttachment(0, 5);
+        btnAddOnreset.setLayoutData(fd_btnAddOnreset);
         btnAddOnreset.setText("Add onReset()");
 
         btnAddOnunbind = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnunbind.setBounds(9, 158, 106, 18);
+        btnAddOnunbind.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnAddOnunbind = new FormData();
+        fd_btnAddOnunbind.top = new FormAttachment(0, 153);
+        fd_btnAddOnunbind.left = new FormAttachment(0, 4);
+        btnAddOnunbind.setLayoutData(fd_btnAddOnunbind);
         btnAddOnunbind.setText("Add onUnbind()");
 
         Label lblEvents = new Label(grpConvenienceOptions, SWT.NONE);
-        lblEvents.setBounds(10, 10, 59, 14);
+        lblEvents.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_lblEvents = new FormData();
+        fd_lblEvents.right = new FormAttachment(0, 64);
+        fd_lblEvents.top = new FormAttachment(0, 5);
+        fd_lblEvents.left = new FormAttachment(0, 5);
+        lblEvents.setLayoutData(fd_lblEvents);
         lblEvents.setText("Events");
 
         Label lblSecurity = new Label(grpConvenienceOptions, SWT.NONE);
+        FormData fd_lblSecurity = new FormData();
+        fd_lblSecurity.right = new FormAttachment(0, 411);
+        fd_lblSecurity.top = new FormAttachment(0, 127);
+        fd_lblSecurity.left = new FormAttachment(0, 219);
+        lblSecurity.setLayoutData(fd_lblSecurity);
         lblSecurity.setVisible(false);
-        lblSecurity.setBounds(224, 132, 192, 14);
         lblSecurity.setText("Gatekeeper Security");
 
         gateKeeper = new Text(grpConvenienceOptions, SWT.BORDER);
+        FormData fd_gateKeeper = new FormData();
+        fd_gateKeeper.right = new FormAttachment(0, 411);
+        fd_gateKeeper.top = new FormAttachment(0, 146);
+        fd_gateKeeper.left = new FormAttachment(0, 219);
+        gateKeeper.setLayoutData(fd_gateKeeper);
         gateKeeper.setVisible(false);
-        gateKeeper.setBounds(224, 151, 192, 19);
 
         Button btnSelectGatekeeper = new Button(grpConvenienceOptions, SWT.NONE);
+        FormData fd_btnSelectGatekeeper = new FormData();
+        fd_btnSelectGatekeeper.right = new FormAttachment(0, 539);
+        fd_btnSelectGatekeeper.top = new FormAttachment(0, 143);
+        fd_btnSelectGatekeeper.left = new FormAttachment(0, 417);
+        btnSelectGatekeeper.setLayoutData(fd_btnSelectGatekeeper);
         btnSelectGatekeeper.setVisible(false);
         btnSelectGatekeeper.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
             }
         });
-        btnSelectGatekeeper.setBounds(422, 148, 122, 28);
         btnSelectGatekeeper.setText("Select Gatekeeper");
 
         btnUseManualReveal = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnUseManualReveal.setBounds(224, 30, 153, 18);
+        btnUseManualReveal.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnUseManualReveal = new FormData();
+        fd_btnUseManualReveal.right = new FormAttachment(0, 372);
+        fd_btnUseManualReveal.top = new FormAttachment(0, 25);
+        fd_btnUseManualReveal.left = new FormAttachment(0, 219);
+        btnUseManualReveal.setLayoutData(fd_btnUseManualReveal);
         btnUseManualReveal.setText("Use Manual Reveal");
 
         Label lblOnReveal = new Label(grpConvenienceOptions, SWT.NONE);
-        lblOnReveal.setBounds(224, 10, 59, 14);
+        lblOnReveal.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_lblOnReveal = new FormData();
+        fd_lblOnReveal.right = new FormAttachment(0, 278);
+        fd_lblOnReveal.top = new FormAttachment(0, 5);
+        fd_lblOnReveal.left = new FormAttachment(0, 219);
+        lblOnReveal.setLayoutData(fd_lblOnReveal);
         lblOnReveal.setText("On Reveal");
 
         Label lblQuerystring = new Label(grpConvenienceOptions, SWT.NONE);
-        lblQuerystring.setBounds(224, 66, 77, 14);
+        lblQuerystring.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_lblQuerystring = new FormData();
+        fd_lblQuerystring.right = new FormAttachment(0, 296);
+        fd_lblQuerystring.top = new FormAttachment(0, 61);
+        fd_lblQuerystring.left = new FormAttachment(0, 219);
+        lblQuerystring.setLayoutData(fd_lblQuerystring);
         lblQuerystring.setText("Querystring");
 
         btnPrepareFromRequest = new Button(grpConvenienceOptions, SWT.CHECK);
+        btnPrepareFromRequest.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        FormData fd_btnPrepareFromRequest = new FormData();
+        fd_btnPrepareFromRequest.right = new FormAttachment(0, 428);
+        fd_btnPrepareFromRequest.top = new FormAttachment(0, 81);
+        fd_btnPrepareFromRequest.left = new FormAttachment(0, 219);
+        btnPrepareFromRequest.setLayoutData(fd_btnPrepareFromRequest);
         btnPrepareFromRequest.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
             }
         });
-        btnPrepareFromRequest.setBounds(224, 86, 209, 18);
         btnPrepareFromRequest.setText("Use Prepare from Request");
         m_bindingContext = initDataBindings();
 

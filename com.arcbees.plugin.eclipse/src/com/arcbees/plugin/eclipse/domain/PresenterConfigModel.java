@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ResolvedSourceField;
+import org.eclipse.swt.widgets.Shell;
 
 public class PresenterConfigModel extends ModelObject {
     private IJavaProject javaProject;
@@ -57,6 +58,7 @@ public class PresenterConfigModel extends ModelObject {
     private String gatekeeper;
     private IPackageFragment selectedPackage;
     private ICompilationUnit nameTokenUnit;
+    private Shell shell;
 
     public PresenterConfigModel() {
         // default settings
@@ -345,5 +347,13 @@ public class PresenterConfigModel extends ModelObject {
         s += "path=" + path + " ";
         s += " }";
         return s;
+    }
+    
+    public void setShell(Shell shell) {
+        this.shell = shell;
+    }
+
+    public Shell getShell() {
+        return shell;
     }
 }
