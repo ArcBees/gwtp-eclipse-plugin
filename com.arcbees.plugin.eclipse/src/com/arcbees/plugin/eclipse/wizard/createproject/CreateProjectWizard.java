@@ -90,17 +90,17 @@ public class CreateProjectWizard extends Wizard {
 
     private void generate(IProgressMonitor monitor) {
         this.monitor = monitor;
-        
+
         List<IProject> projects = null;
         try {
             projects = createProject();
         } catch (CoreException e) {
             return;
         }
-        
+
         // update projects - get rid of redx after new project creation
         updateMavenConfigurationFor(projects);
-        
+
         // TODO add entrypoint to GWT plugin settings for project
     }
 
@@ -127,22 +127,22 @@ public class CreateProjectWizard extends Wizard {
         mavenProjectConfig = MavenPlugin.getProjectConfigurationManager();
         List<IProject> projects = null;
         try {
-            projects = mavenProjectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version, javaPackage,
-                    properties, configuration, monitor);
+            projects = mavenProjectConfig.createArchetypeProjects(location, archetype, groupId, artifactId, version,
+                    javaPackage, properties, configuration, monitor);
         } catch (CoreException e) {
             warn("Could not create maven project. Error: " + e.toString());
             e.printStackTrace();
             throw e;
         }
-        
+
         return projects;
     }
-    
+
     private void updateMavenConfigurationFor(List<IProject> projects) {
-        if (projects == null || projects.size() == 0) { 
+        if (projects == null || projects.size() == 0) {
             return;
         }
-        
+
         for (IProject project : projects) {
             updateMavenConfigurationFor(project);
         }
