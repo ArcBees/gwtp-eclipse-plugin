@@ -56,6 +56,11 @@ import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.plugin.eclipse.validators.ModuleNameValidator;
 import com.arcbees.plugin.eclipse.validators.NewProjectArtifactIdValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormAttachment;
+import swing2swt.layout.FlowLayout;
 
 public class CreateProjectPage extends WizardPage {
     private DataBindingContext m_bindingContext;
@@ -83,78 +88,72 @@ public class CreateProjectPage extends WizardPage {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
-        container.setLayout(new GridLayout(1, false));
+        container.setLayout(new FillLayout(SWT.VERTICAL));
 
         Group grpMaven = new Group(container, SWT.NONE);
-        GridData gd_grpMaven = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_grpMaven.widthHint = 571;
-        grpMaven.setLayoutData(gd_grpMaven);
-        grpMaven.setLayout(new GridLayout(1, false));
         grpMaven.setText("Maven");
+        grpMaven.setLayout(new GridLayout(1, false));
 
         Label lblArtifactid = new Label(grpMaven, SWT.NONE);
+        lblArtifactid.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         lblArtifactid.setText("ArtifactId: 'myproject'");
 
         artifactId = new Text(grpMaven, SWT.BORDER);
+        artifactId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         artifactId.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 checkProjectName();
             }
         });
-        artifactId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
         Label lblGroupid = new Label(grpMaven, SWT.NONE);
+        lblGroupid.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         lblGroupid.setText("GroupId: 'com.arcbees.project'");
 
         groupId = new Text(grpMaven, SWT.BORDER);
-        GridData gd_groupId = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_groupId.widthHint = 556;
-        groupId.setLayoutData(gd_groupId);
+        groupId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         Group grpJavaProject = new Group(container, SWT.NONE);
-        GridData gd_grpJavaProject = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpJavaProject.widthHint = 571;
-        grpJavaProject.setLayoutData(gd_grpJavaProject);
         grpJavaProject.setLayout(new GridLayout(1, false));
         grpJavaProject.setText("Java Project");
 
         Label lblNewLabel = new Label(grpJavaProject, SWT.NONE);
-        GridData gd_lblNewLabel = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+        GridData gd_lblNewLabel = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         gd_lblNewLabel.widthHint = 556;
         lblNewLabel.setLayoutData(gd_lblNewLabel);
         lblNewLabel.setText("GWT Module Name: 'Project'");
 
         moduleName = new Text(grpJavaProject, SWT.BORDER);
-        moduleName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        moduleName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Label lblPackageName = new Label(grpJavaProject, SWT.NONE);
+        lblPackageName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
         lblPackageName.setText("Package Name: 'com.arcbees.project'");
 
         packageName = new Text(grpJavaProject, SWT.BORDER);
-        packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Group grpLocation = new Group(container, SWT.NONE);
-        grpLocation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
         grpLocation.setText("Workspace");
         grpLocation.setLayout(new GridLayout(1, false));
 
         Label lblNewProjectPath = new Label(grpLocation, SWT.NONE);
+        lblNewProjectPath.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 1, 1));
         lblNewProjectPath.setText("New Project Path");
 
         newProjectPath = new Text(grpLocation, SWT.BORDER);
-        GridData gd_newProjectPath = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-        gd_newProjectPath.widthHint = 556;
-        newProjectPath.setLayoutData(gd_newProjectPath);
+        newProjectPath.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         newProjectPath.setEnabled(false);
 
-        Composite composite = new Composite(container, SWT.NONE);
-        GridData gd_composite = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_composite.widthHint = 582;
-        composite.setLayoutData(gd_composite);
+        Group group = new Group(container, SWT.NONE);
+
+        group.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
+        Composite composite = new Composite(group, SWT.NONE);
+        composite.setLayout(new GridLayout(2, false));
 
         Button btnHint = new Button(composite, SWT.NONE);
-        btnHint.setBounds(10, 10, 55, 28);
         btnHint.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -171,7 +170,6 @@ public class CreateProjectPage extends WizardPage {
                 gotoUrl(surl);
             }
         });
-        link.setBounds(452, 16, 120, 15);
         link.setText("<a>Project Creation Help</a>");
         m_bindingContext = initDataBindings();
 
