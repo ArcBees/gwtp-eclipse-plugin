@@ -131,9 +131,6 @@ public class CreatePresenterTask {
         createPresenterViewUi();
 
         // TODO focus on new presenter and open it up
-
-        // TODO logger
-        System.out.println("finished");
     }
 
     private void warn(final String message) {
