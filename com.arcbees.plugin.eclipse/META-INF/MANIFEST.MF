@@ -64,7 +64,8 @@ Bundle-ClassPath: .,
  lib/oro-2.0.8.jar,
  lib/rest-assured-1.8.0.jar,
  lib/tagsoup-1.2.1.jar,
- lib/velocity-1.5.jar
+ lib/velocity-1.5.jar,
+ swing2swt.jar
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,

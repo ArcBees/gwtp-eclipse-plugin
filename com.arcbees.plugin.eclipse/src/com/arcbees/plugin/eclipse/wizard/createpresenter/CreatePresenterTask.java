@@ -178,7 +178,12 @@ public class CreatePresenterTask {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
         presenterOptions.setName(presenterConfigModel.getName());
-        // TODO add more options...
+        presenterOptions.setOnbind(presenterConfigModel.getOnBind());
+        presenterOptions.setOnhide(presenterConfigModel.getOnHide());
+        presenterOptions.setOnreset(presenterConfigModel.getOnReset());
+        presenterOptions.setOnunbind(presenterConfigModel.getOnUnbind());
+        presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
+        presenterOptions.setPrepareFromRequest(presenterConfigModel.getUsePrepareFromRequest());
 
         if (presenterConfigModel.getNestedPresenter()) {
             fetchNestedTemplate(presenterOptions);

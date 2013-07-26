@@ -39,7 +39,6 @@ public class NameTokenValidator implements IValidator {
         if (!btnIsAPlace.getSelection()) {
             return ValidationStatus.ok();
         }
-        System.out.println("NameToken ok try");
         if (value instanceof String) {
             String name = ((String) value).trim();
             boolean passes = name.length() > 0;
