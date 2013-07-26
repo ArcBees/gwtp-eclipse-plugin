@@ -81,6 +81,9 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
+import swing2swt.layout.FlowLayout;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -90,8 +93,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private PresenterConfigModel presenterConfigModel;
 
     private Composite parent;
-
-    private Group grpNestedPresenterOptions;
     private Group grpPopupPresenter;
     private Group grpPresenterWidgetOptions;
     private Button btnNestedPresenter;
@@ -121,6 +122,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnPrepareFromRequest;
     private Binding bindValueForNameToken;
     private Link link;
+    private Composite composite_2;
+    private TabItem tbtmPopupPresenter;
+    private Composite composite_1;
+    private Composite composite_3;
+    private Group group;
+    private Composite composite_4;
+    private Button btnSelectGatekeeper;
+    private Label lblSecurity;
+    private TabFolder tabFolder;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -148,63 +158,57 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         setControl(container);
         container.setLayout(new GridLayout(1, false));
 
-        Label lblName = new Label(container, SWT.NONE);
-        lblName.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        group = new Group(container, SWT.NONE);
+        group.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        group.setLayout(new GridLayout(1, false));
+
+        Label lblName = new Label(group, SWT.NONE);
         lblName.setText("Name: 'AppHome'");
 
-        name = new Text(container, SWT.BORDER);
-        name.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        GridData gd_name = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
-        gd_name.widthHint = 563;
-        name.setLayoutData(gd_name);
+        name = new Text(group, SWT.BORDER);
+        name.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        Label lblPackage = new Label(container, SWT.NONE);
-        lblPackage.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        Label lblPackage = new Label(group, SWT.NONE);
         lblPackage.setText("Package: 'com.arcbees.project.client'");
 
-        Composite composite = new Composite(container, SWT.NONE);
-        GridData gd_composite = new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1);
-        gd_composite.heightHint = 28;
-        gd_composite.widthHint = 571;
-        composite.setLayoutData(gd_composite);
+        composite_4 = new Composite(group, SWT.NONE);
+        GridLayout gl_composite_4 = new GridLayout(2, false);
+        gl_composite_4.marginHeight = 0;
+        gl_composite_4.marginWidth = 0;
+        gl_composite_4.verticalSpacing = 0;
+        gl_composite_4.horizontalSpacing = 0;
+        composite_4.setLayout(gl_composite_4);
+        GridData gd_composite_4 = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+        gd_composite_4.heightHint = 37;
+        composite_4.setLayoutData(gd_composite_4);
 
-        packageName = new Text(composite, SWT.NONE);
-        packageName.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        packageName.setBounds(0, 5, 422, 16);
+        packageName = new Text(composite_4, SWT.BORDER);
+        packageName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        Button btnSelectPackage = new Button(composite, SWT.NONE);
-        btnSelectPackage.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
+        Button btnSelectPackage = new Button(composite_4, SWT.NONE);
         btnSelectPackage.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 openPackageSelectionDialog();
             }
         });
-        btnSelectPackage.setBounds(438, -1, 120, 28);
         btnSelectPackage.setText("Select Package");
 
         Group grpPresenterType = new Group(container, SWT.NONE);
-        grpPresenterType.setLayout(new FormLayout());
-        GridData gd_grpPresenterType = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        grpPresenterType.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        GridData gd_grpPresenterType = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         gd_grpPresenterType.heightHint = 31;
         gd_grpPresenterType.widthHint = 562;
         grpPresenterType.setLayoutData(gd_grpPresenterType);
         grpPresenterType.setText("Presenter Type");
 
         btnNestedPresenter = new Button(grpPresenterType, SWT.RADIO);
-        btnNestedPresenter.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnNestedPresenter = new FormData();
-        fd_btnNestedPresenter.top = new FormAttachment(0, 5);
-        fd_btnNestedPresenter.left = new FormAttachment(0, 5);
-        btnNestedPresenter.setLayoutData(fd_btnNestedPresenter);
         btnNestedPresenter.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean selected = btnNestedPresenter.getSelection();
                 if (selected) {
-                    grpNestedPresenterOptions.setVisible(true);
-                    grpPopupPresenter.setVisible(false);
-                    grpPresenterWidgetOptions.setVisible(false);
+                    tabFolder.setSelection(0);
                 }
             }
         });
@@ -212,52 +216,30 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnNestedPresenter.setText("Nested Presenter");
 
         btnPresenterWidget = new Button(grpPresenterType, SWT.RADIO);
-        btnPresenterWidget.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnPresenterWidget = new FormData();
-        fd_btnPresenterWidget.top = new FormAttachment(0, 5);
-        fd_btnPresenterWidget.left = new FormAttachment(0, 138);
-        btnPresenterWidget.setLayoutData(fd_btnPresenterWidget);
-        btnPresenterWidget.setEnabled(false);
         btnPresenterWidget.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean selected = btnPresenterWidget.getSelection();
                 if (selected) {
-                    grpNestedPresenterOptions.setVisible(false);
-                    grpPopupPresenter.setVisible(true);
-                    grpPresenterWidgetOptions.setVisible(false);
+                    tabFolder.setSelection(1);
                 }
             }
         });
         btnPresenterWidget.setText("Presenter Widget");
 
         btnPopupPresenter = new Button(grpPresenterType, SWT.RADIO);
-        btnPopupPresenter.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnPopupPresenter = new FormData();
-        fd_btnPopupPresenter.top = new FormAttachment(0, 5);
-        fd_btnPopupPresenter.left = new FormAttachment(0, 268);
-        btnPopupPresenter.setLayoutData(fd_btnPopupPresenter);
-        btnPopupPresenter.setEnabled(false);
         btnPopupPresenter.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 boolean selected = btnPopupPresenter.getSelection();
                 if (selected) {
-                    grpNestedPresenterOptions.setVisible(false);
-                    grpPopupPresenter.setVisible(false);
-                    grpPresenterWidgetOptions.setVisible(true);
+                    tabFolder.setSelection(2);
                 }
             }
         });
         btnPopupPresenter.setText("Popup Presenter");
 
         link = new Link(grpPresenterType, SWT.NONE);
-        link.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_link = new FormData();
-        fd_link.right = new FormAttachment(0, 557);
-        fd_link.top = new FormAttachment(0, 7);
-        fd_link.left = new FormAttachment(0, 398);
-        link.setLayoutData(fd_link);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -268,28 +250,41 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         link.setToolTipText("Find more help on presenter creation");
         link.setText("<a>Presenter Creation Help</a>");
 
-        grpNestedPresenterOptions = new Group(container, SWT.NONE);
-        grpNestedPresenterOptions.setLayout(new GridLayout(1, false));
-        GridData gd_grpNestedPresenterOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpNestedPresenterOptions.heightHint = 165;
-        gd_grpNestedPresenterOptions.widthHint = 562;
-        grpNestedPresenterOptions.setLayoutData(gd_grpNestedPresenterOptions);
-        grpNestedPresenterOptions.setText("Nested Presenter Options");
+        tabFolder = new TabFolder(container, SWT.NONE);
+        tabFolder.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                int index = tabFolder.getSelectionIndex();
+                if (index == 0) {
+                    btnNestedPresenter.setSelection(true);
+                    btnPresenterWidget.setSelection(false);
+                    btnPopupPresenter.setSelection(false);
+                } else if (index == 1) {
+                    btnNestedPresenter.setSelection(false);
+                    btnPresenterWidget.setSelection(true);
+                    btnPopupPresenter.setSelection(false);
+                } else if (index == 2) {
+                    btnNestedPresenter.setSelection(false);
+                    btnPresenterWidget.setSelection(false);
+                    btnPopupPresenter.setSelection(true);
+                }
+            }
+        });
+        tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-        Group grpReveal = new Group(grpNestedPresenterOptions, SWT.NONE);
+        TabItem tbtmNestedPresenter = new TabItem(tabFolder, SWT.NONE);
+        tbtmNestedPresenter.setText("Nested Presenter");
+
+        composite_2 = new Composite(tabFolder, SWT.NONE);
+        tbtmNestedPresenter.setControl(composite_2);
+        composite_2.setLayout(new GridLayout(1, false));
+
+        Group grpReveal = new Group(composite_2, SWT.NONE);
+        grpReveal.setLayout(new GridLayout(5, false));
+        grpReveal.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpReveal.setText("Reveal In");
-        grpReveal.setLayout(new FormLayout());
-        GridData gd_grpReveal = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpReveal.heightHint = 31;
-        gd_grpReveal.widthHint = 538;
-        grpReveal.setLayoutData(gd_grpReveal);
 
         btnRevealrootcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealrootcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnRevealrootcontentevent = new FormData();
-        fd_btnRevealrootcontentevent.top = new FormAttachment(0, 5);
-        fd_btnRevealrootcontentevent.left = new FormAttachment(0, 5);
-        btnRevealrootcontentevent.setLayoutData(fd_btnRevealrootcontentevent);
         btnRevealrootcontentevent.setSelection(true);
         btnRevealrootcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -308,11 +303,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnRevealrootcontentevent.setText("Root");
 
         btnRevealrootlayoutcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealrootlayoutcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnRevealrootlayoutcontentevent = new FormData();
-        fd_btnRevealrootlayoutcontentevent.top = new FormAttachment(0, 5);
-        fd_btnRevealrootlayoutcontentevent.left = new FormAttachment(0, 57);
-        btnRevealrootlayoutcontentevent.setLayoutData(fd_btnRevealrootlayoutcontentevent);
         btnRevealrootlayoutcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -330,11 +320,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnRevealrootlayoutcontentevent.setText("RootLayout");
 
         btnRevealcontentevent = new Button(grpReveal, SWT.RADIO);
-        btnRevealcontentevent.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnRevealcontentevent = new FormData();
-        fd_btnRevealcontentevent.top = new FormAttachment(0, 5);
-        fd_btnRevealcontentevent.left = new FormAttachment(0, 144);
-        btnRevealcontentevent.setLayoutData(fd_btnRevealcontentevent);
         btnRevealcontentevent.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -351,12 +336,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnRevealcontentevent.setText("Slot");
 
+        contentSlot = new Text(grpReveal, SWT.BORDER);
+        contentSlot.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        contentSlot.setEnabled(false);
+
         btnSelectContentSlot = new Button(grpReveal, SWT.NONE);
-        btnSelectContentSlot.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnSelectContentSlot = new FormData();
-        fd_btnSelectContentSlot.top = new FormAttachment(0, 1);
-        fd_btnSelectContentSlot.left = new FormAttachment(0, 436);
-        btnSelectContentSlot.setLayoutData(fd_btnSelectContentSlot);
         btnSelectContentSlot.setEnabled(false);
         btnSelectContentSlot.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -366,37 +350,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnSelectContentSlot.setText("Select Slot");
 
-        contentSlot = new Text(grpReveal, SWT.BORDER);
-        contentSlot.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_contentSlot = new FormData();
-        fd_contentSlot.right = new FormAttachment(0, 430);
-        fd_contentSlot.top = new FormAttachment(0, 5);
-        fd_contentSlot.left = new FormAttachment(0, 193);
-        contentSlot.setLayoutData(fd_contentSlot);
-        contentSlot.setEnabled(false);
-
-        Composite composite_1 = new Composite(grpNestedPresenterOptions, SWT.NONE);
-        composite_1.setLayout(new FormLayout());
-        GridData gd_composite_1 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_composite_1.widthHint = 551;
-        composite_1.setLayoutData(gd_composite_1);
-
-        Group grpPlace = new Group(composite_1, SWT.NONE);
-        FormData fd_grpPlace = new FormData();
-        fd_grpPlace.bottom = new FormAttachment(0, 70);
-        fd_grpPlace.right = new FormAttachment(0, 449);
-        fd_grpPlace.top = new FormAttachment(0, 10);
-        fd_grpPlace.left = new FormAttachment(0);
-        grpPlace.setLayoutData(fd_grpPlace);
+        Group grpPlace = new Group(composite_2, SWT.NONE);
+        grpPlace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpPlace.setText("Place");
-        grpPlace.setLayout(new FormLayout());
+        grpPlace.setLayout(new GridLayout(4, false));
 
         btnIsAPlace = new Button(grpPlace, SWT.CHECK);
-        btnIsAPlace.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnIsAPlace = new FormData();
-        fd_btnIsAPlace.top = new FormAttachment(0, 6);
-        fd_btnIsAPlace.left = new FormAttachment(0, 5);
-        btnIsAPlace.setLayoutData(fd_btnIsAPlace);
         btnIsAPlace.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -416,28 +375,13 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnIsAPlace.setText("Is a Place");
 
         Label lblPlaceNamenametoken = new Label(grpPlace, SWT.NONE);
-        lblPlaceNamenametoken.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_lblPlaceNamenametoken = new FormData();
-        fd_lblPlaceNamenametoken.top = new FormAttachment(0, 8);
-        fd_lblPlaceNamenametoken.left = new FormAttachment(0, 82);
-        lblPlaceNamenametoken.setLayoutData(fd_lblPlaceNamenametoken);
         lblPlaceNamenametoken.setToolTipText("Name of the place.");
         lblPlaceNamenametoken.setText("NameToken:");
 
         nameToken = new Text(grpPlace, SWT.BORDER);
-        nameToken.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_nameToken = new FormData();
-        fd_nameToken.right = new FormAttachment(0, 321);
-        fd_nameToken.top = new FormAttachment(0, 5);
-        fd_nameToken.left = new FormAttachment(0, 160);
-        nameToken.setLayoutData(fd_nameToken);
+        nameToken.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         btnIsCrawlable = new Button(grpPlace, SWT.CHECK);
-        btnIsCrawlable.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnIsCrawlable = new FormData();
-        fd_btnIsCrawlable.top = new FormAttachment(0, 6);
-        fd_btnIsCrawlable.left = new FormAttachment(0, 333);
-        btnIsCrawlable.setLayoutData(fd_btnIsCrawlable);
         btnIsCrawlable.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -445,29 +389,43 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnIsCrawlable.setText("Is crawlable");
 
-        Group grpExtra = new Group(composite_1, SWT.NONE);
-        FormData fd_grpExtra = new FormData();
-        fd_grpExtra.bottom = new FormAttachment(0, 71);
-        fd_grpExtra.right = new FormAttachment(0, 551);
-        fd_grpExtra.top = new FormAttachment(0, 11);
-        fd_grpExtra.left = new FormAttachment(0, 455);
-        grpExtra.setLayoutData(fd_grpExtra);
+        Group grpExtra = new Group(composite_2, SWT.NONE);
+        grpExtra.setLayout(new GridLayout(1, false));
+        grpExtra.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpExtra.setText("More Options");
-        grpExtra.setLayout(new FormLayout());
 
         btnCodesplit = new Button(grpExtra, SWT.CHECK);
-        btnCodesplit.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
-        FormData fd_btnCodesplit = new FormData();
-        fd_btnCodesplit.top = new FormAttachment(0, 5);
-        fd_btnCodesplit.left = new FormAttachment(0, 5);
-        btnCodesplit.setLayoutData(fd_btnCodesplit);
         btnCodesplit.setText("CodeSplit");
 
-        grpPopupPresenter = new Group(container, SWT.NONE);
+        TabItem tbtmPresenterWidget = new TabItem(tabFolder, SWT.NONE);
+        tbtmPresenterWidget.setText("Presenter Widget");
+
+        composite_3 = new Composite(tabFolder, SWT.NONE);
+        tbtmPresenterWidget.setControl(composite_3);
+        composite_3.setLayout(new GridLayout(1, false));
+
+        grpPresenterWidgetOptions = new Group(composite_3, SWT.NONE);
+        grpPresenterWidgetOptions.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        grpPresenterWidgetOptions.setLayout(new FormLayout());
+        grpPresenterWidgetOptions.setText("Presenter Widget Options");
+
+        Button btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
+        FormData fd_btnIsASingleton = new FormData();
+        fd_btnIsASingleton.top = new FormAttachment(0, 5);
+        fd_btnIsASingleton.left = new FormAttachment(0, 5);
+        btnIsASingleton.setLayoutData(fd_btnIsASingleton);
+        btnIsASingleton.setText("Is a Singleton");
+
+        tbtmPopupPresenter = new TabItem(tabFolder, SWT.NONE);
+        tbtmPopupPresenter.setText("Popup Presenter");
+
+        composite_1 = new Composite(tabFolder, SWT.NONE);
+        tbtmPopupPresenter.setControl(composite_1);
+        composite_1.setLayout(new GridLayout(1, false));
+
+        grpPopupPresenter = new Group(composite_1, SWT.NONE);
+        grpPopupPresenter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpPopupPresenter.setLayout(new FormLayout());
-        GridData gd_grpPopupPresenter = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpPopupPresenter.widthHint = 562;
-        grpPopupPresenter.setLayoutData(gd_grpPopupPresenter);
         grpPopupPresenter.setText("Popup Presenter Options");
 
         Button btnOverrideDefaultPopup = new Button(grpPopupPresenter, SWT.CHECK);
@@ -502,31 +460,15 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         });
         btnSelectPanel.setText("Select Panel");
 
-        grpPresenterWidgetOptions = new Group(container, SWT.NONE);
-        grpPresenterWidgetOptions.setLayout(new FormLayout());
-        GridData gd_grpPresenterWidgetOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
-        gd_grpPresenterWidgetOptions.heightHint = 25;
-        gd_grpPresenterWidgetOptions.widthHint = 562;
-        grpPresenterWidgetOptions.setLayoutData(gd_grpPresenterWidgetOptions);
-        grpPresenterWidgetOptions.setText("Presenter Widget Options");
-
-        Button btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
-        FormData fd_btnIsASingleton = new FormData();
-        fd_btnIsASingleton.top = new FormAttachment(0, 5);
-        fd_btnIsASingleton.left = new FormAttachment(0, 5);
-        btnIsASingleton.setLayoutData(fd_btnIsASingleton);
-        btnIsASingleton.setText("Is a Singleton");
-
         Group grpConvenienceOptions = new Group(container, SWT.NONE);
         grpConvenienceOptions.setLayout(new FormLayout());
-        GridData gd_grpConvenienceOptions = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+        GridData gd_grpConvenienceOptions = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         gd_grpConvenienceOptions.heightHint = 170;
         gd_grpConvenienceOptions.widthHint = 559;
         grpConvenienceOptions.setLayoutData(gd_grpConvenienceOptions);
         grpConvenienceOptions.setText("Extra Options");
 
         btnAddUihandlers = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddUihandlers.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnAddUihandlers = new FormData();
         fd_btnAddUihandlers.top = new FormAttachment(0, 25);
         fd_btnAddUihandlers.left = new FormAttachment(0, 5);
@@ -534,7 +476,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddUihandlers.setText("Add UiHandlers");
 
         Label lblPresenterLifecycleMethods = new Label(grpConvenienceOptions, SWT.NONE);
-        lblPresenterLifecycleMethods.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_lblPresenterLifecycleMethods = new FormData();
         fd_lblPresenterLifecycleMethods.top = new FormAttachment(0, 61);
         fd_lblPresenterLifecycleMethods.left = new FormAttachment(0, 5);
@@ -542,7 +483,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblPresenterLifecycleMethods.setText("Presenter Lifecycle Methods");
 
         btnAddOnbind = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnbind.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnAddOnbind = new FormData();
         fd_btnAddOnbind.top = new FormAttachment(0, 81);
         fd_btnAddOnbind.left = new FormAttachment(0, 5);
@@ -550,7 +490,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddOnbind.setText("Add onBind()");
 
         btnAddOnhide = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnhide.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnAddOnhide = new FormData();
         fd_btnAddOnhide.top = new FormAttachment(0, 105);
         fd_btnAddOnhide.left = new FormAttachment(0, 5);
@@ -563,7 +502,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddOnhide.setText("Add onHide()");
 
         btnAddOnreset = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnreset.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnAddOnreset = new FormData();
         fd_btnAddOnreset.top = new FormAttachment(0, 129);
         fd_btnAddOnreset.left = new FormAttachment(0, 5);
@@ -571,7 +509,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddOnreset.setText("Add onReset()");
 
         btnAddOnunbind = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnAddOnunbind.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnAddOnunbind = new FormData();
         fd_btnAddOnunbind.top = new FormAttachment(0, 153);
         fd_btnAddOnunbind.left = new FormAttachment(0, 4);
@@ -579,7 +516,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnAddOnunbind.setText("Add onUnbind()");
 
         Label lblEvents = new Label(grpConvenienceOptions, SWT.NONE);
-        lblEvents.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_lblEvents = new FormData();
         fd_lblEvents.right = new FormAttachment(0, 64);
         fd_lblEvents.top = new FormAttachment(0, 5);
@@ -587,13 +523,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblEvents.setLayoutData(fd_lblEvents);
         lblEvents.setText("Events");
 
-        Label lblSecurity = new Label(grpConvenienceOptions, SWT.NONE);
+        lblSecurity = new Label(grpConvenienceOptions, SWT.NONE);
         FormData fd_lblSecurity = new FormData();
         fd_lblSecurity.right = new FormAttachment(0, 411);
         fd_lblSecurity.top = new FormAttachment(0, 127);
         fd_lblSecurity.left = new FormAttachment(0, 219);
         lblSecurity.setLayoutData(fd_lblSecurity);
-        lblSecurity.setVisible(false);
         lblSecurity.setText("Gatekeeper Security");
 
         gateKeeper = new Text(grpConvenienceOptions, SWT.BORDER);
@@ -602,24 +537,22 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         fd_gateKeeper.top = new FormAttachment(0, 146);
         fd_gateKeeper.left = new FormAttachment(0, 219);
         gateKeeper.setLayoutData(fd_gateKeeper);
-        gateKeeper.setVisible(false);
 
-        Button btnSelectGatekeeper = new Button(grpConvenienceOptions, SWT.NONE);
+        btnSelectGatekeeper = new Button(grpConvenienceOptions, SWT.NONE);
         FormData fd_btnSelectGatekeeper = new FormData();
         fd_btnSelectGatekeeper.right = new FormAttachment(0, 539);
         fd_btnSelectGatekeeper.top = new FormAttachment(0, 143);
         fd_btnSelectGatekeeper.left = new FormAttachment(0, 417);
         btnSelectGatekeeper.setLayoutData(fd_btnSelectGatekeeper);
-        btnSelectGatekeeper.setVisible(false);
         btnSelectGatekeeper.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                // TODO
             }
         });
         btnSelectGatekeeper.setText("Select Gatekeeper");
 
         btnUseManualReveal = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnUseManualReveal.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnUseManualReveal = new FormData();
         fd_btnUseManualReveal.right = new FormAttachment(0, 372);
         fd_btnUseManualReveal.top = new FormAttachment(0, 25);
@@ -628,7 +561,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnUseManualReveal.setText("Use Manual Reveal");
 
         Label lblOnReveal = new Label(grpConvenienceOptions, SWT.NONE);
-        lblOnReveal.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_lblOnReveal = new FormData();
         fd_lblOnReveal.right = new FormAttachment(0, 278);
         fd_lblOnReveal.top = new FormAttachment(0, 5);
@@ -637,7 +569,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblOnReveal.setText("On Reveal");
 
         Label lblQuerystring = new Label(grpConvenienceOptions, SWT.NONE);
-        lblQuerystring.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_lblQuerystring = new FormData();
         fd_lblQuerystring.right = new FormAttachment(0, 296);
         fd_lblQuerystring.top = new FormAttachment(0, 61);
@@ -646,7 +577,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblQuerystring.setText("Querystring");
 
         btnPrepareFromRequest = new Button(grpConvenienceOptions, SWT.CHECK);
-        btnPrepareFromRequest.setFont(SWTResourceManager.getFont("Lucida Grande", 10, SWT.NORMAL));
         FormData fd_btnPrepareFromRequest = new FormData();
         fd_btnPrepareFromRequest.right = new FormAttachment(0, 428);
         fd_btnPrepareFromRequest.top = new FormAttachment(0, 81);
@@ -750,12 +680,18 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private void setDefaults() {
-        grpNestedPresenterOptions.setVisible(true);
-        grpPopupPresenter.setVisible(false);
-        grpPresenterWidgetOptions.setVisible(false);
         nameToken.setEnabled(false);
         btnIsCrawlable.setEnabled(false);
         name.setFocus();
+
+        // TODO future
+        lblSecurity.setVisible(false);
+        gateKeeper.setVisible(false);
+        btnSelectGatekeeper.setVisible(false);
+        
+        //TODO future presenters
+//        btnPresenterWidget.setEnabled(false);
+//        btnPopupPresenter.setEnabled(false);
     }
 
     private void selectContentSlot() {
@@ -895,148 +831,96 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
-
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
         IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
-        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(
-                presenterConfigModel.getPath());
+        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getPath());
         UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
         strategy_1.setBeforeSetValidator(new PackageNameValidator());
-        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue,
-                strategy_1, null);
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue, strategy_1, null);
         //
-        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(
-                btnNestedPresenter);
-        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter")
-                .observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget,
-                nestedPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(btnNestedPresenter);
+        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget, nestedPresenterPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(
-                btnPresenterWidget);
-        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget")
-                .observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget,
-                presenterWidgetPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(btnPresenterWidget);
+        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget, presenterWidgetPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(
-                btnPopupPresenter);
-        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter")
-                .observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget,
-                popupPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(btnPopupPresenter);
+        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget, popupPresenterPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
-        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(
-                presenterConfigModel);
+        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(presenterConfigModel);
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setBeforeSetValidator(new PackageNameValidator());
         bindingContext.bindValue(observeTextNameObserveWidget, namePresenterConfigModelObserveValue, strategy, null);
         //
-        IObservableValue observeSelectionBtnRevealrootcontenteventObserveWidget = WidgetProperties.selection().observe(
-                btnRevealrootcontentevent);
-        IObservableValue revealInRootPresenterConfigModelObserveValue = BeanProperties.value("revealInRoot").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealrootcontenteventObserveWidget,
-                revealInRootPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealrootcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealrootcontentevent);
+        IObservableValue revealInRootPresenterConfigModelObserveValue = BeanProperties.value("revealInRoot").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootcontenteventObserveWidget, revealInRootPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnRevealrootlayoutcontenteventObserveWidget = WidgetProperties.selection()
-                .observe(btnRevealrootlayoutcontentevent);
-        IObservableValue revealInRootLayoutPresenterConfigModelObserveValue = BeanProperties
-                .value("revealInRootLayout").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealrootlayoutcontenteventObserveWidget,
-                revealInRootLayoutPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealrootlayoutcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealrootlayoutcontentevent);
+        IObservableValue revealInRootLayoutPresenterConfigModelObserveValue = BeanProperties.value("revealInRootLayout").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootlayoutcontenteventObserveWidget, revealInRootLayoutPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnRevealcontenteventObserveWidget = WidgetProperties.selection().observe(
-                btnRevealcontentevent);
-        IObservableValue revealInSlotPresenterConfigModelObserveValue = BeanProperties.value("revealInSlot").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealcontenteventObserveWidget,
-                revealInSlotPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealcontentevent);
+        IObservableValue revealInSlotPresenterConfigModelObserveValue = BeanProperties.value("revealInSlot").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealcontenteventObserveWidget, revealInSlotPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeTextContentSlotObserveWidget = WidgetProperties.text(SWT.Modify).observe(contentSlot);
-        IObservableValue contentSlotPresenterConfigModelObserveValue = BeanProperties.value("contentSlot").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeTextContentSlotObserveWidget, contentSlotPresenterConfigModelObserveValue,
-                null, null);
+        IObservableValue contentSlotPresenterConfigModelObserveValue = BeanProperties.value("contentSlot").observe(presenterConfigModel);
+        bindingContext.bindValue(observeTextContentSlotObserveWidget, contentSlotPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeSelectionBtnIsAPlaceObserveWidget = WidgetProperties.selection().observe(btnIsAPlace);
-        IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(
-                presenterConfigModel);
+        IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(presenterConfigModel);
         UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
         strategy_3.setBeforeSetValidator(new PlaceValidator());
-        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue,
-                strategy_3, null);
+        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, strategy_3, null);
         //
         IObservableValue observeTextNameTokenObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameToken);
-        IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(
-                presenterConfigModel);
+        IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(presenterConfigModel);
         UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
         strategy_2.setBeforeSetValidator(new NameTokenValidator(btnIsAPlace));
-        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget,
-                nameTokenPresenterConfigModelObserveValue, strategy_2, null);
+        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, strategy_2, null);
         //
-        IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(
-                btnIsCrawlable);
-        IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnIsCrawlableObserveWidget,
-                crawlablePresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(btnIsCrawlable);
+        IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnIsCrawlableObserveWidget, crawlablePresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeSelectionBtnCodesplitObserveWidget = WidgetProperties.selection().observe(btnCodesplit);
-        IObservableValue codeSplitPresenterConfigModelObserveValue = BeanProperties.value("codeSplit").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue,
-                null, null);
-        //
-        IObservableValue observeSelectionBtnAddOnbindObserveWidget = WidgetProperties.selection().observe(btnAddOnbind);
-        IObservableValue javaProjectPresenterConfigModelObserveValue = BeanProperties.value("javaProject").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget,
-                javaProjectPresenterConfigModelObserveValue, null, null);
+        IObservableValue codeSplitPresenterConfigModelObserveValue = BeanProperties.value("codeSplit").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeSelectionBtnAddOnhideObserveWidget = WidgetProperties.selection().observe(btnAddOnhide);
-        IObservableValue onHidePresenterConfigModelObserveValue = BeanProperties.value("onHide").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnhideObserveWidget, onHidePresenterConfigModelObserveValue,
-                null, null);
+        IObservableValue onHidePresenterConfigModelObserveValue = BeanProperties.value("onHide").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnhideObserveWidget, onHidePresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnAddOnresetObserveWidget = WidgetProperties.selection().observe(
-                btnAddOnreset);
-        IObservableValue onResetPresenterConfigModelObserveValue = BeanProperties.value("onReset").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnresetObserveWidget, onResetPresenterConfigModelObserveValue,
-                null, null);
+        IObservableValue observeSelectionBtnAddOnresetObserveWidget = WidgetProperties.selection().observe(btnAddOnreset);
+        IObservableValue onResetPresenterConfigModelObserveValue = BeanProperties.value("onReset").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnresetObserveWidget, onResetPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnAddOnunbindObserveWidget = WidgetProperties.selection().observe(
-                btnAddOnunbind);
-        IObservableValue onUnbindPresenterConfigModelObserveValue = BeanProperties.value("onUnbind").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnunbindObserveWidget, onUnbindPresenterConfigModelObserveValue,
-                null, null);
+        IObservableValue observeSelectionBtnAddOnunbindObserveWidget = WidgetProperties.selection().observe(btnAddOnunbind);
+        IObservableValue onUnbindPresenterConfigModelObserveValue = BeanProperties.value("onUnbind").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnunbindObserveWidget, onUnbindPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnUseManualRevealObserveWidget = WidgetProperties.selection().observe(
-                btnUseManualReveal);
-        IObservableValue useManualRevealPresenterConfigModelObserveValue = BeanProperties.value("useManualReveal")
-                .observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnUseManualRevealObserveWidget,
-                useManualRevealPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnUseManualRevealObserveWidget = WidgetProperties.selection().observe(btnUseManualReveal);
+        IObservableValue useManualRevealPresenterConfigModelObserveValue = BeanProperties.value("useManualReveal").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnUseManualRevealObserveWidget, useManualRevealPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPrepareFromRequestObserveWidget = WidgetProperties.selection().observe(
-                btnPrepareFromRequest);
-        IObservableValue usePrepareFromRequestPresenterConfigModelObserveValue = BeanProperties.value(
-                "usePrepareFromRequest").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPrepareFromRequestObserveWidget,
-                usePrepareFromRequestPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPrepareFromRequestObserveWidget = WidgetProperties.selection().observe(btnPrepareFromRequest);
+        IObservableValue usePrepareFromRequestPresenterConfigModelObserveValue = BeanProperties.value("usePrepareFromRequest").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPrepareFromRequestObserveWidget, usePrepareFromRequestPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnAddUihandlersObserveWidget = WidgetProperties.selection().observe(
-                btnAddUihandlers);
-        IObservableValue useUiHandlersPresenterConfigModelObserveValue = BeanProperties.value("useUiHandlers").observe(
-                presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddUihandlersObserveWidget,
-                useUiHandlersPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnAddUihandlersObserveWidget = WidgetProperties.selection().observe(btnAddUihandlers);
+        IObservableValue useUiHandlersPresenterConfigModelObserveValue = BeanProperties.value("useUiHandlers").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddUihandlersObserveWidget, useUiHandlersPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnAddOnbindObserveWidget = WidgetProperties.selection().observe(btnAddOnbind);
+        IObservableValue onBindPresenterConfigModelObserveValue = BeanProperties.value("onBind").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget, onBindPresenterConfigModelObserveValue, null, null);
         //
         return bindingContext;
     }
