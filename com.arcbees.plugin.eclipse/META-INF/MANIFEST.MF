@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GWT-Platform Eclipse Plugin (GWTP)
 Bundle-SymbolicName: com.arcbees.plugin.eclipse;singleton:=true
-Bundle-Version: 1.1.4.alpha
+Bundle-Version: 1.1.5.alpha
 Bundle-Activator: com.arcbees.plugin.eclipse.Activator
 Bundle-Vendor: ARCBEES
 Require-Bundle: org.eclipse.ui,
@@ -64,7 +64,8 @@ Bundle-ClassPath: .,
  lib/oro-2.0.8.jar,
  lib/rest-assured-1.8.0.jar,
  lib/tagsoup-1.2.1.jar,
- lib/velocity-1.5.jar
+ lib/velocity-1.5.jar,
+ swing2swt.jar
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,

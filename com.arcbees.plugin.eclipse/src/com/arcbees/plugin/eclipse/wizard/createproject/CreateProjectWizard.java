@@ -85,6 +85,8 @@ public class CreateProjectWizard extends Wizard {
             }
         };
         job.schedule();
+        
+        // TODO focus on project when done
     }
 
     private void generate(IProgressMonitor monitor) {

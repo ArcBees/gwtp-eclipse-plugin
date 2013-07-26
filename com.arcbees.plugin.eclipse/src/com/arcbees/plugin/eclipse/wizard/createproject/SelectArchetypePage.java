@@ -46,6 +46,9 @@ import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.plugin.eclipse.domain.Tag;
 import com.arcbees.plugin.eclipse.util.ProgressTaskMonitor;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.GridData;
 
 public class SelectArchetypePage extends WizardPage {
     private ProjectConfigModel projectConfigModel;
@@ -69,10 +72,10 @@ public class SelectArchetypePage extends WizardPage {
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        
+
         setPageComplete(false);
 
-        //fetchMonitor.setVisible(true);
+        // fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }
@@ -100,10 +103,10 @@ public class SelectArchetypePage extends WizardPage {
                         return Status.CANCEL_STATUS;
                     }
                 } while (loading);
-                
+
                 if (!loading) {
                     fetchMonitor.reset();
-                    //fetchMonitor.setVisible(false);
+                    // fetchMonitor.setVisible(false);
                 }
 
                 return Status.OK_STATUS;
@@ -143,12 +146,15 @@ public class SelectArchetypePage extends WizardPage {
         Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
-        container.setLayout(new RowLayout(SWT.VERTICAL));
+        container.setLayout(new GridLayout(1, false));
 
         tableViewer = new TableViewer(container, SWT.BORDER | SWT.FULL_SELECTION);
         tableViewer.setContentProvider(ArrayContentProvider.getInstance());
         table = tableViewer.getTable();
-        table.setLayoutData(new RowData(567, 429));
+        GridData gd_table = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+        gd_table.widthHint = 520;
+        gd_table.heightHint = 420;
+        table.setLayoutData(gd_table);
         table.setLinesVisible(true);
         table.setHeaderVisible(true);
 
@@ -156,7 +162,7 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnName = tableViewerColumn.getColumn();
         tblclmnName.setWidth(193);
         tblclmnName.setText("Name");
-        
+
         TableViewerColumn tableViewerColumnCategories = new TableViewerColumn(tableViewer, SWT.NONE);
         TableColumn tblclmnCategories = tableViewerColumnCategories.getColumn();
         tblclmnCategories.setWidth(100);
@@ -166,9 +172,9 @@ public class SelectArchetypePage extends WizardPage {
         TableColumn tblclmnTags = tableViewerColumnTag.getColumn();
         tblclmnTags.setWidth(409);
         tblclmnTags.setText("Tags");
-        
+
         ProgressBar progressBarUi = new ProgressBar(container, SWT.SMOOTH);
-        progressBarUi.setLayoutData(new RowData(585, SWT.DEFAULT));
+        progressBarUi.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
         fetchMonitor = new ProgressTaskMonitor(progressBarUi);
 
@@ -199,7 +205,7 @@ public class SelectArchetypePage extends WizardPage {
                 return sb.toString();
             }
         });
-        
+
         // TODO deal with nulls
         tableViewerColumnCategories.setLabelProvider(new ColumnLabelProvider() {
             @Override
