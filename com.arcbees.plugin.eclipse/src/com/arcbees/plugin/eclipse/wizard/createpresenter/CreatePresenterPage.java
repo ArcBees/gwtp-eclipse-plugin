@@ -84,6 +84,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import swing2swt.layout.FlowLayout;
+import org.eclipse.swt.custom.CLabel;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -415,6 +416,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         fd_btnIsASingleton.left = new FormAttachment(0, 5);
         btnIsASingleton.setLayoutData(fd_btnIsASingleton);
         btnIsASingleton.setText("Is a Singleton");
+        
+        CLabel lblFeatureNotEnabled = new CLabel(composite_3, SWT.NONE);
+        lblFeatureNotEnabled.setText("Feature not enabled yet.");
 
         tbtmPopupPresenter = new TabItem(tabFolder, SWT.NONE);
         tbtmPopupPresenter.setText("Popup Presenter");
@@ -459,6 +463,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             }
         });
         btnSelectPanel.setText("Select Panel");
+        
+        CLabel label = new CLabel(composite_1, SWT.NONE);
+        label.setText("Feature not enabled yet.");
 
         Group grpConvenienceOptions = new Group(container, SWT.NONE);
         grpConvenienceOptions.setLayout(new FormLayout());
@@ -690,8 +697,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnSelectGatekeeper.setVisible(false);
         
         //TODO future presenters
-//        btnPresenterWidget.setEnabled(false);
-//        btnPopupPresenter.setEnabled(false);
+        btnPresenterWidget.setEnabled(false);
+        btnPopupPresenter.setEnabled(false);
     }
 
     private void selectContentSlot() {
