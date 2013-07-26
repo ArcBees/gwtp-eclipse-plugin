@@ -31,6 +31,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/oro-2.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/rest-assured-1.8.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tagsoup-1.2.1.jar"/>
-	<classpathentry kind="lib" path="/Users/branflake2267/git/gwtp-eclipse-plugin/com.arcbees.plugin.eclipse/lib/swing2swt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
