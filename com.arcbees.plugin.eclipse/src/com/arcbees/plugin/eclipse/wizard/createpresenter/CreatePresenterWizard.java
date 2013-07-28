@@ -85,7 +85,14 @@ public class CreatePresenterWizard extends Wizard {
             return;
         }
 
-        IStructuredSelection selection = (IStructuredSelection) window.getSelectionService().getSelection();
+        IStructuredSelection selection;
+        try {
+            selection = (IStructuredSelection) window.getSelectionService().getSelection();
+        } catch (Exception e1) {
+            // TODO nothing is selected?
+            e1.printStackTrace();
+            return;
+        }
         Object firstElement = selection.getFirstElement();
         IJavaProject project = null;
         IPackageFragment selectedPackage = null;
