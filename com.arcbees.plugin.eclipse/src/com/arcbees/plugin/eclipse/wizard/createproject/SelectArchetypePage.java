@@ -16,6 +16,8 @@
 
 package com.arcbees.plugin.eclipse.wizard.createproject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,12 +34,18 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.arcbees.plugin.eclipse.domain.Archetype;
 import com.arcbees.plugin.eclipse.domain.ArchetypeCollection;
@@ -45,10 +53,6 @@ import com.arcbees.plugin.eclipse.domain.Category;
 import com.arcbees.plugin.eclipse.domain.ProjectConfigModel;
 import com.arcbees.plugin.eclipse.domain.Tag;
 import com.arcbees.plugin.eclipse.util.ProgressTaskMonitor;
-import org.eclipse.swt.widgets.ProgressBar;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
 
 public class SelectArchetypePage extends WizardPage {
     private ProjectConfigModel projectConfigModel;
@@ -106,7 +110,6 @@ public class SelectArchetypePage extends WizardPage {
 
                 if (!loading) {
                     fetchMonitor.reset();
-                    // fetchMonitor.setVisible(false);
                 }
 
                 return Status.OK_STATUS;
@@ -226,6 +229,16 @@ public class SelectArchetypePage extends WizardPage {
             }
         });
 
+        Link link = new Link(container, SWT.NONE);
+        link.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String surl = "https://project-directory.appspot.com/";
+                gotoUrl(surl);
+            }
+        });
+        link.setText("<a>View this in the web app</a>");
+
         tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
@@ -236,4 +249,19 @@ public class SelectArchetypePage extends WizardPage {
             }
         });
     }
+
+    /**
+     * Open url in default external browser
+     */
+    private void gotoUrl(String surl) {
+        try {
+            URL url = new URL(surl);
+            PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+        } catch (PartInitException ex) {
+            ex.printStackTrace();
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

@@ -132,6 +132,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnSelectGatekeeper;
     private Label lblSecurity;
     private TabFolder tabFolder;
+    private Button button;
+    private Button btnOverrideDefaultPopup;
+    private Button btnIsASingleton;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -210,6 +213,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnNestedPresenter.getSelection();
                 if (selected) {
                     tabFolder.setSelection(0);
+                    presenterConfigModel.setNestedPresenter(true);
+                    presenterConfigModel.setPresenterWidget(false);
+                    presenterConfigModel.setPopupPresenter(false);
                 }
             }
         });
@@ -223,6 +229,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnPresenterWidget.getSelection();
                 if (selected) {
                     tabFolder.setSelection(1);
+                    presenterConfigModel.setNestedPresenter(false);
+                    presenterConfigModel.setPresenterWidget(true);
+                    presenterConfigModel.setPopupPresenter(false);
                 }
             }
         });
@@ -235,6 +244,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnPopupPresenter.getSelection();
                 if (selected) {
                     tabFolder.setSelection(2);
+                    presenterConfigModel.setNestedPresenter(false);
+                    presenterConfigModel.setPresenterWidget(false);
+                    presenterConfigModel.setPopupPresenter(true);
                 }
             }
         });
@@ -260,14 +272,26 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                     btnNestedPresenter.setSelection(true);
                     btnPresenterWidget.setSelection(false);
                     btnPopupPresenter.setSelection(false);
+                    
+                    presenterConfigModel.setNestedPresenter(true);
+                    presenterConfigModel.setPresenterWidget(false);
+                    presenterConfigModel.setPopupPresenter(false);
                 } else if (index == 1) {
                     btnNestedPresenter.setSelection(false);
                     btnPresenterWidget.setSelection(true);
                     btnPopupPresenter.setSelection(false);
+                    
+                    presenterConfigModel.setNestedPresenter(false);
+                    presenterConfigModel.setPresenterWidget(true);
+                    presenterConfigModel.setPopupPresenter(false);
                 } else if (index == 2) {
                     btnNestedPresenter.setSelection(false);
                     btnPresenterWidget.setSelection(false);
                     btnPopupPresenter.setSelection(true);
+                    
+                    presenterConfigModel.setNestedPresenter(false);
+                    presenterConfigModel.setPresenterWidget(false);
+                    presenterConfigModel.setPopupPresenter(true);
                 }
             }
         });
@@ -410,15 +434,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpPresenterWidgetOptions.setLayout(new FormLayout());
         grpPresenterWidgetOptions.setText("Presenter Widget Options");
 
-        Button btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
+        btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
         FormData fd_btnIsASingleton = new FormData();
         fd_btnIsASingleton.top = new FormAttachment(0, 5);
         fd_btnIsASingleton.left = new FormAttachment(0, 5);
         btnIsASingleton.setLayoutData(fd_btnIsASingleton);
         btnIsASingleton.setText("Is a Singleton");
-        
-        CLabel lblFeatureNotEnabled = new CLabel(composite_3, SWT.NONE);
-        lblFeatureNotEnabled.setText("Feature not enabled yet.");
 
         tbtmPopupPresenter = new TabItem(tabFolder, SWT.NONE);
         tbtmPopupPresenter.setText("Popup Presenter");
@@ -428,30 +449,22 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         composite_1.setLayout(new GridLayout(1, false));
 
         grpPopupPresenter = new Group(composite_1, SWT.NONE);
+        grpPopupPresenter.setLayout(new GridLayout(3, false));
         grpPopupPresenter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        grpPopupPresenter.setLayout(new FormLayout());
         grpPopupPresenter.setText("Popup Presenter Options");
+        
+        button = new Button(grpPopupPresenter, SWT.CHECK);
+        button.setText("Is a Singleton");
+        new Label(grpPopupPresenter, SWT.NONE);
+        new Label(grpPopupPresenter, SWT.NONE);
 
-        Button btnOverrideDefaultPopup = new Button(grpPopupPresenter, SWT.CHECK);
-        FormData fd_btnOverrideDefaultPopup = new FormData();
-        fd_btnOverrideDefaultPopup.right = new FormAttachment(0, 184);
-        fd_btnOverrideDefaultPopup.top = new FormAttachment(0, 5);
-        fd_btnOverrideDefaultPopup.left = new FormAttachment(0, 5);
-        btnOverrideDefaultPopup.setLayoutData(fd_btnOverrideDefaultPopup);
+        btnOverrideDefaultPopup = new Button(grpPopupPresenter, SWT.CHECK);
         btnOverrideDefaultPopup.setText("Override default Popup Panel");
 
         overridePopupPanel = new Text(grpPopupPresenter, SWT.BORDER);
-        FormData fd_overridePopupPanel = new FormData();
-        fd_overridePopupPanel.right = new FormAttachment(0, 374);
-        fd_overridePopupPanel.top = new FormAttachment(0, 5);
-        fd_overridePopupPanel.left = new FormAttachment(0, 190);
-        overridePopupPanel.setLayoutData(fd_overridePopupPanel);
+        overridePopupPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
         Button btnSelectPanel = new Button(grpPopupPresenter, SWT.NONE);
-        FormData fd_btnSelectPanel = new FormData();
-        fd_btnSelectPanel.top = new FormAttachment(0, 1);
-        fd_btnSelectPanel.left = new FormAttachment(0, 380);
-        btnSelectPanel.setLayoutData(fd_btnSelectPanel);
         btnSelectPanel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -463,9 +476,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             }
         });
         btnSelectPanel.setText("Select Panel");
-        
-        CLabel label = new CLabel(composite_1, SWT.NONE);
-        label.setText("Feature not enabled yet.");
 
         Group grpConvenienceOptions = new Group(container, SWT.NONE);
         grpConvenienceOptions.setLayout(new FormLayout());
@@ -696,9 +706,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         gateKeeper.setVisible(false);
         btnSelectGatekeeper.setVisible(false);
         
-        //TODO future presenters
-        btnPresenterWidget.setEnabled(false);
-        btnPopupPresenter.setEnabled(false);
+        //btnPresenterWidget.setEnabled(false);
+        //btnPopupPresenter.setEnabled(false);
     }
 
     private void selectContentSlot() {
@@ -928,6 +937,17 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         IObservableValue observeSelectionBtnAddOnbindObserveWidget = WidgetProperties.selection().observe(btnAddOnbind);
         IObservableValue onBindPresenterConfigModelObserveValue = BeanProperties.value("onBind").observe(presenterConfigModel);
         bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget, onBindPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionButtonObserveWidget = WidgetProperties.selection().observe(button);
+        IObservableValue singletonPresenterConfigModelObserveValue = BeanProperties.value("singleton").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionButtonObserveWidget, singletonPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnOverrideDefaultPopupObserveWidget = WidgetProperties.selection().observe(btnOverrideDefaultPopup);
+        IObservableValue overridePopupPresenterConfigModelObserveValue = BeanProperties.value("overridePopup").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnOverrideDefaultPopupObserveWidget, overridePopupPresenterConfigModelObserveValue, null, null);
+        //
+        IObservableValue observeSelectionBtnIsASingletonObserveWidget = WidgetProperties.selection().observe(btnIsASingleton);
+        bindingContext.bindValue(observeSelectionBtnIsASingletonObserveWidget, singletonPresenterConfigModelObserveValue, null, null);
         //
         return bindingContext;
     }

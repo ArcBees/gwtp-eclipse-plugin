@@ -137,14 +137,18 @@ public class CreatePresenterTask {
         createPresenterView();
         createPresenterViewUi();
         createLinkPresenterWidgetToPanel();
-        
+
         // TODO focus on new presenter package and open it up
 
         logger.info("...Creating presenter finished.");
     }
 
     private void createLinkPresenterWidgetToPanel() {
-      // TODO add presenter widget to parent panel?   
+        if (!presenterConfigModel.getPresenterWidget()) {
+            return;
+        }
+
+        // TODO add presenter widget to parent panel?
     }
 
     private void warn(final String message) {
@@ -194,6 +198,10 @@ public class CreatePresenterTask {
         presenterOptions.setOnunbind(presenterConfigModel.getOnUnbind());
         presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
         presenterOptions.setPrepareFromRequest(presenterConfigModel.getUsePrepareFromRequest());
+        presenterOptions.setUihandlers(presenterConfigModel.getUseUiHandlers());
+        
+        // TODO future
+        presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
 
         if (presenterConfigModel.getNestedPresenter()) {
             fetchNestedTemplate(presenterOptions);
@@ -212,6 +220,7 @@ public class CreatePresenterTask {
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
         nestedPresenterOptions.setNameToken(presenterConfigModel.getNameTokenWithClass());
         nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
+        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
         if (presenterConfigModel.getRevealInRoot()) {
             nestedPresenterOptions.setRevealType("Root");
@@ -222,7 +231,6 @@ public class CreatePresenterTask {
         } else if (presenterConfigModel.getRevealInSlot()) {
             nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlotAsString());
         }
-        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
         try {
             createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
