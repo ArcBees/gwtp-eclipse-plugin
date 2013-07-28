@@ -135,6 +135,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button button;
     private Button btnOverrideDefaultPopup;
     private Button btnIsASingleton;
+    private Label lblQuerystring;
+    private Button btnSelectPopupPanel;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -213,9 +215,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnNestedPresenter.getSelection();
                 if (selected) {
                     tabFolder.setSelection(0);
-                    presenterConfigModel.setNestedPresenter(true);
-                    presenterConfigModel.setPresenterWidget(false);
-                    presenterConfigModel.setPopupPresenter(false);
+                    setPresenterType(0);
                 }
             }
         });
@@ -229,9 +229,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnPresenterWidget.getSelection();
                 if (selected) {
                     tabFolder.setSelection(1);
-                    presenterConfigModel.setNestedPresenter(false);
-                    presenterConfigModel.setPresenterWidget(true);
-                    presenterConfigModel.setPopupPresenter(false);
+                    setPresenterType(1);
                 }
             }
         });
@@ -244,9 +242,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 boolean selected = btnPopupPresenter.getSelection();
                 if (selected) {
                     tabFolder.setSelection(2);
-                    presenterConfigModel.setNestedPresenter(false);
-                    presenterConfigModel.setPresenterWidget(false);
-                    presenterConfigModel.setPopupPresenter(true);
+                    setPresenterType(2);
                 }
             }
         });
@@ -268,30 +264,19 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 int index = tabFolder.getSelectionIndex();
+                setPresenterType(index);
                 if (index == 0) {
                     btnNestedPresenter.setSelection(true);
                     btnPresenterWidget.setSelection(false);
                     btnPopupPresenter.setSelection(false);
-                    
-                    presenterConfigModel.setNestedPresenter(true);
-                    presenterConfigModel.setPresenterWidget(false);
-                    presenterConfigModel.setPopupPresenter(false);
                 } else if (index == 1) {
                     btnNestedPresenter.setSelection(false);
                     btnPresenterWidget.setSelection(true);
                     btnPopupPresenter.setSelection(false);
-                    
-                    presenterConfigModel.setNestedPresenter(false);
-                    presenterConfigModel.setPresenterWidget(true);
-                    presenterConfigModel.setPopupPresenter(false);
                 } else if (index == 2) {
                     btnNestedPresenter.setSelection(false);
                     btnPresenterWidget.setSelection(false);
                     btnPopupPresenter.setSelection(true);
-                    
-                    presenterConfigModel.setNestedPresenter(false);
-                    presenterConfigModel.setPresenterWidget(false);
-                    presenterConfigModel.setPopupPresenter(true);
                 }
             }
         });
@@ -464,8 +449,8 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         overridePopupPanel = new Text(grpPopupPresenter, SWT.BORDER);
         overridePopupPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        Button btnSelectPanel = new Button(grpPopupPresenter, SWT.NONE);
-        btnSelectPanel.addSelectionListener(new SelectionAdapter() {
+        btnSelectPopupPanel = new Button(grpPopupPresenter, SWT.NONE);
+        btnSelectPopupPanel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 IType popupType = selectPopupWidget();
@@ -475,7 +460,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
                 }
             }
         });
-        btnSelectPanel.setText("Select Panel");
+        btnSelectPopupPanel.setText("Select Panel");
 
         Group grpConvenienceOptions = new Group(container, SWT.NONE);
         grpConvenienceOptions.setLayout(new FormLayout());
@@ -585,7 +570,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblOnReveal.setLayoutData(fd_lblOnReveal);
         lblOnReveal.setText("On Reveal");
 
-        Label lblQuerystring = new Label(grpConvenienceOptions, SWT.NONE);
+        lblQuerystring = new Label(grpConvenienceOptions, SWT.NONE);
         FormData fd_lblQuerystring = new FormData();
         fd_lblQuerystring.right = new FormAttachment(0, 296);
         fd_lblQuerystring.top = new FormAttachment(0, 61);
@@ -608,6 +593,31 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         m_bindingContext = initDataBindings();
 
         observeBindingChanges();
+    }
+    
+    private void setPresenterType(int index) {
+        if (index == 0) {
+            presenterConfigModel.setNestedPresenter(true);
+            presenterConfigModel.setPresenterWidget(false);
+            presenterConfigModel.setPopupPresenter(false);
+            
+            lblQuerystring.setVisible(true);
+            btnPrepareFromRequest.setVisible(true);
+        } else if (index == 1) {
+            presenterConfigModel.setNestedPresenter(false);
+            presenterConfigModel.setPresenterWidget(true);
+            presenterConfigModel.setPopupPresenter(false);
+            
+            lblQuerystring.setVisible(false);
+            btnPrepareFromRequest.setVisible(false);
+        } else if (index == 2) {
+            presenterConfigModel.setNestedPresenter(false);
+            presenterConfigModel.setPresenterWidget(false);
+            presenterConfigModel.setPopupPresenter(true);
+            
+            lblQuerystring.setVisible(false);
+            btnPrepareFromRequest.setVisible(false);
+        }
     }
 
     /**
@@ -701,13 +711,14 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         btnIsCrawlable.setEnabled(false);
         name.setFocus();
 
-        // TODO future
+        // TODO gatekeeper selection future
         lblSecurity.setVisible(false);
         gateKeeper.setVisible(false);
         btnSelectGatekeeper.setVisible(false);
         
-        //btnPresenterWidget.setEnabled(false);
-        //btnPopupPresenter.setEnabled(false);
+        // TODO popup panel selection future
+        overridePopupPanel.setVisible(false);
+        btnSelectPopupPanel.setVisible(false);
     }
 
     private void selectContentSlot() {
@@ -847,6 +858,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
+    
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //

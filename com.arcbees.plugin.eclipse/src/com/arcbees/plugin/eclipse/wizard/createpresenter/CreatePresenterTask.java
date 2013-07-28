@@ -201,7 +201,7 @@ public class CreatePresenterTask {
         presenterOptions.setUihandlers(presenterConfigModel.getUseUiHandlers());
         
         // TODO future
-        presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
+        //presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
 
         if (presenterConfigModel.getNestedPresenter()) {
             fetchNestedTemplate(presenterOptions);
@@ -253,6 +253,7 @@ public class CreatePresenterTask {
     private void fetchPopupPresenterTemplate(PresenterOptions presenterOptions) throws Exception {
         PopupPresenterOptions presenterWidgetOptions = new PopupPresenterOptions();
         presenterWidgetOptions.setSingleton(presenterConfigModel.getSingleton());
+        presenterWidgetOptions.setCustom(presenterConfigModel.getOverridePopup());
 
         try {
             createdPopupPresenterTemplates = CreatePopupPresenter.run(presenterOptions, presenterWidgetOptions, true);
