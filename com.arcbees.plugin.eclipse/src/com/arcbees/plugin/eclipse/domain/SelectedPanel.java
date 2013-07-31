@@ -18,11 +18,11 @@ package com.arcbees.plugin.eclipse.domain;
 
 import org.eclipse.jdt.internal.core.SourceType;
 
-public class SelectedParentPanel {
+public class SelectedPanel {
     private SourceType presenterSourceType;
     private SourceType viewSourceType;
     private int selectedIndexPanel;
-    
+
     public SourceType getPresenterSourceType() {
         return presenterSourceType;
     }
@@ -46,6 +46,4 @@ public class SelectedParentPanel {
     public void setSelectedIndexPanel(int selectedIndexPanel) {
         this.selectedIndexPanel = selectedIndexPanel;
     }
-    
-    
 }

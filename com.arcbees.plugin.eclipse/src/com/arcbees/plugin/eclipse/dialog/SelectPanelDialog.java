@@ -58,7 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.eclipse.domain.SelectedParentPanel;
+import com.arcbees.plugin.eclipse.domain.SelectedPanel;
 import com.arcbees.plugin.eclipse.util.ProgressTaskMonitor;
 
 public class SelectPanelDialog extends Dialog {
@@ -83,7 +83,7 @@ public class SelectPanelDialog extends Dialog {
     private int selectedIndexPresenter;
     private int selectedIndexView;
     private int selectedIndexPanel;
-    private SelectedParentPanel selectedParentPanelModel;
+    private SelectedPanel selectedParentPanelModel;
     
     /**
      * Create the dialog.
@@ -190,7 +190,7 @@ public class SelectPanelDialog extends Dialog {
     }
 
     private void canFinishSelection() {
-        selectedParentPanelModel = new SelectedParentPanel();
+        selectedParentPanelModel = new SelectedPanel();
         selectedParentPanelModel.setPresenterSourceType(listElementsTypePresenters.get(selectedIndexPresenter));
         selectedParentPanelModel.setViewSourceType(listElementsTypeViews.get(selectedIndexView));
         selectedParentPanelModel.setSelectedIndexPanel(selectedIndexPanel);
@@ -198,7 +198,7 @@ public class SelectPanelDialog extends Dialog {
         // TODO enable OK
     }
     
-    public SelectedParentPanel getSelectedParentPanelModel() {
+    public SelectedPanel getSelectedParentPanelModel() {
         return selectedParentPanelModel;
     }
 
