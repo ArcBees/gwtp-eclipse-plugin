@@ -59,6 +59,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -66,11 +69,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
+
+import swing2swt.layout.FlowLayout;
 
 import com.arcbees.plugin.eclipse.dialog.SelectPanelDialog;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
@@ -78,17 +85,6 @@ import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
 import com.arcbees.plugin.eclipse.validators.PlaceValidator;
-
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-
-import swing2swt.layout.FlowLayout;
-
-import org.eclipse.swt.custom.CLabel;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -891,10 +887,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
-    
+
     private void selectParentPanel() {
         SelectPanelDialog dialog = new SelectPanelDialog(getShell(), presenterConfigModel);
-        
+
         if (Window.OK == dialog.open()) {
             // TODO
         }
