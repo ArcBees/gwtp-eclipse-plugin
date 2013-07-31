@@ -59,6 +59,7 @@ public class PresenterConfigModel extends ModelObject {
     private IPackageFragment selectedPackage;
     private ICompilationUnit nameTokenUnit;
     private Shell shell;
+    private SelectedPanelModel selectedDestinationPanelModel;
 
     public PresenterConfigModel() {
         // default settings
@@ -355,5 +356,13 @@ public class PresenterConfigModel extends ModelObject {
 
     public Shell getShell() {
         return shell;
+    }
+
+    public void setPresenterWidgetDestination(SelectedPanelModel selectedDestinationPanelModel) {
+        this.selectedDestinationPanelModel = selectedDestinationPanelModel;
+    }
+    
+    public SelectedPanelModel getPresenterWidgetDestination() {
+        return selectedDestinationPanelModel;
     }
 }

@@ -56,12 +56,18 @@ import com.arcbees.plugin.eclipse.util.PackageHierarchy;
 import com.arcbees.plugin.eclipse.util.PackageHierarchyElement;
 import com.arcbees.plugin.template.create.place.CreateNameTokens;
 import com.arcbees.plugin.template.create.presenter.CreateNestedPresenter;
+import com.arcbees.plugin.template.create.presenter.CreatePopupPresenter;
+import com.arcbees.plugin.template.create.presenter.CreatePresenterWidget;
 import com.arcbees.plugin.template.domain.place.CreatedNameTokens;
 import com.arcbees.plugin.template.domain.place.NameToken;
 import com.arcbees.plugin.template.domain.place.NameTokenOptions;
 import com.arcbees.plugin.template.domain.presenter.CreatedNestedPresenter;
+import com.arcbees.plugin.template.domain.presenter.CreatedPopupPresenter;
+import com.arcbees.plugin.template.domain.presenter.CreatedPresenterWidget;
 import com.arcbees.plugin.template.domain.presenter.NestedPresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PopupPresenterOptions;
 import com.arcbees.plugin.template.domain.presenter.PresenterOptions;
+import com.arcbees.plugin.template.domain.presenter.PresenterWidgetOptions;
 import com.arcbees.plugin.template.domain.presenter.RenderedTemplate;
 
 public class CreatePresenterTask {
@@ -75,13 +81,15 @@ public class CreatePresenterTask {
 
     private PresenterConfigModel presenterConfigModel;
     private IProgressMonitor progressMonitor;
-    private CreatedNestedPresenter createdNestedPresenterTemplates;
     private IPackageFragment presenterCreatedPackage;
-    private boolean forceWriting;
     private PackageHierarchy packageHierarchy;
-    private CreatedNameTokens createdNameTokenTemplates;
     private IPackageFragment createdNameTokensPackage;
     private CodeFormattingUtil codeFormatter;
+    private CreatedNestedPresenter createdNestedPresenterTemplates;
+    private CreatedPresenterWidget createdPresenterWidgetTemplates;
+    private CreatedPopupPresenter createdPopupPresenterTemplates;
+    private CreatedNameTokens createdNameTokenTemplates;
+    private boolean forceWriting = true;
 
     private CreatePresenterTask(PresenterConfigModel presenterConfigModel, IProgressMonitor progressMonitor) {
         this.presenterConfigModel = presenterConfigModel;
@@ -111,15 +119,14 @@ public class CreatePresenterTask {
             e.printStackTrace();
             return;
         }
+
         try {
-            fetchTemplatesNestedPresenter();
+            fetchPresenterTemplates();
         } catch (Exception e) {
             warn("Could not fetch the ntested presenter templates: Error: " + e.toString());
             e.printStackTrace();
             return;
         }
-
-        forceWriting = true;
 
         createNameTokensFieldAndMethods();
         createPresenterPackage();
@@ -129,8 +136,19 @@ public class CreatePresenterTask {
         createPresenterUiHandlers();
         createPresenterView();
         createPresenterViewUi();
+        createLinkPresenterWidgetToPanel();
 
-        // TODO focus on new presenter and open it up
+        // TODO focus on new presenter package and open it up
+
+        logger.info("...Creating presenter finished.");
+    }
+
+    private void createLinkPresenterWidgetToPanel() {
+        if (!presenterConfigModel.getPresenterWidget()) {
+            return;
+        }
+
+        // TODO add presenter widget to parent panel?
     }
 
     private void warn(final String message) {
@@ -170,8 +188,7 @@ public class CreatePresenterTask {
         }
     }
 
-    private void fetchTemplatesNestedPresenter() throws Exception {
-        // Translate options from PresenterConfigModel to PresenterOptions
+    private void fetchPresenterTemplates() throws Exception {
         PresenterOptions presenterOptions = new PresenterOptions();
         presenterOptions.setPackageName(presenterConfigModel.getSelectedPackageAndNameAsSubPackage());
         presenterOptions.setName(presenterConfigModel.getName());
@@ -181,13 +198,17 @@ public class CreatePresenterTask {
         presenterOptions.setOnunbind(presenterConfigModel.getOnUnbind());
         presenterOptions.setManualreveal(presenterConfigModel.getUseManualReveal());
         presenterOptions.setPrepareFromRequest(presenterConfigModel.getUsePrepareFromRequest());
+        presenterOptions.setUihandlers(presenterConfigModel.getUseUiHandlers());
+        
+        // TODO future
+        //presenterOptions.setGatekeeper(presenterConfigModel.getGatekeeper());
 
         if (presenterConfigModel.getNestedPresenter()) {
             fetchNestedTemplate(presenterOptions);
         } else if (presenterConfigModel.getPresenterWidget()) {
-            // TODO
+            fetchPresenterWidgetTemplate(presenterOptions);
         } else if (presenterConfigModel.getPopupPresenter()) {
-            // TODO
+            fetchPopupPresenterTemplate(presenterOptions);
         }
     }
 
@@ -199,6 +220,7 @@ public class CreatePresenterTask {
         nestedPresenterOptions.setCodeSplit(presenterConfigModel.getCodeSplit());
         nestedPresenterOptions.setNameToken(presenterConfigModel.getNameTokenWithClass());
         nestedPresenterOptions.setNameTokenImport(presenterConfigModel.getNameTokenUnitImport());
+        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
         if (presenterConfigModel.getRevealInRoot()) {
             nestedPresenterOptions.setRevealType("Root");
@@ -209,10 +231,32 @@ public class CreatePresenterTask {
         } else if (presenterConfigModel.getRevealInSlot()) {
             nestedPresenterOptions.setRevealType(presenterConfigModel.getContentSlotAsString());
         }
-        nestedPresenterOptions.setContentSlotImport(presenterConfigModel.getContentSlotImport());
 
         try {
             createdNestedPresenterTemplates = CreateNestedPresenter.run(presenterOptions, nestedPresenterOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private void fetchPresenterWidgetTemplate(PresenterOptions presenterOptions) throws Exception {
+        PresenterWidgetOptions presenterWidgetOptions = new PresenterWidgetOptions();
+        presenterWidgetOptions.setSingleton(presenterConfigModel.getSingleton());
+
+        try {
+            createdPresenterWidgetTemplates = CreatePresenterWidget.run(presenterOptions, presenterWidgetOptions, true);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private void fetchPopupPresenterTemplate(PresenterOptions presenterOptions) throws Exception {
+        PopupPresenterOptions presenterWidgetOptions = new PopupPresenterOptions();
+        presenterWidgetOptions.setSingleton(presenterConfigModel.getSingleton());
+        presenterWidgetOptions.setCustom(presenterConfigModel.getOverridePopup());
+
+        try {
+            createdPopupPresenterTemplates = CreatePopupPresenter.run(presenterOptions, presenterWidgetOptions, true);
         } catch (Exception e) {
             throw e;
         }
@@ -224,8 +268,7 @@ public class CreatePresenterTask {
     private String createPresenterPackage() {
         String presenterPackageName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage();
         createPackage(presenterPackageName, forceWriting);
-        // TODO logger
-        System.out.println("Created Package: " + presenterPackageName);
+        logger.info("Created Package: " + presenterPackageName);
         return presenterPackageName;
     }
 
@@ -268,12 +311,19 @@ public class CreatePresenterTask {
     }
 
     private void createPresenterModule() {
-        RenderedTemplate rendered = createdNestedPresenterTemplates.getModule();
+        RenderedTemplate rendered = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            rendered = createdNestedPresenterTemplates.getModule();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            rendered = createdPresenterWidgetTemplates.getModule();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            rendered = createdPopupPresenterTemplates.getModule();
+        }
         createClass(rendered, forceWriting);
     }
 
     /**
-     * TODO extraction of functions TODO extract "GinModule" to constant TODO extract "gin" to constant
+     * TODO extraction of functions, TODO extract "GinModule" to constant, TODO extract "gin" to constant
      */
     private void createPresenterModuleLinkForGin() {
         // 1. first search parent
@@ -295,9 +345,7 @@ public class CreatePresenterTask {
             // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
             if (unit == null) {
                 unit = packageHierarchy.findFirstInterfaceType("GinModule");
-                // TODO logger
-                System.out
-                        .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+                logger.info("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
             }
         }
 
@@ -318,9 +366,7 @@ public class CreatePresenterTask {
         // TODO could make this smarter in the future, this is a last resort, to install it somewhere.
         if (unit == null) {
             unit = packageHierarchy.findFirstInterfaceType("GinModule");
-            // TODO logger
-            System.out
-                    .println("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
+            logger.info("Warning: This didn't find a ideal place to put the gin install for the new presenter module");
         }
 
         // (could do this next for ease)
@@ -338,8 +384,7 @@ public class CreatePresenterTask {
                 e.printStackTrace();
             }
         } else {
-            // TODO display error, wasn't able to install gin module
-            System.out.println("Error: Wasn't able to install Module");
+            logger.warning("Error: Wasn't able to install Module");
             warn("Could not create install module.");
         }
     }
@@ -359,12 +404,13 @@ public class CreatePresenterTask {
         // find the configure method
         MethodDeclaration method = findMethod(astRoot, "configure");
         if (method == null) {
-            // TODO throw exception
+            warn("Wasn't able to findMethod Configure in unit: " + unit.getElementName());
+            logger.severe("createPresenterGinLink() unit did not have configure implementation.");
             return;
         }
 
         // presenter import
-        String fileNameForModule = createdNestedPresenterTemplates.getModule().getNameAndNoExts();
+        String fileNameForModule = getFileNameForModule();
         String importName = presenterConfigModel.getSelectedPackageAndNameAsSubPackage() + "." + fileNameForModule;
         String[] presenterPackage = importName.split("\\.");
         ImportDeclaration importDeclaration = astRoot.getAST().newImportDeclaration();
@@ -393,8 +439,19 @@ public class CreatePresenterTask {
         buffer.setContents(newSource);
         buffer.save(progressMonitor, forceWriting);
 
-        // TODO logger
-        System.out.println("Added presenter gin install into " + unit.getElementName() + " " + installModuleStatement);
+        logger.info("Added presenter gin install into " + unit.getElementName() + " " + installModuleStatement);
+    }
+
+    private String getFileNameForModule() {
+        String name = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            name = createdNestedPresenterTemplates.getModule().getNameAndNoExts();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            name = createdPresenterWidgetTemplates.getModule().getNameAndNoExts();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            name = createdPopupPresenterTemplates.getModule().getNameAndNoExts();
+        }
+        return name;
     }
 
     private MethodDeclaration findMethod(CompilationUnit astRoot, String methodName) {
@@ -422,7 +479,14 @@ public class CreatePresenterTask {
     }
 
     private void createPresenter() {
-        RenderedTemplate rendered = createdNestedPresenterTemplates.getPresenter();
+        RenderedTemplate rendered = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            rendered = createdNestedPresenterTemplates.getPresenter();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            rendered = createdPresenterWidgetTemplates.getPresenter();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            rendered = createdPopupPresenterTemplates.getPresenter();
+        }
         createClass(rendered, forceWriting);
     }
 
@@ -430,17 +494,38 @@ public class CreatePresenterTask {
         if (!presenterConfigModel.getUseUiHandlers()) {
             return;
         }
-        RenderedTemplate rendered = createdNestedPresenterTemplates.getUihandlers();
+        RenderedTemplate rendered = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            rendered = createdNestedPresenterTemplates.getUihandlers();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            rendered = createdPresenterWidgetTemplates.getUihandlers();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            rendered = createdPopupPresenterTemplates.getUihandlers();
+        }
         createClass(rendered, forceWriting);
     }
 
     private void createPresenterView() {
-        RenderedTemplate rendered = createdNestedPresenterTemplates.getView();
+        RenderedTemplate rendered = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            rendered = createdNestedPresenterTemplates.getView();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            rendered = createdPresenterWidgetTemplates.getView();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            rendered = createdPopupPresenterTemplates.getView();
+        }
         createClass(rendered, forceWriting);
     }
 
     private void createPresenterViewUi() {
-        RenderedTemplate rendered = createdNestedPresenterTemplates.getViewui();
+        RenderedTemplate rendered = null;
+        if (presenterConfigModel.getNestedPresenter()) {
+            rendered = createdNestedPresenterTemplates.getViewui();
+        } else if (presenterConfigModel.getPresenterWidget()) {
+            rendered = createdPresenterWidgetTemplates.getViewui();
+        } else if (presenterConfigModel.getPopupPresenter()) {
+            rendered = createdPopupPresenterTemplates.getViewui();
+        }
 
         IFolder folder = (IFolder) presenterCreatedPackage.getResource();
         IFile newFile = folder.getFile(rendered.getNameAndNoExt());
@@ -484,9 +569,12 @@ public class CreatePresenterTask {
      * create name tokens class, if it doesn't exist
      */
     private void createNameTokensFieldAndMethods() {
+        if (!presenterConfigModel.getPlace()) {
+            return;
+        }
         ICompilationUnit unitNameTokens = presenterConfigModel.getNameTokenUnit();
         if (unitNameTokens == null) {
-            // TODO nothing to do
+            logger.info("createNameTokensFieldAndMethods: skipping creating nametokens methods.");
             return;
         }
 
@@ -569,7 +657,7 @@ public class CreatePresenterTask {
             nameTokenUnit = createdNameTokensPackage.createCompilationUnit(className, contents, forceWriting,
                     progressMonitor);
         } catch (JavaModelException e) {
-            System.out.println("Couldn't create className: " + className);
+            logger.warning("Couldn't create className: " + className);
             warn("Could not createNameTokensFile Error: " + e.toString());
             e.printStackTrace();
         }
@@ -586,7 +674,7 @@ public class CreatePresenterTask {
             unit = presenterCreatedPackage.createCompilationUnit(className, contents, force, progressMonitor);
         } catch (JavaModelException e) {
             warn("Could create class. " + className + " Error: " + e.toString());
-            System.out.println("Couldn't create className: " + className);
+            logger.warning("Couldn't create className: " + className);
             e.printStackTrace();
             return;
         }
