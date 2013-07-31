@@ -59,6 +59,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -66,11 +69,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
+
+import swing2swt.layout.FlowLayout;
 
 import com.arcbees.plugin.eclipse.dialog.SelectPanelDialog;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
@@ -78,17 +85,6 @@ import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
 import com.arcbees.plugin.eclipse.validators.PlaceValidator;
-
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-
-import swing2swt.layout.FlowLayout;
-
-import org.eclipse.swt.custom.CLabel;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -142,9 +138,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Label lblQuerystring;
     private Button btnSelectPopupPanel;
     private Composite composite;
-    private Composite composite_5;
-    private Text parentPanel;
+    private Text destinationPresenterPanel;
     private Button btnSelectParentPanel;
+    private Composite destinationPresenterComposite;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -426,18 +422,22 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpPresenterWidgetOptions.setLayout(new GridLayout(1, false));
         grpPresenterWidgetOptions.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpPresenterWidgetOptions.setText("Presenter Widget Options");
+        
+                btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
+                btnIsASingleton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+                btnIsASingleton.setText("Is a Singleton");
 
-        Composite parentPanelComposite = new Composite(grpPresenterWidgetOptions, SWT.NONE);
-        GridLayout gl_parentPanelComposite = new GridLayout(2, false);
-        gl_parentPanelComposite.marginWidth = 0;
-        gl_parentPanelComposite.marginHeight = 0;
-        parentPanelComposite.setLayout(gl_parentPanelComposite);
-        parentPanelComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+        destinationPresenterComposite = new Composite(grpPresenterWidgetOptions, SWT.NONE);
+        GridLayout gl_destinationPresenterComposite = new GridLayout(2, false);
+        gl_destinationPresenterComposite.marginWidth = 0;
+        gl_destinationPresenterComposite.marginHeight = 0;
+        destinationPresenterComposite.setLayout(gl_destinationPresenterComposite);
+        destinationPresenterComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-        parentPanel = new Text(parentPanelComposite, SWT.BORDER);
-        parentPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        destinationPresenterPanel = new Text(destinationPresenterComposite, SWT.BORDER);
+        destinationPresenterPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        btnSelectParentPanel = new Button(parentPanelComposite, SWT.NONE);
+        btnSelectParentPanel = new Button(destinationPresenterComposite, SWT.NONE);
         btnSelectParentPanel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -445,10 +445,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             }
         });
         btnSelectParentPanel.setText("Select Parent Panel");
-
-        btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
-        btnIsASingleton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        btnIsASingleton.setText("Is a Singleton");
 
         tbtmPopupPresenter = new TabItem(tabFolder, SWT.NONE);
         tbtmPopupPresenter.setText("Popup Presenter");
@@ -461,9 +457,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         grpPopupPresenter.setLayout(new GridLayout(1, false));
         grpPopupPresenter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpPopupPresenter.setText("Popup Presenter Options");
-
-        composite_5 = new Composite(grpPopupPresenter, SWT.NONE);
-        composite_5.setLayout(new GridLayout(1, false));
 
         button = new Button(grpPopupPresenter, SWT.CHECK);
         button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -752,6 +745,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         // TODO popup panel selection future
         overridePopupPanel.setVisible(false);
         btnSelectPopupPanel.setVisible(false);
+        
+        // TODO destination presenter panel
+        destinationPresenterComposite.setVisible(false);
     }
 
     private void selectContentSlot() {
@@ -891,12 +887,12 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
-    
+
     private void selectParentPanel() {
         SelectPanelDialog dialog = new SelectPanelDialog(getShell(), presenterConfigModel);
-        
+
         if (Window.OK == dialog.open()) {
-            // TODO
+            presenterConfigModel.setPresenterWidgetDestination(dialog.getSelectedDestinationPanelModel());
         }
     }
 
