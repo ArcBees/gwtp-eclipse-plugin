@@ -58,7 +58,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
-import com.arcbees.plugin.eclipse.domain.SelectedPanel;
+import com.arcbees.plugin.eclipse.domain.SelectedPanelModel;
 import com.arcbees.plugin.eclipse.util.ProgressTaskMonitor;
 
 public class SelectPanelDialog extends Dialog {
@@ -83,7 +83,7 @@ public class SelectPanelDialog extends Dialog {
     private int selectedIndexPresenter;
     private int selectedIndexView;
     private int selectedIndexPanel;
-    private SelectedPanel selectedParentPanelModel;
+    private SelectedPanelModel selectedDestinationPanelModel;
     
     /**
      * Create the dialog.
@@ -190,16 +190,16 @@ public class SelectPanelDialog extends Dialog {
     }
 
     private void canFinishSelection() {
-        selectedParentPanelModel = new SelectedPanel();
-        selectedParentPanelModel.setPresenterSourceType(listElementsTypePresenters.get(selectedIndexPresenter));
-        selectedParentPanelModel.setViewSourceType(listElementsTypeViews.get(selectedIndexView));
-        selectedParentPanelModel.setSelectedIndexPanel(selectedIndexPanel);
+        selectedDestinationPanelModel = new SelectedPanelModel();
+        selectedDestinationPanelModel.setPresenterSourceType(listElementsTypePresenters.get(selectedIndexPresenter));
+        selectedDestinationPanelModel.setViewSourceType(listElementsTypeViews.get(selectedIndexView));
+        selectedDestinationPanelModel.setSelectedIndexPanel(selectedIndexPanel);
         
         // TODO enable OK
     }
     
-    public SelectedPanel getSelectedParentPanelModel() {
-        return selectedParentPanelModel;
+    public SelectedPanelModel getSelectedDestinationPanelModel() {
+        return selectedDestinationPanelModel;
     }
 
     /**
@@ -220,7 +220,7 @@ public class SelectPanelDialog extends Dialog {
      */
     @Override
     protected Point getInitialSize() {
-        return new Point(450, 629);
+        return new Point(662, 629);
     }
 
     private void findPresenters(final String filterPattern) {
@@ -263,7 +263,7 @@ public class SelectPanelDialog extends Dialog {
                 if (match.getElement() instanceof SourceType) {
                     SourceType type = (SourceType) match.getElement();
                     listElementsTypePresenters.add(type);
-                    listElementsString.add(type.getElementName());
+                    listElementsString.add(type.getFullyQualifiedName());
                 }
             }
         };
@@ -329,7 +329,7 @@ public class SelectPanelDialog extends Dialog {
                 if (match.getElement() instanceof SourceType) {
                     SourceType type = (SourceType) match.getElement();
                     listElementsTypeViews.add(type);
-                    listElementsViewsString.add(type.getElementName());
+                    listElementsViewsString.add(type.getFullyQualifiedName());
                 }
             }
         };

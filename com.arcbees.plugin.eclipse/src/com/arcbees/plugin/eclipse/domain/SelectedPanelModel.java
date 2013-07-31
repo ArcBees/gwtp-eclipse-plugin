@@ -18,7 +18,7 @@ package com.arcbees.plugin.eclipse.domain;
 
 import org.eclipse.jdt.internal.core.SourceType;
 
-public class SelectedPanel {
+public class SelectedPanelModel {
     private SourceType presenterSourceType;
     private SourceType viewSourceType;
     private int selectedIndexPanel;

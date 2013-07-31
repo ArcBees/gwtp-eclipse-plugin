@@ -892,7 +892,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         SelectPanelDialog dialog = new SelectPanelDialog(getShell(), presenterConfigModel);
 
         if (Window.OK == dialog.open()) {
-            // TODO
+            presenterConfigModel.setPresenterWidgetDestination(dialog.getSelectedDestinationPanelModel());
         }
     }
 
