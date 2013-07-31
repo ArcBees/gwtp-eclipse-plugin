@@ -2,7 +2,7 @@
 <feature
       id="com.arcbees.plugin.eclipse.feature"
       label="GWT-Platform Tools (GWTP)"
-      version="1.1.7.alpha"
+      version="1.1.8.beta"
       provider-name="ARCBEES">
 
    <description url="https://github.com/ArcBees/gwtp-eclipse-plugin/wiki">
