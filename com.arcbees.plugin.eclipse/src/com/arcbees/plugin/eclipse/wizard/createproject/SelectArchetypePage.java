@@ -79,7 +79,6 @@ public class SelectArchetypePage extends WizardPage {
 
         setPageComplete(false);
 
-        // fetchMonitor.setVisible(true);
         runMonitor();
         runFetch();
     }

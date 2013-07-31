@@ -59,6 +59,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -66,25 +69,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
+import swing2swt.layout.FlowLayout;
+
+import com.arcbees.plugin.eclipse.dialog.SelectPanelDialog;
 import com.arcbees.plugin.eclipse.domain.PresenterConfigModel;
 import com.arcbees.plugin.eclipse.filter.WidgetSelectionExtension;
 import com.arcbees.plugin.eclipse.validators.NameTokenValidator;
 import com.arcbees.plugin.eclipse.validators.PackageNameValidator;
 import com.arcbees.plugin.eclipse.validators.PlaceValidator;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import swing2swt.layout.FlowLayout;
-import org.eclipse.swt.custom.CLabel;
 
 /**
  * All of the UI is generated from Eclipse JFace Editor
@@ -137,6 +137,10 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Button btnIsASingleton;
     private Label lblQuerystring;
     private Button btnSelectPopupPanel;
+    private Composite composite;
+    private Text destinationPresenterPanel;
+    private Button btnSelectParentPanel;
+    private Composite destinationPresenterComposite;
 
     public CreatePresenterPage(PresenterConfigModel presenterConfigModel) {
         super(true, "wizardPageCreatePresenter");
@@ -415,16 +419,32 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         composite_3.setLayout(new GridLayout(1, false));
 
         grpPresenterWidgetOptions = new Group(composite_3, SWT.NONE);
+        grpPresenterWidgetOptions.setLayout(new GridLayout(1, false));
         grpPresenterWidgetOptions.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-        grpPresenterWidgetOptions.setLayout(new FormLayout());
         grpPresenterWidgetOptions.setText("Presenter Widget Options");
+        
+                btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
+                btnIsASingleton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+                btnIsASingleton.setText("Is a Singleton");
 
-        btnIsASingleton = new Button(grpPresenterWidgetOptions, SWT.CHECK);
-        FormData fd_btnIsASingleton = new FormData();
-        fd_btnIsASingleton.top = new FormAttachment(0, 5);
-        fd_btnIsASingleton.left = new FormAttachment(0, 5);
-        btnIsASingleton.setLayoutData(fd_btnIsASingleton);
-        btnIsASingleton.setText("Is a Singleton");
+        destinationPresenterComposite = new Composite(grpPresenterWidgetOptions, SWT.NONE);
+        GridLayout gl_destinationPresenterComposite = new GridLayout(2, false);
+        gl_destinationPresenterComposite.marginWidth = 0;
+        gl_destinationPresenterComposite.marginHeight = 0;
+        destinationPresenterComposite.setLayout(gl_destinationPresenterComposite);
+        destinationPresenterComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
+        destinationPresenterPanel = new Text(destinationPresenterComposite, SWT.BORDER);
+        destinationPresenterPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
+        btnSelectParentPanel = new Button(destinationPresenterComposite, SWT.NONE);
+        btnSelectParentPanel.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                selectParentPanel();
+            }
+        });
+        btnSelectParentPanel.setText("Select Parent Panel");
 
         tbtmPopupPresenter = new TabItem(tabFolder, SWT.NONE);
         tbtmPopupPresenter.setText("Popup Presenter");
@@ -434,26 +454,32 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         composite_1.setLayout(new GridLayout(1, false));
 
         grpPopupPresenter = new Group(composite_1, SWT.NONE);
-        grpPopupPresenter.setLayout(new GridLayout(3, false));
+        grpPopupPresenter.setLayout(new GridLayout(1, false));
         grpPopupPresenter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         grpPopupPresenter.setText("Popup Presenter Options");
-        
-        button = new Button(grpPopupPresenter, SWT.CHECK);
-        button.setText("Is a Singleton");
-        new Label(grpPopupPresenter, SWT.NONE);
-        new Label(grpPopupPresenter, SWT.NONE);
 
-        btnOverrideDefaultPopup = new Button(grpPopupPresenter, SWT.CHECK);
+        button = new Button(grpPopupPresenter, SWT.CHECK);
+        button.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        button.setText("Is a Singleton");
+
+        composite = new Composite(grpPopupPresenter, SWT.NONE);
+        GridLayout gl_composite = new GridLayout(3, false);
+        gl_composite.marginWidth = 0;
+        gl_composite.marginHeight = 0;
+        gl_composite.horizontalSpacing = 0;
+        composite.setLayout(gl_composite);
+
+        btnOverrideDefaultPopup = new Button(composite, SWT.CHECK);
         btnOverrideDefaultPopup.setText("Override default Popup Panel");
 
-        overridePopupPanel = new Text(grpPopupPresenter, SWT.BORDER);
+        overridePopupPanel = new Text(composite, SWT.BORDER);
         overridePopupPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
-        btnSelectPopupPanel = new Button(grpPopupPresenter, SWT.NONE);
+        btnSelectPopupPanel = new Button(composite, SWT.NONE);
         btnSelectPopupPanel.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                IType popupType = selectPopupWidget();
+                IType popupType = selectPopupWidgetDialog();
                 if (popupType != null) {
                     String widget = popupType.getFullyQualifiedName('.');
                     overridePopupPanel.setText(widget);
@@ -594,27 +620,27 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         observeBindingChanges();
     }
-    
+
     private void setPresenterType(int index) {
         if (index == 0) {
             presenterConfigModel.setNestedPresenter(true);
             presenterConfigModel.setPresenterWidget(false);
             presenterConfigModel.setPopupPresenter(false);
-            
+
             lblQuerystring.setVisible(true);
             btnPrepareFromRequest.setVisible(true);
         } else if (index == 1) {
             presenterConfigModel.setNestedPresenter(false);
             presenterConfigModel.setPresenterWidget(true);
             presenterConfigModel.setPopupPresenter(false);
-            
+
             lblQuerystring.setVisible(false);
             btnPrepareFromRequest.setVisible(false);
         } else if (index == 2) {
             presenterConfigModel.setNestedPresenter(false);
             presenterConfigModel.setPresenterWidget(false);
             presenterConfigModel.setPopupPresenter(true);
-            
+
             lblQuerystring.setVisible(false);
             btnPrepareFromRequest.setVisible(false);
         }
@@ -675,7 +701,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     }
 
     private void openPackageSelectionDialog() {
-        IPackageFragment selectedPackage = selectClientPackage();
+        IPackageFragment selectedPackage = selectClientPackageDialog();
         if (selectedPackage != null) {
             packageName.setText(selectedPackage.getElementName());
             presenterConfigModel.setPath(selectedPackage.getElementName());
@@ -715,10 +741,13 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         lblSecurity.setVisible(false);
         gateKeeper.setVisible(false);
         btnSelectGatekeeper.setVisible(false);
-        
+
         // TODO popup panel selection future
         overridePopupPanel.setVisible(false);
         btnSelectPopupPanel.setVisible(false);
+        
+        // TODO destination presenter panel
+        destinationPresenterComposite.setVisible(false);
     }
 
     private void selectContentSlot() {
@@ -808,7 +837,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         }
     }
 
-    private IType selectPopupWidget() {
+    private IType selectPopupWidgetDialog() {
         IJavaProject project = presenterConfigModel.getJavaProject();
         if (project == null) {
             // TODO notify the user that a project is not selected.
@@ -830,7 +859,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         return null;
     }
 
-    private IPackageFragment selectClientPackage() {
+    private IPackageFragment selectClientPackageDialog() {
         IJavaElement selectedPackage = presenterConfigModel.getSelectedPackage();
         if (selectedPackage == null) {
             String message = "This can't drill the available selections. To fix it, close the dialog and then "
@@ -858,108 +887,174 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
         return null;
     }
-    
+
+    private void selectParentPanel() {
+        SelectPanelDialog dialog = new SelectPanelDialog(getShell(), presenterConfigModel);
+
+        if (Window.OK == dialog.open()) {
+            presenterConfigModel.setPresenterWidgetDestination(dialog.getSelectedDestinationPanelModel());
+        }
+    }
+
     protected DataBindingContext initDataBindings() {
         DataBindingContext bindingContext = new DataBindingContext();
         //
         IObservableValue observeTextPackageNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(packageName);
-        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(presenterConfigModel.getPath());
+        IObservableValue bytesPresenterConfigModelgetPathObserveValue = PojoProperties.value("bytes").observe(
+                presenterConfigModel.getPath());
         UpdateValueStrategy strategy_1 = new UpdateValueStrategy();
         strategy_1.setBeforeSetValidator(new PackageNameValidator());
-        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue, strategy_1, null);
+        bindingContext.bindValue(observeTextPackageNameObserveWidget, bytesPresenterConfigModelgetPathObserveValue,
+                strategy_1, null);
         //
-        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(btnNestedPresenter);
-        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget, nestedPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnNestedPresenterObserveWidget = WidgetProperties.selection().observe(
+                btnNestedPresenter);
+        IObservableValue nestedPresenterPresenterConfigModelObserveValue = BeanProperties.value("nestedPresenter")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnNestedPresenterObserveWidget,
+                nestedPresenterPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(btnPresenterWidget);
-        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget, presenterWidgetPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPresenterWidgetObserveWidget = WidgetProperties.selection().observe(
+                btnPresenterWidget);
+        IObservableValue presenterWidgetPresenterConfigModelObserveValue = BeanProperties.value("presenterWidget")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPresenterWidgetObserveWidget,
+                presenterWidgetPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(btnPopupPresenter);
-        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget, popupPresenterPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPopupPresenterObserveWidget = WidgetProperties.selection().observe(
+                btnPopupPresenter);
+        IObservableValue popupPresenterPresenterConfigModelObserveValue = BeanProperties.value("popupPresenter")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPopupPresenterObserveWidget,
+                popupPresenterPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeTextNameObserveWidget = WidgetProperties.text(SWT.Modify).observe(name);
-        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(presenterConfigModel);
+        IObservableValue namePresenterConfigModelObserveValue = BeanProperties.value("name").observe(
+                presenterConfigModel);
         UpdateValueStrategy strategy = new UpdateValueStrategy();
         strategy.setBeforeSetValidator(new PackageNameValidator());
         bindingContext.bindValue(observeTextNameObserveWidget, namePresenterConfigModelObserveValue, strategy, null);
         //
-        IObservableValue observeSelectionBtnRevealrootcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealrootcontentevent);
-        IObservableValue revealInRootPresenterConfigModelObserveValue = BeanProperties.value("revealInRoot").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealrootcontenteventObserveWidget, revealInRootPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealrootcontenteventObserveWidget = WidgetProperties.selection().observe(
+                btnRevealrootcontentevent);
+        IObservableValue revealInRootPresenterConfigModelObserveValue = BeanProperties.value("revealInRoot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootcontenteventObserveWidget,
+                revealInRootPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnRevealrootlayoutcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealrootlayoutcontentevent);
-        IObservableValue revealInRootLayoutPresenterConfigModelObserveValue = BeanProperties.value("revealInRootLayout").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealrootlayoutcontenteventObserveWidget, revealInRootLayoutPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealrootlayoutcontenteventObserveWidget = WidgetProperties.selection()
+                .observe(btnRevealrootlayoutcontentevent);
+        IObservableValue revealInRootLayoutPresenterConfigModelObserveValue = BeanProperties
+                .value("revealInRootLayout").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealrootlayoutcontenteventObserveWidget,
+                revealInRootLayoutPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnRevealcontenteventObserveWidget = WidgetProperties.selection().observe(btnRevealcontentevent);
-        IObservableValue revealInSlotPresenterConfigModelObserveValue = BeanProperties.value("revealInSlot").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnRevealcontenteventObserveWidget, revealInSlotPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnRevealcontenteventObserveWidget = WidgetProperties.selection().observe(
+                btnRevealcontentevent);
+        IObservableValue revealInSlotPresenterConfigModelObserveValue = BeanProperties.value("revealInSlot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnRevealcontenteventObserveWidget,
+                revealInSlotPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeTextContentSlotObserveWidget = WidgetProperties.text(SWT.Modify).observe(contentSlot);
-        IObservableValue contentSlotPresenterConfigModelObserveValue = BeanProperties.value("contentSlot").observe(presenterConfigModel);
-        bindingContext.bindValue(observeTextContentSlotObserveWidget, contentSlotPresenterConfigModelObserveValue, null, null);
+        IObservableValue contentSlotPresenterConfigModelObserveValue = BeanProperties.value("contentSlot").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeTextContentSlotObserveWidget, contentSlotPresenterConfigModelObserveValue,
+                null, null);
         //
         IObservableValue observeSelectionBtnIsAPlaceObserveWidget = WidgetProperties.selection().observe(btnIsAPlace);
-        IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(presenterConfigModel);
+        IObservableValue placePresenterConfigModelObserveValue = BeanProperties.value("place").observe(
+                presenterConfigModel);
         UpdateValueStrategy strategy_3 = new UpdateValueStrategy();
         strategy_3.setBeforeSetValidator(new PlaceValidator());
-        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue, strategy_3, null);
+        bindingContext.bindValue(observeSelectionBtnIsAPlaceObserveWidget, placePresenterConfigModelObserveValue,
+                strategy_3, null);
         //
         IObservableValue observeTextNameTokenObserveWidget = WidgetProperties.text(SWT.Modify).observe(nameToken);
-        IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(presenterConfigModel);
+        IObservableValue nameTokenPresenterConfigModelObserveValue = BeanProperties.value("nameToken").observe(
+                presenterConfigModel);
         UpdateValueStrategy strategy_2 = new UpdateValueStrategy();
         strategy_2.setBeforeSetValidator(new NameTokenValidator(btnIsAPlace));
-        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget, nameTokenPresenterConfigModelObserveValue, strategy_2, null);
+        bindValueForNameToken = bindingContext.bindValue(observeTextNameTokenObserveWidget,
+                nameTokenPresenterConfigModelObserveValue, strategy_2, null);
         //
-        IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(btnIsCrawlable);
-        IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnIsCrawlableObserveWidget, crawlablePresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnIsCrawlableObserveWidget = WidgetProperties.selection().observe(
+                btnIsCrawlable);
+        IObservableValue crawlablePresenterConfigModelObserveValue = BeanProperties.value("crawlable").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnIsCrawlableObserveWidget,
+                crawlablePresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeSelectionBtnCodesplitObserveWidget = WidgetProperties.selection().observe(btnCodesplit);
-        IObservableValue codeSplitPresenterConfigModelObserveValue = BeanProperties.value("codeSplit").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue, null, null);
+        IObservableValue codeSplitPresenterConfigModelObserveValue = BeanProperties.value("codeSplit").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnCodesplitObserveWidget, codeSplitPresenterConfigModelObserveValue,
+                null, null);
         //
         IObservableValue observeSelectionBtnAddOnhideObserveWidget = WidgetProperties.selection().observe(btnAddOnhide);
-        IObservableValue onHidePresenterConfigModelObserveValue = BeanProperties.value("onHide").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnhideObserveWidget, onHidePresenterConfigModelObserveValue, null, null);
+        IObservableValue onHidePresenterConfigModelObserveValue = BeanProperties.value("onHide").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnhideObserveWidget, onHidePresenterConfigModelObserveValue,
+                null, null);
         //
-        IObservableValue observeSelectionBtnAddOnresetObserveWidget = WidgetProperties.selection().observe(btnAddOnreset);
-        IObservableValue onResetPresenterConfigModelObserveValue = BeanProperties.value("onReset").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnresetObserveWidget, onResetPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnAddOnresetObserveWidget = WidgetProperties.selection().observe(
+                btnAddOnreset);
+        IObservableValue onResetPresenterConfigModelObserveValue = BeanProperties.value("onReset").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnresetObserveWidget, onResetPresenterConfigModelObserveValue,
+                null, null);
         //
-        IObservableValue observeSelectionBtnAddOnunbindObserveWidget = WidgetProperties.selection().observe(btnAddOnunbind);
-        IObservableValue onUnbindPresenterConfigModelObserveValue = BeanProperties.value("onUnbind").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnunbindObserveWidget, onUnbindPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnAddOnunbindObserveWidget = WidgetProperties.selection().observe(
+                btnAddOnunbind);
+        IObservableValue onUnbindPresenterConfigModelObserveValue = BeanProperties.value("onUnbind").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnunbindObserveWidget, onUnbindPresenterConfigModelObserveValue,
+                null, null);
         //
-        IObservableValue observeSelectionBtnUseManualRevealObserveWidget = WidgetProperties.selection().observe(btnUseManualReveal);
-        IObservableValue useManualRevealPresenterConfigModelObserveValue = BeanProperties.value("useManualReveal").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnUseManualRevealObserveWidget, useManualRevealPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnUseManualRevealObserveWidget = WidgetProperties.selection().observe(
+                btnUseManualReveal);
+        IObservableValue useManualRevealPresenterConfigModelObserveValue = BeanProperties.value("useManualReveal")
+                .observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnUseManualRevealObserveWidget,
+                useManualRevealPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnPrepareFromRequestObserveWidget = WidgetProperties.selection().observe(btnPrepareFromRequest);
-        IObservableValue usePrepareFromRequestPresenterConfigModelObserveValue = BeanProperties.value("usePrepareFromRequest").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnPrepareFromRequestObserveWidget, usePrepareFromRequestPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnPrepareFromRequestObserveWidget = WidgetProperties.selection().observe(
+                btnPrepareFromRequest);
+        IObservableValue usePrepareFromRequestPresenterConfigModelObserveValue = BeanProperties.value(
+                "usePrepareFromRequest").observe(presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnPrepareFromRequestObserveWidget,
+                usePrepareFromRequestPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnAddUihandlersObserveWidget = WidgetProperties.selection().observe(btnAddUihandlers);
-        IObservableValue useUiHandlersPresenterConfigModelObserveValue = BeanProperties.value("useUiHandlers").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddUihandlersObserveWidget, useUiHandlersPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnAddUihandlersObserveWidget = WidgetProperties.selection().observe(
+                btnAddUihandlers);
+        IObservableValue useUiHandlersPresenterConfigModelObserveValue = BeanProperties.value("useUiHandlers").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddUihandlersObserveWidget,
+                useUiHandlersPresenterConfigModelObserveValue, null, null);
         //
         IObservableValue observeSelectionBtnAddOnbindObserveWidget = WidgetProperties.selection().observe(btnAddOnbind);
-        IObservableValue onBindPresenterConfigModelObserveValue = BeanProperties.value("onBind").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget, onBindPresenterConfigModelObserveValue, null, null);
+        IObservableValue onBindPresenterConfigModelObserveValue = BeanProperties.value("onBind").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnAddOnbindObserveWidget, onBindPresenterConfigModelObserveValue,
+                null, null);
         //
         IObservableValue observeSelectionButtonObserveWidget = WidgetProperties.selection().observe(button);
-        IObservableValue singletonPresenterConfigModelObserveValue = BeanProperties.value("singleton").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionButtonObserveWidget, singletonPresenterConfigModelObserveValue, null, null);
+        IObservableValue singletonPresenterConfigModelObserveValue = BeanProperties.value("singleton").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionButtonObserveWidget, singletonPresenterConfigModelObserveValue, null,
+                null);
         //
-        IObservableValue observeSelectionBtnOverrideDefaultPopupObserveWidget = WidgetProperties.selection().observe(btnOverrideDefaultPopup);
-        IObservableValue overridePopupPresenterConfigModelObserveValue = BeanProperties.value("overridePopup").observe(presenterConfigModel);
-        bindingContext.bindValue(observeSelectionBtnOverrideDefaultPopupObserveWidget, overridePopupPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnOverrideDefaultPopupObserveWidget = WidgetProperties.selection().observe(
+                btnOverrideDefaultPopup);
+        IObservableValue overridePopupPresenterConfigModelObserveValue = BeanProperties.value("overridePopup").observe(
+                presenterConfigModel);
+        bindingContext.bindValue(observeSelectionBtnOverrideDefaultPopupObserveWidget,
+                overridePopupPresenterConfigModelObserveValue, null, null);
         //
-        IObservableValue observeSelectionBtnIsASingletonObserveWidget = WidgetProperties.selection().observe(btnIsASingleton);
-        bindingContext.bindValue(observeSelectionBtnIsASingletonObserveWidget, singletonPresenterConfigModelObserveValue, null, null);
+        IObservableValue observeSelectionBtnIsASingletonObserveWidget = WidgetProperties.selection().observe(
+                btnIsASingleton);
+        bindingContext.bindValue(observeSelectionBtnIsASingletonObserveWidget,
+                singletonPresenterConfigModelObserveValue, null, null);
         //
         return bindingContext;
     }
