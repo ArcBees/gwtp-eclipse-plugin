@@ -42,3 +42,4 @@ Install the requirements first then the GWTP plugin can be installed by using up
 
 ##Thanks to
 [![Arcbees.com](http://arcbees-ads.appspot.com/ad.png)](http://arcbees.com)
+[![githalytics.com alpha](https://cruel-carlota.gopagoda.com/265740669f166308c536601f1ade1db7 "githalytics.com")](http://githalytics.com/ArcBees/gwtp-eclipse-plugin)
