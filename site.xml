@@ -3,7 +3,7 @@
    <description name="GWTP Eclipse Plugin" url="http://arcbees.github.io/gwtp-eclipse-plugin/">
       GWT-Platform Eclipse Plugin tools.
    </description>
-   <feature url="features/com.arcbees.plugin.eclipse.feature_1.1.8.beta.jar" id="com.arcbees.plugin.eclipse.feature" version="1.1.8.beta">
+   <feature url="features/com.arcbees.plugin.eclipse.feature_1.1.9.beta.jar" id="com.arcbees.plugin.eclipse.feature" version="1.1.9.beta">
       <category name="gwtp-tools"/>
    </feature>
    <category-def name="gwtp-tools" label="GWT-Platform Tools"/>
