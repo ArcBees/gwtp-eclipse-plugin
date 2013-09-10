@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GWT-Platform Eclipse Plugin (GWTP)
 Bundle-SymbolicName: com.arcbees.plugin.eclipse;singleton:=true
-Bundle-Version: 1.1.8.beta
+Bundle-Version: 1.1.9.beta
 Bundle-Activator: com.arcbees.plugin.eclipse.Activator
 Bundle-Vendor: ARCBEES
 Require-Bundle: org.eclipse.ui,
