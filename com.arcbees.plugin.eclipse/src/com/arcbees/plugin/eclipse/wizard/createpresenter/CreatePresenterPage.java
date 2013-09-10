@@ -627,22 +627,34 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             presenterConfigModel.setPresenterWidget(false);
             presenterConfigModel.setPopupPresenter(false);
 
-            lblQuerystring.setVisible(true);
-            btnPrepareFromRequest.setVisible(true);
+            if (lblQuerystring != null) {
+                lblQuerystring.setVisible(true);
+            }
+            if (btnPrepareFromRequest != null) {
+                btnPrepareFromRequest.setVisible(true);
+            }
         } else if (index == 1) {
             presenterConfigModel.setNestedPresenter(false);
             presenterConfigModel.setPresenterWidget(true);
             presenterConfigModel.setPopupPresenter(false);
 
-            lblQuerystring.setVisible(false);
-            btnPrepareFromRequest.setVisible(false);
+            if (lblQuerystring != null) {
+                lblQuerystring.setVisible(false);
+            }
+            if (btnPrepareFromRequest != null) {
+                btnPrepareFromRequest.setVisible(false);
+            }
         } else if (index == 2) {
             presenterConfigModel.setNestedPresenter(false);
             presenterConfigModel.setPresenterWidget(false);
             presenterConfigModel.setPopupPresenter(true);
 
-            lblQuerystring.setVisible(false);
-            btnPrepareFromRequest.setVisible(false);
+            if (lblQuerystring != null) {
+                lblQuerystring.setVisible(false);
+            }
+            if (btnPrepareFromRequest != null) {
+                btnPrepareFromRequest.setVisible(false);
+            }
         }
     }
 
