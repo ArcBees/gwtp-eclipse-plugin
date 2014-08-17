@@ -8,7 +8,6 @@ target
 .classpath
 .gwt
 bin
-META-INF
 .checkstyle
 chromedriver.log
 .errai/
