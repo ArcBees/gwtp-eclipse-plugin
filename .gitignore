@@ -1,11 +1,45 @@
-# Project
-build
-bin
+gwt-unitCache
+www-test
 target
+.project
+*.iml
+.settings
+.idea
+.classpath
+.gwt
+bin
+META-INF
+.checkstyle
+chromedriver.log
+.errai/
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
 
-# Mac
-.DS_Store
+# External tool builders
+.externalToolBuilders/
 
-# IDE-Templates source
-**/src_idetemplates**
-**/resources_idetemplates**
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin 
+.target
+
+# TeXlipse plugin
+.texlipse
+*.versionsBackup

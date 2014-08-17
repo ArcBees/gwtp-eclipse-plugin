@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/plugin.feature.source_0.0.0.jar" id="gwtp.plugin.feature.source" version="0.0.0">
+      <category name="gwtp.plugin Developer Resources"/>
+   </feature>
+   <feature url="features/gwtp.plugin.feature_1.0.0.qualifier.jar" id="gwtp.plugin.feature" version="1.0.0.qualifier"/>
+</site>
