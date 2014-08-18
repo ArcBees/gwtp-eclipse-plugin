@@ -18,6 +18,13 @@
              icon="src/main/resources/icons/icon.png"
              id="com.arcbees.gwtp.plugin.core.presenter.CreatePresenterWizard"
              name="GWTP Presenter" />
+             
+       <wizard
+             category="com.arcbees.plugin.core.newWizards"
+             class="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"
+             icon="src/main/resources/icons/icon.png"
+             id="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"
+             name="GWTP Event" />
     </extension> 
      
      <extension
@@ -28,6 +35,8 @@
                id="com.arcbees.gwtp.plugin.core.project.CreateProjectWizard"/>
          <newWizardShortcut
                id="com.arcbees.gwtp.plugin.core.presenter.CreatePresenterWizard"/>
+         <newWizardShortcut
+               id="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"/>
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
@@ -35,6 +44,8 @@
                id="com.arcbees.gwtp.plugin.core.project.CreateProjectWizard"/>
          <newWizardShortcut
                id="com.arcbees.gwtp.plugin.core.presenter.CreatePresenterWizard"/>
+         <newWizardShortcut
+               id="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"/>
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
@@ -42,6 +53,8 @@
                id="com.arcbees.gwtp.plugin.core.project.CreateProjectWizard"/>
          <newWizardShortcut
                id="com.arcbees.gwtp.plugin.core.presenter.CreatePresenterWizard"/>
+         <newWizardShortcut
+               id="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"/>
       </perspectiveExtension>
       <perspectiveExtension
             targetID="org.eclipse.jst.j2ee.J2EEPerspective">
@@ -49,6 +62,8 @@
                id="com.arcbees.gwtp.plugin.core.project.CreateProjectWizard"/>
          <newWizardShortcut
                id="com.arcbees.gwtp.plugin.core.presenter.CreatePresenterWizard"/>
+         <newWizardShortcut
+               id="com.arcbees.gwtp.plugin.core.event.CreateEventWizard"/>
       </perspectiveExtension>      
    </extension>
 

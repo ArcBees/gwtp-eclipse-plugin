@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IBuffer;
@@ -48,13 +47,10 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.ResolvedSourceField;
 import org.eclipse.jdt.internal.core.ResolvedSourceType;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -77,9 +73,10 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import com.arcbees.gwtp.plugin.core.StupidVelocityShim;
+import com.arcbees.gwtp.plugin.core.common.GWTPNewTypeWizardPage;
 import com.arcbees.gwtp.plugin.core.util.CodeFormattingUtil;
 
-public class CreatePresenterPage extends NewTypeWizardPage {
+public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
     private final static Logger logger = Logger.getLogger(CreatePresenterPage.class.getName());
 
@@ -93,9 +90,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
     private Group revealInGroup;
 
     public CreatePresenterPage() {
-        super(true, "wizardPageCreatePresenter");
-        setTitle("Create Presenter");
-        setDescription("Create a presenter for the project.");
+        super("wizardPageCreatePresenter", "Create Presenter", "Create a presenter for the project.");
         stringMap.put("revealType", "RevealType.Root");
     }
 
@@ -158,14 +153,9 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
     }
 
-    private Button createButton(final Composite container, final String text, final int type) {
-        return createButton(container, text, type, null);
-    }
 
     private Button createButton(final Composite container, final String text, final int type, final String booleanValueName) {
-        final Button button = new Button(container, type);
-        button.setBounds(0, 0, 100, 20);
-        button.setText(text);
+        final Button button = createButton(container, text, type);
 
         if (booleanValueName != null) {
             button.addSelectionListener(new SelectionAdapter() {
@@ -180,29 +170,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
             });
         }
         return button;
-    }
-
-    @Override
-    public void createControl(final Composite parent) {
-        initializeDialogUnits(parent);
-        final Composite container = new Composite(parent, SWT.NONE);
-        container.setFont(parent.getFont());
-
-        final int nColumns = 4;
-        final GridLayout layout = new GridLayout();
-        layout.numColumns = nColumns;
-        container.setLayout(layout);
-
-        createTypeNameControls(container, nColumns);
-        createPackageControls(container, nColumns);
-
-        createPresenterTabs(container, nColumns);
-
-        createExtraOptions(container);
-
-        setControl(container);
-
-        Dialog.applyDialogFont(container);
     }
 
     private void createExtraOptions(final Composite container) {
@@ -234,13 +201,7 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
     }
 
-    private Group createGroup(final Composite container, final String title, final int columns) {
-        final Group group = new Group(container, SWT.NONE);
-        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
-        group.setLayout(new GridLayout(columns, false));
-        group.setText(title);
-        return group;
-    }
+
 
     private void createMoreNestedOptions(final Composite container) {
         final Group group = createGroup(container, "More Options", 1);
@@ -543,10 +504,11 @@ public class CreatePresenterPage extends NewTypeWizardPage {
 
     }
 
-    protected void doStatusUpdate() {
-        final IStatus[] status = new IStatus[] { fContainerStatus, fPackageStatus, fTypeNameStatus };
+    @Override
+    protected void extendControl(final Composite container) {
+        createPresenterTabs(container, getNumberOfColumns());
 
-        updateStatus(status);
+        createExtraOptions(container);
     }
 
     private List<ResolvedSourceType> findClassName(final String name) {
@@ -644,21 +606,6 @@ public class CreatePresenterPage extends NewTypeWizardPage {
         gl_tabBody.marginBottom = 10;
         gl_tabBody.verticalSpacing = 20;
         return gl_tabBody;
-    }
-
-    @Override
-    protected void handleFieldChanged(final String fieldName) {
-        super.handleFieldChanged(fieldName);
-        doStatusUpdate();
-    }
-
-    public void init(final IStructuredSelection selection) {
-        final IJavaElement jelem = getInitialJavaElement(selection);
-        initContainerPage(jelem);
-        initTypePage(jelem);
-
-        doStatusUpdate();
-
     }
 
     /**
