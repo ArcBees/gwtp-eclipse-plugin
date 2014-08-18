@@ -417,6 +417,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
     @Override
     public void createType(final IProgressMonitor monitor) throws CoreException, InterruptedException {
+        ensurePackageExists(monitor);
         StupidVelocityShim.setStripUnknownKeys(true);
         final IPath packagePath = getPackageFragment().getResource().getProjectRelativePath().append(new Path(getTypeName().toLowerCase() + "/"));
 
@@ -580,16 +581,21 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
                     }
                 }
             }
-            ;
         }
 
-        final IJavaElement parent = packageFragment.getParent();
-        if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-            return getGinModule((IPackageFragment) packageFragment.getParent(), monitor);
+        String packageName = packageFragment.getElementName();
+        if (packageName.contains(".")) {
+            packageName = packageName.substring(0, packageName.lastIndexOf("."));
+            return getGinModule(getPackageFragmentRoot().getPackageFragment(packageName), monitor);
         }
 
         return null;
 
+    }
+
+    @Override
+    protected String getNameSuffix() {
+        return "Presenter";
     }
 
     private String getNameTokenMethod(final String nameToken) {

@@ -22,9 +22,18 @@ public abstract class GWTPNewTypeWizard extends NewElementWizard {
         addPage(page);
     }
 
+    protected boolean autoOpen() {
+        return false;
+    }
+
     @Override
     protected void finishPage(final IProgressMonitor monitor) throws InterruptedException, CoreException {
         page.createType(monitor);
+        if (autoOpen()) {
+            selectAndReveal(getCreatedElement().getResource());
+            getCreatedElement().getOpenable().open(monitor);
+        }
+
     }
 
     @Override

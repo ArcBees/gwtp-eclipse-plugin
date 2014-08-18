@@ -1,7 +1,12 @@
 package com.arcbees.gwtp.plugin.core.common;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -63,10 +68,35 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         updateStatus(status);
     }
 
+    protected final void ensurePackageExists(final IProgressMonitor monitor) throws JavaModelException {
+        final IPackageFragmentRoot root= getPackageFragmentRoot();
+        IPackageFragment pack= getPackageFragment();
+        if (pack == null) {
+            pack= root.getPackageFragment(""); //$NON-NLS-1$
+        }
+
+        if (!pack.exists()) {
+            final String packName= pack.getElementName();
+            pack= root.createPackageFragment(packName, true, new SubProgressMonitor(monitor, 1));
+        }
+
+    }
+
     protected abstract void extendControl(final Composite container);
+
+    protected abstract String getNameSuffix();
 
     protected int getNumberOfColumns() {
         return 4;
+    }
+
+    @Override
+    public String getTypeName() {
+        String typeName = super.getTypeName();
+        if (typeName.toLowerCase().endsWith(getNameSuffix().toLowerCase())) {
+            typeName = typeName.substring(0, typeName.length() - getNameSuffix().length());
+        }
+        return typeName;
     }
 
     @Override

@@ -62,13 +62,11 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
 
     @Override
     public void createType(final IProgressMonitor monitor) throws CoreException, InterruptedException {
+        ensurePackageExists(monitor);
         StupidVelocityShim.setStripUnknownKeys(true);
 
         final Map<String, Object> context = new HashMap<>();
-
-        final String eventName = getTypeName().toLowerCase().endsWith("Event") ? getTypeName().substring(0, getTypeName().length() - "Event".length()) : getTypeName();
-
-        context.put("eventName", eventName);
+        context.put("eventName", getTypeName());
         context.put("packageName", getPackageText());
         context.put("handlerModifier", eventRestriction == EventRestriction.SINGE_CATCH ? "" : "public ");
         context.put("eventModifier", eventRestriction == EventRestriction.SINGLE_FIRE ? "" : "public ");
@@ -83,9 +81,8 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
 
             final String output = StupidVelocityShim.evaluate(template, context);
 
-            final IFile file = project.getFile(getPackageFragment().getResource().getProjectRelativePath().append(new Path(eventName + "Event.java")));
+            final IFile file = project.getFile(getPackageFragment().getResource().getProjectRelativePath().append(new Path(getTypeName() + "Event.java")));
             file.create(new ByteArrayInputStream(output.getBytes(StandardCharsets.UTF_8)), IResource.NONE, null);
-
         }
 
     }
@@ -93,6 +90,11 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
     @Override
     protected void extendControl(final Composite composite) {
         createRestrictionControls(composite);
+    }
+
+    @Override
+    protected String getNameSuffix() {
+        return "Event";
     }
 
 }
