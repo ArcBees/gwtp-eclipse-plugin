@@ -39,14 +39,6 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         super(true, id);
         setTitle(title);
         setDescription(description);
-
-    }
-
-    protected Button createButton(final Composite container, final String text, final int type) {
-        final Button button = new Button(container, type);
-        button.setBounds(0, 0, 100, 20);
-        button.setText(text);
-        return button;
     }
 
     @Override
@@ -67,7 +59,22 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         setControl(container);
 
         Dialog.applyDialogFont(container);
+    }
 
+    @Override
+    public String getTypeName() {
+        String typeName = super.getTypeName();
+        if (typeName.toLowerCase().endsWith(getNameSuffix().toLowerCase())) {
+            typeName = typeName.substring(0, typeName.length() - getNameSuffix().length());
+        }
+        return typeName;
+    }
+
+    protected Button createButton(final Composite container, final String text, final int type) {
+        final Button button = new Button(container, type);
+        button.setBounds(0, 0, 100, 20);
+        button.setText(text);
+        return button;
     }
 
     protected Group createGroup(final Composite container, final String title, final int columns) {
@@ -78,24 +85,17 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         return group;
     }
 
-    private void doStatusUpdate() {
-        final IStatus[] status = new IStatus[] { fContainerStatus, fPackageStatus, fTypeNameStatus };
-
-        updateStatus(status);
-    }
-
     protected final void ensurePackageExists(final IProgressMonitor monitor) throws JavaModelException {
-        final IPackageFragmentRoot root= getPackageFragmentRoot();
-        IPackageFragment pack= getPackageFragment();
+        final IPackageFragmentRoot root = getPackageFragmentRoot();
+        IPackageFragment pack = getPackageFragment();
         if (pack == null) {
-            pack= root.getPackageFragment(""); //$NON-NLS-1$
+            pack = root.getPackageFragment(""); //$NON-NLS-1$
         }
 
         if (!pack.exists()) {
-            final String packName= pack.getElementName();
-            pack= root.createPackageFragment(packName, true, new SubProgressMonitor(monitor, 1));
+            final String packName = pack.getElementName();
+            pack = root.createPackageFragment(packName, true, new SubProgressMonitor(monitor, 1));
         }
-
     }
 
     protected abstract void extendControl(final Composite container);
@@ -104,15 +104,6 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
 
     protected int getNumberOfColumns() {
         return 4;
-    }
-
-    @Override
-    public String getTypeName() {
-        String typeName = super.getTypeName();
-        if (typeName.toLowerCase().endsWith(getNameSuffix().toLowerCase())) {
-            typeName = typeName.substring(0, typeName.length() - getNameSuffix().length());
-        }
-        return typeName;
     }
 
     @Override
@@ -127,9 +118,10 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         initTypePage(jelem);
 
         doStatusUpdate();
-
     }
 
-
-
+    private void doStatusUpdate() {
+        final IStatus[] status = new IStatus[] { fContainerStatus, fPackageStatus, fTypeNameStatus };
+        updateStatus(status);
+    }
 }

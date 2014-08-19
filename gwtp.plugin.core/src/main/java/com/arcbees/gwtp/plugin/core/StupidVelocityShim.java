@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 // Can't use velocity in the plugin because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=396554
 // This is not a replacement for velocity but is custom tuned to this projects templates.
 public class StupidVelocityShim {
+    private static boolean stripUnknownKeys;
 
     public static String evaluate(final String input, final Map<String, Object> context) {
         int ifLevel = 0;
@@ -54,7 +55,6 @@ public class StupidVelocityShim {
                     if (!line.trim().isEmpty() || (originalLine.equals(line))) {
                         result.append(line).append("\n");
                     }
-
                 }
             }
             if (line.trim().startsWith("#if")) {
@@ -79,12 +79,11 @@ public class StupidVelocityShim {
         return result.substring(0, Math.max(0, result.length() - 1)).toString();
     }
 
-    private static final String getValueInBrackets(final String input) {
+    private static String getValueInBrackets(final String input) {
         final int first = input.indexOf("(");
         final int last = input.lastIndexOf(")");
         return input.substring(first + 1, last);
     }
-
 
     public static void setStripUnknownKeys(final boolean strip) {
         stripUnknownKeys = strip;
@@ -98,9 +97,4 @@ public class StupidVelocityShim {
         }
         return line;
     }
-
-    private static boolean stripUnknownKeys;
-
-
-
 }

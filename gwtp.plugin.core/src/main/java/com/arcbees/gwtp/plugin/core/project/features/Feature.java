@@ -20,10 +20,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Feature {
-    APP_ENGINE("Google App Engine", "https://developers.google.com/appengine/", true, new FeatureConfigOption("Application Id", "Project", null)),
+    APP_ENGINE("Google App Engine", "https://developers.google.com/appengine/", true, new FeatureConfigOption(
+            "Application Id", "Project", null)),
     OBJECTIFY("Objectify", "https://code.google.com/p/objectify-appengine/", true),
-    UNIVERSAL_ANALYTICS("Google Universal Analytics", "https://github.com/ArcBees/universal-analytics", true, new FeatureConfigOption("Web Property ID", "UX-XXXX-Y", null)),
+    UNIVERSAL_ANALYTICS("Google Universal Analytics", "https://github.com/ArcBees/universal-analytics", true,
+                    new FeatureConfigOption("Web Property ID", "UX-XXXX-Y", null)),
     GWT_PUSH_STATE("HTML5 Push State", "https://github.com/jbarop/gwt-pushstate", true);
+
+    private final boolean recommended;
+    private final String url;
+    private final String title;
+    private final List<FeatureConfigOption> configOptions = new ArrayList<>();
+
+    Feature(final String title, final String url, final boolean recommended,
+            final FeatureConfigOption... configOptions) {
+        this.title = title;
+        this.url = url;
+        this.recommended = recommended;
+
+        for (final FeatureConfigOption option : configOptions) {
+            this.configOptions.add(option);
+        }
+    }
 
     public static Node<Feature> getFeatures() {
         final Node<Feature> root = new Node<>(null);
@@ -32,24 +50,6 @@ public enum Feature {
         root.addChild(UNIVERSAL_ANALYTICS);
         root.addChild(GWT_PUSH_STATE);
         return root;
-    }
-
-    private final boolean recommended;
-    private final String url;
-
-    private final String title;
-
-    private final List<FeatureConfigOption> configOptions = new ArrayList<>();
-
-    Feature(final String title, final String url, final boolean recommended, final FeatureConfigOption... configOptions) {
-        this.title = title;
-        this.url = url;
-        this.recommended = recommended;
-
-        for (final FeatureConfigOption option : configOptions) {
-            this.configOptions.add(option);
-        }
-
     }
 
     public List<FeatureConfigOption> getConfigOptions() {
@@ -71,5 +71,4 @@ public enum Feature {
     public boolean isRecommended() {
         return recommended;
     }
-
 }

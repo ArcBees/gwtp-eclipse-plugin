@@ -14,12 +14,27 @@
  * the License.
  */
 
-package com.arcbees.gwtp.plugin.core.event;
+package com.arcbees.gwtp.plugin.core.util.zip;
 
-import com.arcbees.gwtp.plugin.core.common.GWTPNewTypeWizard;
+public class TemplateZipItem {
 
-public class CreateEventWizard extends GWTPNewTypeWizard {
-    public CreateEventWizard() {
-        super("Create GWTP Presenter", new CreateEventPage());
+    private final String text;
+    private final String name;
+
+    TemplateZipItem(final String name, final String text) {
+        this.name = name;
+        this.text = text;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public boolean isFolder() {
+        return this.text == null;
     }
 }

@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 
 public class FeatureLabelProvider implements ILabelProvider {
-
     private Set<ILabelProviderListener> listeners = new HashSet<>();
 
     @Override
@@ -34,7 +33,7 @@ public class FeatureLabelProvider implements ILabelProvider {
 
     @Override
     public void dispose() {
-
+        // do nothing
     }
 
     @Override
@@ -55,7 +54,5 @@ public class FeatureLabelProvider implements ILabelProvider {
     @Override
     public void removeListener(final ILabelProviderListener listener) {
         listeners.remove(listener);
-
     }
-
 }

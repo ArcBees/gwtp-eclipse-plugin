@@ -38,19 +38,18 @@ import com.arcbees.gwtp.plugin.core.project.features.FeatureConfigOption;
 import com.arcbees.gwtp.plugin.core.project.features.Node;
 
 public class FeatureConfigPage extends WizardPage {
+    private static final FeatureConfigPage INSTANCE = new FeatureConfigPage();
 
-    static FeatureConfigPage get() {
-        return INSTANCE;
-    }
+    private final Map<Feature, Group> featureGroups = new HashMap<>();
 
-    private Map<Feature, Group> featureGroups = new HashMap<>();
-
-    private Set<FeatureConfigOption> configOptions = new HashSet<>();
-
-    private static FeatureConfigPage INSTANCE = new FeatureConfigPage();
+    private final Set<FeatureConfigOption> configOptions = new HashSet<>();
 
     private FeatureConfigPage() {
         super("Configure Your Features", "Configure Your Features", null);
+    }
+
+    static FeatureConfigPage get() {
+        return INSTANCE;
     }
 
     @Override
@@ -67,7 +66,6 @@ public class FeatureConfigPage extends WizardPage {
             createGroup(container, node.getData());
             createFeatureConfigWidgets(container, node.getChildren());
         }
-
     }
 
     private void createGroup(final Composite container, final Feature feature) {
@@ -98,19 +96,15 @@ public class FeatureConfigPage extends WizardPage {
             @Override
             public void modifyText(final ModifyEvent e) {
                 option.setValue(input.getText());
-
             }
         });
 
         configOptions.add(option);
-
     }
 
     public void fillContext(final Map<String, Object> context) {
         for (final FeatureConfigOption option : configOptions) {
             context.put(option.getName(), option.getValue());
         }
-
     }
-
 }

@@ -40,7 +40,6 @@ import com.arcbees.gwtp.plugin.core.StupidVelocityShim;
 import com.arcbees.gwtp.plugin.core.common.GWTPNewTypeWizardPage;
 
 public class CreateEventPage extends GWTPNewTypeWizardPage {
-
     private enum EventRestriction {
         NONE,
         SINGLE_FIRE,
@@ -58,7 +57,6 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
         public void widgetSelected(final SelectionEvent e) {
             eventRestriction = this.restriction;
         }
-
     }
 
     private EventRestriction eventRestriction = EventRestriction.SINGLE_FIRE;
@@ -69,11 +67,14 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
 
     private void createRestrictionControls(final Composite composite) {
         final Group group = createGroup(composite, "Event Restrictions", 1);
-        final Button singleFireRadio = createButton(group, "Only presenters in the same package can fire this event.", SWT.RADIO);
+        final Button singleFireRadio = createButton(group, "Only presenters in the same package can fire this event.",
+                SWT.RADIO);
         singleFireRadio.setSelection(true);
         singleFireRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGLE_FIRE));
-        createButton(group, "Only presenters in the same package can catch this event", SWT.RADIO).addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH));
-        createButton(group, "All presenters can fire and catch this event", SWT.RADIO).addSelectionListener(new RestrictionSelector(EventRestriction.NONE));
+        createButton(group, "Only presenters in the same package can catch this event", SWT.RADIO)
+        .addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH));
+        createButton(group, "All presenters can fire and catch this event", SWT.RADIO).addSelectionListener(
+                new RestrictionSelector(EventRestriction.NONE));
     }
 
     @Override
@@ -87,7 +88,6 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
         context.put("handlerModifier", eventRestriction == EventRestriction.SINGE_CATCH ? "" : "public ");
         context.put("eventModifier", eventRestriction == EventRestriction.SINGLE_FIRE ? "" : "public ");
 
-
         final InputStream is = getClass().getResourceAsStream("/src/main/resources/templates/event.java.template");
         try (Scanner s = new Scanner(is)) {
             s.useDelimiter("\\A");
@@ -97,10 +97,10 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
 
             final String output = StupidVelocityShim.evaluate(template, context);
 
-            final IFile file = project.getFile(getPackageFragment().getResource().getProjectRelativePath().append(new Path(getTypeName() + "Event.java")));
+            final IFile file = project.getFile(getPackageFragment().getResource().getProjectRelativePath()
+                    .append(new Path(getTypeName() + "Event.java")));
             file.create(new ByteArrayInputStream(output.getBytes(StandardCharsets.UTF_8)), IResource.NONE, null);
         }
-
     }
 
     @Override
@@ -112,5 +112,4 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
     protected String getNameSuffix() {
         return "Event";
     }
-
 }

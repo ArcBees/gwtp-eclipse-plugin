@@ -20,11 +20,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 public class FeatureContentProvider implements ITreeContentProvider {
-
     @Override
     public void dispose() {
-        // TODO Auto-generated method stub
-
+        // do nothing
     }
 
     @Override
@@ -49,8 +47,6 @@ public class FeatureContentProvider implements ITreeContentProvider {
 
     @Override
     public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
-        // TODO Auto-generated method stub
-
+        // do nothing
     }
-
 }

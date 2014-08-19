@@ -37,14 +37,9 @@ import com.arcbees.gwtp.plugin.core.project.features.FeatureLabelProvider;
 import com.arcbees.gwtp.plugin.core.project.features.Node;
 
 public class AddFeaturesPage extends WizardPage {
-
-    static AddFeaturesPage get() {
-        return INSTANCE;
-    }
+    private static final AddFeaturesPage INSTANCE = new AddFeaturesPage();;
 
     private final Map<Feature, Boolean> featureSelectionMap = new HashMap<>();
-
-    private final static AddFeaturesPage INSTANCE = new AddFeaturesPage();;
 
     private AddFeaturesPage() {
         super("Add Features To Your Project", "Add Features To Your Project", null);
@@ -71,12 +66,16 @@ public class AddFeaturesPage extends WizardPage {
             @SuppressWarnings("unchecked")
             @Override
             public void checkStateChanged(final CheckStateChangedEvent event) {
-                if (event.getChecked() == false) {
+                if (!event.getChecked()) {
                     checkboxTreeViewer.setSubtreeChecked(event.getElement(), false);
                 }
                 featureSelectionMap.put(((Node<Feature>) event.getElement()).getData(), event.getChecked());
             }
         });
+    }
+
+    static AddFeaturesPage get() {
+        return INSTANCE;
     }
 
     private void fillContext(final List<Node<Feature>> children, final Map<String, Object> context) {
@@ -86,7 +85,6 @@ public class AddFeaturesPage extends WizardPage {
             }
             fillContext(node.getChildren(), context);
         }
-
     }
 
     public void fillContext(final Map<String, Object> context) {
