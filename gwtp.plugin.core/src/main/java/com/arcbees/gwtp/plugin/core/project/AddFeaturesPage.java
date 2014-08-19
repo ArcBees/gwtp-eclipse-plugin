@@ -69,9 +69,14 @@ public class AddFeaturesPage extends WizardPage {
                 if (!event.getChecked()) {
                     checkboxTreeViewer.setSubtreeChecked(event.getElement(), false);
                 }
-                featureSelectionMap.put(((Node<Feature>) event.getElement()).getData(), event.getChecked());
+                setFeatureSelected(((Node<Feature>) event.getElement()).getData(), event.getChecked());
             }
         });
+    }
+
+    private void setFeatureSelected(Feature feature, boolean selected) {
+        featureSelectionMap.put(feature, selected);
+        FeatureConfigPage.get().setFeatureEnabled(feature, selected);
     }
 
     static AddFeaturesPage get() {

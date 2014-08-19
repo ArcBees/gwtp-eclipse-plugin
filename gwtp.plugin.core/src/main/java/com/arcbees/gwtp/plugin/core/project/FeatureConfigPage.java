@@ -42,6 +42,8 @@ public class FeatureConfigPage extends WizardPage {
 
     private final Map<Feature, Group> featureGroups = new HashMap<>();
 
+    private final Map<Feature, Boolean> enabledFeatures = new HashMap<>();
+
     private final Set<FeatureConfigOption> configOptions = new HashSet<>();
 
     private FeatureConfigPage() {
@@ -61,6 +63,19 @@ public class FeatureConfigPage extends WizardPage {
         createFeatureConfigWidgets(container, Feature.getFeatures().getChildren());
     }
 
+    public void fillContext(final Map<String, Object> context) {
+        for (final FeatureConfigOption option : configOptions) {
+            context.put(option.getName(), option.getValue());
+        }
+    }
+
+    void setFeatureEnabled(final Feature feature, final boolean enabled) {
+        enabledFeatures.put(feature, enabled);
+        if (featureGroups.containsKey(feature)) {
+            featureGroups.get(feature).setVisible(enabled);
+        }
+    }
+
     private void createFeatureConfigWidgets(final Composite container, final List<Node<Feature>> children) {
         for (final Node<Feature> node : children) {
             createGroup(container, node.getData());
@@ -78,6 +93,10 @@ public class FeatureConfigPage extends WizardPage {
 
             for (final FeatureConfigOption option : feature.getConfigOptions()) {
                 createTextInput(group, option);
+            }
+
+            if (enabledFeatures.containsKey(feature)) {
+                group.setVisible(enabledFeatures.get(feature));
             }
         }
     }
@@ -100,11 +119,5 @@ public class FeatureConfigPage extends WizardPage {
         });
 
         configOptions.add(option);
-    }
-
-    public void fillContext(final Map<String, Object> context) {
-        for (final FeatureConfigOption option : configOptions) {
-            context.put(option.getName(), option.getValue());
-        }
     }
 }

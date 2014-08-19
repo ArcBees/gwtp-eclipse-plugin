@@ -65,18 +65,6 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
         super("wizardPageEvent", "Create Event", "Create an event for the project.");
     }
 
-    private void createRestrictionControls(final Composite composite) {
-        final Group group = createGroup(composite, "Event Restrictions", 1);
-        final Button singleFireRadio = createButton(group, "Only presenters in the same package can fire this event.",
-                SWT.RADIO);
-        singleFireRadio.setSelection(true);
-        singleFireRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGLE_FIRE));
-        createButton(group, "Only presenters in the same package can catch this event", SWT.RADIO)
-        .addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH));
-        createButton(group, "All presenters can fire and catch this event", SWT.RADIO).addSelectionListener(
-                new RestrictionSelector(EventRestriction.NONE));
-    }
-
     @Override
     public void createType(final IProgressMonitor monitor) throws CoreException, InterruptedException {
         ensurePackageExists(monitor);
@@ -111,5 +99,17 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
     @Override
     protected String getNameSuffix() {
         return "Event";
+    }
+
+    private void createRestrictionControls(final Composite composite) {
+        final Group group = createGroup(composite, "Event Restrictions", 1);
+        final Button singleFireRadio = createButton(group, "Only presenters in the same package can fire this event.",
+                SWT.RADIO);
+        singleFireRadio.setSelection(true);
+        singleFireRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGLE_FIRE));
+        createButton(group, "Only presenters in the same package can catch this event", SWT.RADIO)
+        .addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH));
+        createButton(group, "All presenters can fire and catch this event", SWT.RADIO).addSelectionListener(
+                new RestrictionSelector(EventRestriction.NONE));
     }
 }
