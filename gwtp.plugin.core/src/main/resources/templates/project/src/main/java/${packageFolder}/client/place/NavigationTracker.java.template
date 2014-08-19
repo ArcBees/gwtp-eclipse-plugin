@@ -24,5 +24,4 @@ public class NavigationTracker implements NavigationHandler {
         analytics.sendPageView().documentPath(placeManager.buildHistoryToken(navigationEvent.getRequest())).go();
     }
 }
-
 #end
