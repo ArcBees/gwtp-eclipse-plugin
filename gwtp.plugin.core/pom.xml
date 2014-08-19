@@ -10,5 +10,4 @@
     <packaging>eclipse-plugin</packaging>
     <name>GWTP Plugin For Eclipse</name>
     <description>GWTP-Plugin For Eclipse</description>
-  
 </project>
