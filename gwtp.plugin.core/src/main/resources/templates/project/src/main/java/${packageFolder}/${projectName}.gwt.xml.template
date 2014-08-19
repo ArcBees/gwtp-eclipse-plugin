@@ -15,10 +15,10 @@
     <inherits name='com.gwtplatform.dispatch.Dispatch' />
     <inherits name='com.gwtplatform.mvp.MvpWithEntryPoint' />
     #if ($UNIVERSAL_ANALYTICS)
-    <inherits name="de.barop.gwt.PushState" />
+    <inherits name="com.arcbees.analytics.Analytics"/>
     #end
     #if ($GWT_PUSH_STATE)
-    <inherits name="com.arcbees.analytics.Analytics"/>
+    <inherits name="de.barop.gwt.PushState" />
     #end
 
     <source path='client' />
