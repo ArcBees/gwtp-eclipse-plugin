@@ -48,18 +48,23 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
 
     private class RestrictionSelector extends SelectionAdapter {
         private final EventRestriction restriction;
+        private final Button button;
 
-        RestrictionSelector(final EventRestriction restriction) {
+        RestrictionSelector(final EventRestriction restriction, final Button button) {
             this.restriction = restriction;
+            this.button = button;
         }
 
         @Override
         public void widgetSelected(final SelectionEvent e) {
-            eventRestriction = this.restriction;
+            if (button.getSelection()) {
+                eventRestriction = this.restriction;
+            }
         }
     }
 
     private EventRestriction eventRestriction = EventRestriction.SINGLE_FIRE;
+    private boolean hasHandlers;
 
     public CreateEventPage() {
         super("wizardPageEvent", "Create Event", "Create an event for the project.");
@@ -75,6 +80,9 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
         context.put("packageName", getPackageText());
         context.put("handlerModifier", eventRestriction == EventRestriction.SINGE_CATCH ? "" : "public ");
         context.put("eventModifier", eventRestriction == EventRestriction.SINGLE_FIRE ? "" : "public ");
+        if (hasHandlers) {
+            context.put("hasHandlers", true);
+        }
 
         final InputStream is = getClass().getResourceAsStream("/src/main/resources/templates/event.java.template");
         try (Scanner s = new Scanner(is)) {
@@ -94,6 +102,7 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
     @Override
     protected void extendControl(final Composite composite) {
         createRestrictionControls(composite);
+        createHasHandlersControls(composite);
     }
 
     @Override
@@ -101,15 +110,28 @@ public class CreateEventPage extends GWTPNewTypeWizardPage {
         return "Event";
     }
 
+    private void createHasHandlersControls(final Composite composite) {
+        final Group group = createGroup(composite, "HasHandlers", 1);
+        final Button hasHandlersButton = createButton(group, "Add HasHandlers Interface", SWT.CHECK);
+        hasHandlersButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(final SelectionEvent e) {
+                hasHandlers = hasHandlersButton.getSelection();
+            }
+        });
+    }
+
     private void createRestrictionControls(final Composite composite) {
         final Group group = createGroup(composite, "Event Restrictions", 1);
         final Button singleFireRadio = createButton(group, "Only presenters in the same package can fire this event.",
                 SWT.RADIO);
         singleFireRadio.setSelection(true);
-        singleFireRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGLE_FIRE));
-        createButton(group, "Only presenters in the same package can catch this event", SWT.RADIO)
-        .addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH));
-        createButton(group, "All presenters can fire and catch this event", SWT.RADIO).addSelectionListener(
-                new RestrictionSelector(EventRestriction.NONE));
+        singleFireRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGLE_FIRE, singleFireRadio));
+
+        final Button singleCatchRadio = createButton(group, "Only presenters in the same package can catch this event",
+                SWT.RADIO);
+        singleCatchRadio.addSelectionListener(new RestrictionSelector(EventRestriction.SINGE_CATCH, singleCatchRadio));
+        final Button noneRadio = createButton(group, "All presenters can fire and catch this event", SWT.RADIO);
+        noneRadio.addSelectionListener(new RestrictionSelector(EventRestriction.NONE, noneRadio));
     }
 }

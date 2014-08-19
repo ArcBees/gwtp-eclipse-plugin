@@ -2,12 +2,21 @@ package ${packageName};
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+#if ( $hasHandlers )
+import com.google.gwt.event.shared.HasHandlers;
+import com.google.web.bindery.event.shared.HandlerRegistration;
+#end
 
 public class ${eventName}Event extends GwtEvent<${eventName}Event.${eventName}Handler> {
     ${handlerModifier}interface ${eventName}Handler extends EventHandler {
         void on${eventName}(${eventName}Event event);
     }
-
+    
+    #if ( $hasHandlers )
+    public interface ${eventName}Handlers extends HasHandlers {
+        HandlerRegistration add${eventName}Handler(${eventName}Handler handler);
+    }
+    #end
     private static Type<${eventName}Handler> TYPE = new Type<${eventName}Handler>();
     
     private final String message;
