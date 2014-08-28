@@ -17,7 +17,7 @@
         <universal-analytics.version>2.0</universal-analytics.version>
         #end
         #if ($GWT_PUSH_STATE)
-        <gwt-pushstate.version>1.1.0-SNAPSHOT</gwt-pushstate.version>
+        <gwt-pushstate.version>1.1.0</gwt-pushstate.version>
         #end
         <!-- server -->
         <guice.version>3.0</guice.version>
@@ -283,7 +283,7 @@
         #end
         #if ($GWT_PUSH_STATE)
         <dependency>
-            <groupId>de.barop.gwt</groupId>
+            <groupId>com.wallissoftware</groupId>
             <artifactId>gwt-pushstate</artifactId>
             <version>${gwt-pushstate.version}</version>
         </dependency>
