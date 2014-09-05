@@ -45,6 +45,5 @@ class ${name}View extends ${extends} implements ${name}Presenter.MyView {
             super.setInSlot(slot, content);
         }
     }
-    
     #end
 }

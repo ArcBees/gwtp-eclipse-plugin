@@ -130,6 +130,5 @@ public class ${name}Presenter extends PresenterWidget<${name}Presenter.MyView> $
     protected void onReset() {
         super.onReset();
     }
-    
     #end
 }
