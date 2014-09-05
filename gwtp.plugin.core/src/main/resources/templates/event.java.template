@@ -8,6 +8,8 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 #end
 
 public class ${eventName}Event extends GwtEvent<${eventName}Event.${eventName}Handler> {
+    private static Type<${eventName}Handler> TYPE = new Type<${eventName}Handler>();
+    
     ${handlerModifier}interface ${eventName}Handler extends EventHandler {
         void on${eventName}(${eventName}Event event);
     }
@@ -17,7 +19,6 @@ public class ${eventName}Event extends GwtEvent<${eventName}Event.${eventName}Ha
         HandlerRegistration add${eventName}Handler(${eventName}Handler handler);
     }
     #end
-    private static Type<${eventName}Handler> TYPE = new Type<${eventName}Handler>();
     
     private final String message;
    
