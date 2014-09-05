@@ -98,7 +98,6 @@ public class NameProjectPage extends WizardPage {
 
     @Override
     public void createControl(final Composite parent) {
-
         final Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
@@ -111,12 +110,10 @@ public class NameProjectPage extends WizardPage {
         final Composite advancedTabBody = createTab(tabFolder, "Advanced");
 
         final ModifyListener modifyListener = new ModifyListener() {
-
             @Override
             public void modifyText(final ModifyEvent e) {
                 autoPopulateAdvancedInputs();
             }
-
         };
 
         projectName = createTextInput(simpleTabBody, "Project Name", "MyProject", modifyListener);
@@ -124,12 +121,10 @@ public class NameProjectPage extends WizardPage {
 
         final Button autoPopulateButton = createCheckButton(advancedTabBody, "Auto Populate");
         autoPopulateButton.addSelectionListener(new SelectionAdapter() {
-
             @Override
             public void widgetSelected(final SelectionEvent e) {
                 setAdvancedInputsEnabled(!autoPopulateButton.getSelection());
             }
-
         });
 
         mavenArtifactId = createTextInput(advancedTabBody, "Maven Artifact Id", "MyProject", null);
@@ -148,7 +143,6 @@ public class NameProjectPage extends WizardPage {
         openFolderButton.setText("Open");
 
         openFolderButton.addSelectionListener(new SelectionAdapter() {
-
             @Override
             public void widgetSelected(final SelectionEvent e) {
                 showFolderDialog();
