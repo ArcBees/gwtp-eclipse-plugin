@@ -423,21 +423,17 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         final Button contentSlotRadio = createButton(revealInGroup, "Slot", SWT.RADIO);
 
         rootRevealRadio.addSelectionListener(new SelectionAdapter() {
-
             @Override
             public void widgetSelected(final SelectionEvent e) {
                 stringMap.put("revealType", "RevealType.Root");
             }
-
         });
 
-        rootLayoutRevealRadio.addSelectionListener(new SelectionAdapter() {
-
+       rootLayoutRevealRadio.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(final SelectionEvent e) {
                 stringMap.put("revealType", "RevealType.RootLayout");
             }
-
         });
 
         final Text contentSlot = new Text(revealInGroup, SWT.BORDER);
@@ -445,7 +441,6 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         contentSlot.setEnabled(false);
 
         contentSlot.addModifyListener(new ModifyListener() {
-
             @Override
             public void modifyText(final ModifyEvent e) {
                 stringMap.put("revealType", contentSlot.getText());
