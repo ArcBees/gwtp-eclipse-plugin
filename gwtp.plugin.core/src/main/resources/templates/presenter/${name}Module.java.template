@@ -9,9 +9,9 @@ public class ${name}Module extends AbstractPresenterModule {
         bindPresenter(${name}Presenter.class, ${name}Presenter.MyView.class, ${name}View.class, ${name}Presenter.MyProxy.class);
         #else
         #if ($singleton)
-            bindPresenterWidget(${name}Presenter.class, ${name}Presenter.MyView.class, ${name}View.class);
-        #else
             bindSingletonPresenterWidget(${name}Presenter.class, ${name}Presenter.MyView.class, ${name}View.class);
+        #else
+            bindPresenterWidget(${name}Presenter.class, ${name}Presenter.MyView.class, ${name}View.class);
         #end
         #end
     }
