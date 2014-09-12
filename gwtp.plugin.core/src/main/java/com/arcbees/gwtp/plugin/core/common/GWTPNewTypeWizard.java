@@ -26,7 +26,7 @@ public abstract class GWTPNewTypeWizard extends NewElementWizard {
 
     private final GWTPNewTypeWizardPage page;
 
-    public GWTPNewTypeWizard(final String windowTitle, final GWTPNewTypeWizardPage page) {
+    public GWTPNewTypeWizard(String windowTitle, GWTPNewTypeWizardPage page) {
         setWindowTitle("Create GWTP Presenter");
         setHelpAvailable(false);
         this.page = page;
@@ -54,7 +54,7 @@ public abstract class GWTPNewTypeWizard extends NewElementWizard {
     }
 
     @Override
-    protected void finishPage(final IProgressMonitor monitor) throws InterruptedException, CoreException {
+    protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
         page.createType(monitor);
         if (autoOpen()) {
             selectAndReveal(getCreatedElement().getResource());

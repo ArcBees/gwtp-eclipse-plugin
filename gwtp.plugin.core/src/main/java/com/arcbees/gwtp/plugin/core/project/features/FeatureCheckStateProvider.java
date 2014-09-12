@@ -21,12 +21,12 @@ import org.eclipse.jface.viewers.ICheckStateProvider;
 public class FeatureCheckStateProvider implements ICheckStateProvider {
 
     @Override
-    public boolean isChecked(final Object element) {
+    public boolean isChecked(Object element) {
         return ((Node<Feature>) element).getData().isRecommended();
     }
 
     @Override
-    public boolean isGrayed(final Object element) {
+    public boolean isGrayed(Object element) {
         return false;
     }
 

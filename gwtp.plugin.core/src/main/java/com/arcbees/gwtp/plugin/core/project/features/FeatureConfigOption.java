@@ -22,14 +22,14 @@ public class FeatureConfigOption {
     private String value;
     private final String name;
 
-    FeatureConfigOption(final String name, final String defaultValue, final String description) {
+    FeatureConfigOption(String name, String defaultValue, String description) {
         this.name = name;
         this.value = defaultValue;
         this.description = description;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -39,7 +39,7 @@ public class FeatureConfigOption {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FeatureConfigOption other = (FeatureConfigOption) obj;
+        FeatureConfigOption other = (FeatureConfigOption) obj;
         if (description == null) {
             if (other.description != null) {
                 return false;
@@ -78,7 +78,7 @@ public class FeatureConfigOption {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         int result = 1;
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -86,7 +86,7 @@ public class FeatureConfigOption {
         return result;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

@@ -35,19 +35,19 @@ import org.eclipse.swt.widgets.Group;
 
 public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
 
-    public GWTPNewTypeWizardPage(final String id, final String title, final String description) {
+    public GWTPNewTypeWizardPage(String id, String title, String description) {
         super(true, id);
         setTitle(title);
         setDescription(description);
     }
 
     @Override
-    public final void createControl(final Composite parent) {
+    public void createControl(Composite parent) {
         initializeDialogUnits(parent);
-        final Composite container = new Composite(parent, SWT.NONE);
+        Composite container = new Composite(parent, SWT.NONE);
         container.setFont(parent.getFont());
 
-        final GridLayout layout = new GridLayout();
+        GridLayout layout = new GridLayout();
         layout.numColumns = getNumberOfColumns();
         container.setLayout(layout);
 
@@ -70,35 +70,35 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
         return typeName;
     }
 
-    protected Button createButton(final Composite container, final String text, final int type) {
-        final Button button = new Button(container, type);
+    protected Button createButton(Composite container, String text, int type) {
+        Button button = new Button(container, type);
         button.setBounds(0, 0, 100, 20);
         button.setText(text);
         return button;
     }
 
-    protected Group createGroup(final Composite container, final String title, final int columns) {
-        final Group group = new Group(container, SWT.NONE);
+    protected Group createGroup(Composite container, String title, int columns) {
+        Group group = new Group(container, SWT.NONE);
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, getNumberOfColumns(), 1));
         group.setLayout(new GridLayout(columns, false));
         group.setText(title);
         return group;
     }
 
-    protected final void ensurePackageExists(final IProgressMonitor monitor) throws JavaModelException {
-        final IPackageFragmentRoot root = getPackageFragmentRoot();
+    protected void ensurePackageExists(IProgressMonitor monitor) throws JavaModelException {
+        IPackageFragmentRoot root = getPackageFragmentRoot();
         IPackageFragment pack = getPackageFragment();
         if (pack == null) {
             pack = root.getPackageFragment(""); //$NON-NLS-1$
         }
 
         if (!pack.exists()) {
-            final String packName = pack.getElementName();
+            String packName = pack.getElementName();
             pack = root.createPackageFragment(packName, true, new SubProgressMonitor(monitor, 1));
         }
     }
 
-    protected abstract void extendControl(final Composite container);
+    protected abstract void extendControl(Composite container);
 
     protected abstract String getNameSuffix();
 
@@ -107,13 +107,13 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
     }
 
     @Override
-    protected void handleFieldChanged(final String fieldName) {
+    protected void handleFieldChanged(String fieldName) {
         super.handleFieldChanged(fieldName);
         doStatusUpdate();
     }
 
-    protected final void init(final IStructuredSelection selection) {
-        final IJavaElement jelem = getInitialJavaElement(selection);
+    protected void init(IStructuredSelection selection) {
+        IJavaElement jelem = getInitialJavaElement(selection);
         initContainerPage(jelem);
         initTypePage(jelem);
 
@@ -121,7 +121,7 @@ public abstract class GWTPNewTypeWizardPage extends NewTypeWizardPage {
     }
 
     private void doStatusUpdate() {
-        final IStatus[] status = new IStatus[] { fContainerStatus, fPackageStatus, fTypeNameStatus };
+        IStatus[] status = new IStatus[] { fContainerStatus, fPackageStatus, fTypeNameStatus };
         updateStatus(status);
     }
 }

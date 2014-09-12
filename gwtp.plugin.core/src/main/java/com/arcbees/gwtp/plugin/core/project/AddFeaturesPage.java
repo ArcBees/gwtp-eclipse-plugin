@@ -46,8 +46,8 @@ public class AddFeaturesPage extends WizardPage {
     }
 
     @Override
-    public void createControl(final Composite parent) {
-        final Composite container = new Composite(parent, SWT.NULL);
+    public void createControl(Composite parent) {
+        Composite container = new Composite(parent, SWT.NULL);
 
         setControl(container);
         container.setLayout(new GridLayout(1, false));
@@ -55,7 +55,7 @@ public class AddFeaturesPage extends WizardPage {
         final CheckboxTreeViewer checkboxTreeViewer = new CheckboxTreeViewer(container, SWT.BORDER);
         checkboxTreeViewer.setAutoExpandLevel(-1);
         checkboxTreeViewer.setExpandPreCheckFilters(false);
-        final Tree tree = checkboxTreeViewer.getTree();
+        Tree tree = checkboxTreeViewer.getTree();
         tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         checkboxTreeViewer.setContentProvider(new FeatureContentProvider());
         checkboxTreeViewer.setLabelProvider(new FeatureLabelProvider());
@@ -65,7 +65,7 @@ public class AddFeaturesPage extends WizardPage {
         checkboxTreeViewer.addCheckStateListener(new ICheckStateListener() {
             @SuppressWarnings("unchecked")
             @Override
-            public void checkStateChanged(final CheckStateChangedEvent event) {
+            public void checkStateChanged(CheckStateChangedEvent event) {
                 if (!event.getChecked()) {
                     checkboxTreeViewer.setSubtreeChecked(event.getElement(), false);
                 }
@@ -83,8 +83,8 @@ public class AddFeaturesPage extends WizardPage {
         return INSTANCE;
     }
 
-    private void fillContext(final List<Node<Feature>> children, final Map<String, Object> context) {
-        for (final Node<Feature> node: children) {
+    private void fillContext(List<Node<Feature>> children, Map<String, Object> context) {
+        for (Node<Feature> node: children) {
             if (isFeatureSelected(node.getData())) {
                 context.put(node.getData().name(), true);
             }
@@ -92,11 +92,11 @@ public class AddFeaturesPage extends WizardPage {
         }
     }
 
-    public void fillContext(final Map<String, Object> context) {
+    public void fillContext(Map<String, Object> context) {
         fillContext(Feature.getFeatures().getChildren(), context);
     }
 
-    private boolean isFeatureSelected(final Feature feature) {
+    private boolean isFeatureSelected(Feature feature) {
         return featureSelectionMap.containsKey(feature) ? featureSelectionMap.get(feature) : feature.isRecommended();
     }
 }

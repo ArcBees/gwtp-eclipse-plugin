@@ -33,7 +33,7 @@ public class ZipTemplateIterator implements Iterable<TemplateZipItem>, Iterator<
 
     private String zipFilePath;
 
-    public ZipTemplateIterator(final String zipFilePath) {
+    public ZipTemplateIterator(String zipFilePath) {
         this.zipFilePath = zipFilePath;
     }
 
@@ -41,7 +41,7 @@ public class ZipTemplateIterator implements Iterable<TemplateZipItem>, Iterator<
         if (zipInputStream != null) {
             try {
                 zipInputStream.close();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -57,7 +57,7 @@ public class ZipTemplateIterator implements Iterable<TemplateZipItem>, Iterator<
                 nextEntry = zipInputStream.getNextEntry();
                 hasNextCalled = true;
                 return nextEntry != null;
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
@@ -69,7 +69,7 @@ public class ZipTemplateIterator implements Iterable<TemplateZipItem>, Iterator<
     @Override
     public Iterator<TemplateZipItem> iterator() {
         closeCurrentStream();
-        final InputStream inputStream = getClass().getResourceAsStream(zipFilePath);
+        InputStream inputStream = getClass().getResourceAsStream(zipFilePath);
         this.zipInputStream = new ZipInputStream(inputStream);
         return this;
     }
@@ -107,8 +107,8 @@ public class ZipTemplateIterator implements Iterable<TemplateZipItem>, Iterator<
 
     private String readZipEntryContents() {
         @SuppressWarnings("resource")
-        final Scanner scanner = new Scanner(zipInputStream);
-        final StringBuilder sb = new StringBuilder();
+        Scanner scanner = new Scanner(zipInputStream);
+        StringBuilder sb = new StringBuilder();
         while (scanner.hasNext()) {
             sb.append(scanner.nextLine()).append("\n");
         }

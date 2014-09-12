@@ -27,7 +27,7 @@ public class FeatureLabelProvider implements ILabelProvider {
     private Set<ILabelProviderListener> listeners = new HashSet<>();
 
     @Override
-    public void addListener(final ILabelProviderListener listener) {
+    public void addListener(ILabelProviderListener listener) {
         listeners.add(listener);
     }
 
@@ -37,22 +37,22 @@ public class FeatureLabelProvider implements ILabelProvider {
     }
 
     @Override
-    public Image getImage(final Object element) {
+    public Image getImage(Object element) {
         return null;
     }
 
     @Override
-    public String getText(final Object element) {
+    public String getText(Object element) {
         return ((Node<Feature>) element).getData().getTitle();
     }
 
     @Override
-    public boolean isLabelProperty(final Object element, final String property) {
+    public boolean isLabelProperty(Object element, String property) {
         return false;
     }
 
     @Override
-    public void removeListener(final ILabelProviderListener listener) {
+    public void removeListener(ILabelProviderListener listener) {
         listeners.remove(listener);
     }
 }

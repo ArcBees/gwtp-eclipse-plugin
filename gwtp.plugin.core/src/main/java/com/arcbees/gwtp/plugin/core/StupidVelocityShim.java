@@ -24,15 +24,15 @@ import java.util.Map.Entry;
 public class StupidVelocityShim {
     private static boolean stripUnknownKeys;
 
-    public static String evaluate(final String input, final Map<String, Object> context) {
+    public static String evaluate(String input, Map<String, Object> context) {
         int ifLevel = 0;
-        final StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
         for (String line : input.split("\n")) {
             if (ifLevel == 0) {
 
                 if (line.trim().startsWith("#set")) {
-                    final String assignment = getValueInBrackets(line).trim();
-                    final String[] split = assignment.split("=");
+                    String assignment = getValueInBrackets(line).trim();
+                    String[] split = assignment.split("=");
                     String key = split[0].trim();
                     String value = split[1].trim();
                     if (value.startsWith("\"")) {
@@ -47,7 +47,7 @@ public class StupidVelocityShim {
                     String originalLine = "";
                     while (!originalLine.equals(line)) {
                         originalLine = line;
-                        for (final Entry<String, Object> entry : context.entrySet()) {
+                        for (Entry<String, Object> entry : context.entrySet()) {
                             line = line.replace("${" + entry.getKey() + "}", entry.getValue() + "");
                         }
                     }
@@ -58,7 +58,7 @@ public class StupidVelocityShim {
                 }
             }
             if (line.trim().startsWith("#if")) {
-                final String property = getValueInBrackets(line).trim();
+                String property = getValueInBrackets(line).trim();
                 if (property.startsWith("$")) {
                     if (!context.containsKey(property.substring(1))) {
                         ifLevel += 1;
@@ -79,17 +79,17 @@ public class StupidVelocityShim {
         return result.substring(0, Math.max(0, result.length() - 1)).toString();
     }
 
-    private static String getValueInBrackets(final String input) {
-        final int first = input.indexOf("(");
-        final int last = input.lastIndexOf(")");
+    private static String getValueInBrackets(String input) {
+        int first = input.indexOf("(");
+        int last = input.lastIndexOf(")");
         return input.substring(first + 1, last);
     }
 
-    public static void setStripUnknownKeys(final boolean strip) {
+    public static void setStripUnknownKeys(boolean strip) {
         stripUnknownKeys = strip;
     }
 
-    private static final String stripRemainingKeys(final String line) {
+    private static String stripRemainingKeys(String line) {
         if (stripUnknownKeys && line.contains("${") && line.contains("}")) {
             if (line.indexOf("${") < line.indexOf("}")) {
                 return line.replace(line.substring(line.indexOf("${"), line.indexOf("}") + 1), "");

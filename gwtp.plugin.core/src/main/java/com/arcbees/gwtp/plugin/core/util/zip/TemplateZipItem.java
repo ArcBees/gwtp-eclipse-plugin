@@ -21,7 +21,7 @@ public class TemplateZipItem {
     private final String text;
     private final String name;
 
-    TemplateZipItem(final String name, final String text) {
+    TemplateZipItem(String name, String text) {
         this.name = name;
         this.text = text;
     }

@@ -26,27 +26,27 @@ public class FeatureContentProvider implements ITreeContentProvider {
     }
 
     @Override
-    public Object[] getChildren(final Object parentElement) {
+    public Object[] getChildren(Object parentElement) {
         return ((Node<?>) parentElement).getChildren().toArray();
     }
 
     @Override
-    public Object[] getElements(final Object inputElement) {
+    public Object[] getElements(Object inputElement) {
         return Feature.getFeatures().getChildren().toArray();
     }
 
     @Override
-    public Object getParent(final Object element) {
+    public Object getParent(Object element) {
         return ((Node<?>) element).getParent();
     }
 
     @Override
-    public boolean hasChildren(final Object element) {
+    public boolean hasChildren(Object element) {
         return getChildren(element).length > 0;
     }
 
     @Override
-    public void inputChanged(final Viewer viewer, final Object oldInput, final Object newInput) {
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         // do nothing
     }
 }

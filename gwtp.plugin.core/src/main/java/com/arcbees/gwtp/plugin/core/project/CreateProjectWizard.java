@@ -66,7 +66,7 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
     }
 
     @Override
-    public void init(final IWorkbench workbench, final IStructuredSelection selection) {
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
         fWorkbench = workbench;
     }
 
@@ -77,9 +77,9 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
     }
 
     public void runGenerate() {
-        final Job job = new Job("Generate Project") {
+        Job job = new Job("Generate Project") {
             @Override
-            protected IStatus run(final IProgressMonitor monitor) {
+            protected IStatus run(IProgressMonitor monitor) {
                 generate(monitor);
                 return Status.OK_STATUS;
             }
@@ -87,24 +87,24 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
         job.schedule();
     }
 
-    protected void selectAndReveal(final IResource newResource) {
+    protected void selectAndReveal(IResource newResource) {
         BasicNewResourceWizard.selectAndReveal(newResource, fWorkbench.getActiveWorkbenchWindow());
     }
 
-    private void createProject(final IProgressMonitor monitor) throws Exception {
+    private void createProject(IProgressMonitor monitor) throws Exception {
         StupidVelocityShim.setStripUnknownKeys(false);
-        final IProject project = ResourcesPlugin.getWorkspace().getRoot()
+        IProject project = ResourcesPlugin.getWorkspace().getRoot()
                 .getProject(NameProjectPage.get().getProjectName());
         project.create(monitor);
         project.open(monitor);
 
         if (!project.getLocation().equals(NameProjectPage.get().getLocation())) {
-            final IProjectDescription description = project.getDescription();
+            IProjectDescription description = project.getDescription();
             description.setLocation(NameProjectPage.get().getLocation());
             project.setDescription(description, monitor);
         }
 
-        final Map<String, Object> context = new HashMap<>();
+        Map<String, Object> context = new HashMap<>();
         context.put("mavenGroup", NameProjectPage.get().getMavenGroup());
         context.put("mavenArtifactId", NameProjectPage.get().getMavenArtifactId());
         context.put("projectName", NameProjectPage.get().getProjectName());
@@ -115,15 +115,15 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
         FeatureConfigPage.get().fillContext(context);
 
         String lastFolderPath = "";
-        final ZipTemplateIterator zipTemplateIterator = new ZipTemplateIterator(
+        ZipTemplateIterator zipTemplateIterator = new ZipTemplateIterator(
                 "/src/main/resources/templates/project/project.zip");
-        for (final TemplateZipItem item : zipTemplateIterator) {
-            final String path = StupidVelocityShim.evaluate(item.getName(), context);
+        for (TemplateZipItem item : zipTemplateIterator) {
+            String path = StupidVelocityShim.evaluate(item.getName(), context);
             if (item.isFolder()) {
-                final String[] last = lastFolderPath.split("/");
-                final String[] current = path.split("/");
+                String[] last = lastFolderPath.split("/");
+                String[] current = path.split("/");
                 if (current.length > last.length) {
-                    final StringBuilder pathBuilder = new StringBuilder();
+                    StringBuilder pathBuilder = new StringBuilder();
                     for (int i = 0; i < current.length; i++) {
                         pathBuilder.append(current[i]).append("/");
                         if (last.length <= i) {
@@ -135,9 +135,9 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
                 }
                 lastFolderPath = path;
             } else {
-                final String fileContent = StupidVelocityShim.evaluate(item.getText(), context);
+                String fileContent = StupidVelocityShim.evaluate(item.getText(), context);
                 if (!fileContent.trim().isEmpty()) {
-                    final IFile file = project.getFile(new Path(path));
+                    IFile file = project.getFile(new Path(path));
                     file.create(new ByteArrayInputStream(fileContent.getBytes(StandardCharsets.UTF_8)),
                             IResource.NONE, null);
                 }
@@ -145,15 +145,15 @@ public class CreateProjectWizard extends Wizard implements INewWizard {
         }
         zipTemplateIterator.closeCurrentStream();
 
-        final IProjectConfigurationManager mavenConfig = MavenPlugin.getProjectConfigurationManager();
-        final ResolverConfiguration resolverConfiguration = mavenConfig.getResolverConfiguration(project);
+        IProjectConfigurationManager mavenConfig = MavenPlugin.getProjectConfigurationManager();
+        ResolverConfiguration resolverConfiguration = mavenConfig.getResolverConfiguration(project);
         mavenConfig.enableMavenNature(project, resolverConfiguration, monitor);
     }
 
-    private void generate(final IProgressMonitor monitor) {
+    private void generate(IProgressMonitor monitor) {
         try {
             createProject(monitor);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             warn("Could not create gwtp project. Error: " + e.toString());
             e.printStackTrace();
         }

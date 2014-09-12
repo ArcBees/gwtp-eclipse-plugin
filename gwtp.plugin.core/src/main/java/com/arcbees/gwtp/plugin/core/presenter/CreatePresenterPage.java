@@ -108,16 +108,16 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
     }
 
     @Override
-    public void createType(final IProgressMonitor monitor) throws CoreException, InterruptedException {
+    public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {
         ensurePackageExists(monitor);
         StupidVelocityShim.setStripUnknownKeys(true);
-        final IPath packagePath = getPackageFragment().getResource().getProjectRelativePath()
+        IPath packagePath = getPackageFragment().getResource().getProjectRelativePath()
                 .append(new Path(getTypeName().toLowerCase() + "/"));
 
-        final IProject project = getJavaProject().getProject();
+        IProject project = getJavaProject().getProject();
         project.getFolder(packagePath).create(true, true, monitor);
 
-        final Map<String, Object> context = new HashMap<>();
+        Map<String, Object> context = new HashMap<>();
         context.put("name", getTypeName());
         context.put("package", getPackageFragment().getElementName() + "." + getTypeName().toLowerCase());
         if (isNested) {
@@ -128,13 +128,13 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
             context.remove("preparefromrequest");
         }
 
-        for (final Entry<String, Boolean> entry : booleanMap.entrySet()) {
+        for (Entry<String, Boolean> entry : booleanMap.entrySet()) {
             if (entry.getValue()) {
                 context.put(entry.getKey(), true);
             }
         }
 
-        for (final Entry<String, String> entry : stringMap.entrySet()) {
+        for (Entry<String, String> entry : stringMap.entrySet()) {
             context.put(entry.getKey(), entry.getValue());
         }
 
@@ -150,14 +150,14 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
             }
         }
 
-        final ZipTemplateIterator zipTemplateIterator = new ZipTemplateIterator(
+        ZipTemplateIterator zipTemplateIterator = new ZipTemplateIterator(
                 "/src/main/resources/templates/presenter/presenter.zip");
-        for (final TemplateZipItem item : zipTemplateIterator) {
+        for (TemplateZipItem item : zipTemplateIterator) {
             if (!item.isFolder()) {
-                final String fileText = StupidVelocityShim.evaluate(item.getText(), context);
+                String fileText = StupidVelocityShim.evaluate(item.getText(), context);
                 if (!fileText.trim().isEmpty()) {
-                    final String fileName = StupidVelocityShim.evaluate(item.getName(), context);
-                    final IFile file = project.getFile(packagePath.append(new Path(fileName)));
+                    String fileName = StupidVelocityShim.evaluate(item.getName(), context);
+                    IFile file = project.getFile(packagePath.append(new Path(fileName)));
                     file.create(new ByteArrayInputStream(fileText.getBytes(StandardCharsets.UTF_8)),
                             IResource.NONE, null);
                 }
@@ -165,7 +165,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         }
         zipTemplateIterator.closeCurrentStream();
 
-        final ICompilationUnit ginModule = getGinModule(getPackageFragment(), monitor);
+        ICompilationUnit ginModule = getGinModule(getPackageFragment(), monitor);
         if (ginModule != null) {
             logger.info("GinModule: " + ginModule.getElementName());
             try {
@@ -178,7 +178,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
     }
 
     @Override
-    protected void extendControl(final Composite container) {
+    protected void extendControl(Composite container) {
         createPresenterTabs(container, getNumberOfColumns());
         createExtraOptions(container);
     }
@@ -188,57 +188,57 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         return "Presenter";
     }
 
-    private void addMethodsToNameTokens(final ICompilationUnit unit, final String nameToken,
-            final IProgressMonitor monitor) throws JavaModelException, MalformedTreeException, BadLocationException {
-        final Document document = new Document(unit.getSource());
-        final CompilationUnit astRoot = initAstRoot(unit, monitor);
+    private void addMethodsToNameTokens(ICompilationUnit unit, String nameToken,
+            IProgressMonitor monitor) throws JavaModelException, MalformedTreeException, BadLocationException {
+        Document document = new Document(unit.getSource());
+        CompilationUnit astRoot = initAstRoot(unit, monitor);
 
         // creation of ASTRewrite
-        final ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
+        ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
 
         // find existing method
-        final MethodDeclaration method = findMethod(astRoot, getNameTokenMethod(nameToken));
+        MethodDeclaration method = findMethod(astRoot, getNameTokenMethod(nameToken));
         if (method != null) {
             logger.severe("FYI: the method in nameTokens already exists." + method.toString());
             return;
         }
 
-        final List types = astRoot.types();
-        final ASTNode rootNode = (ASTNode) types.get(0);
-        final ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+        List types = astRoot.types();
+        ASTNode rootNode = (ASTNode) types.get(0);
+        ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 
-        final ASTNode fieldNode = rewrite.createStringPlaceholder("public statuc final String " + nameToken + " = \""
+        ASTNode fieldNode = rewrite.createStringPlaceholder("public statuc String " + nameToken + " = \""
                 + nameToken + "\";", ASTNode.EMPTY_STATEMENT);
 
-        final StringBuilder nameTokenMethod = new StringBuilder();
+        StringBuilder nameTokenMethod = new StringBuilder();
         nameTokenMethod.append("public static String ").append(getNameTokenMethod(nameToken)).append("() {\n")
         .append("return " + nameToken + ";\n").append("}\n");
-        final ASTNode methodNode = rewrite.createStringPlaceholder(nameTokenMethod.toString(), ASTNode.EMPTY_STATEMENT);
+        ASTNode methodNode = rewrite.createStringPlaceholder(nameTokenMethod.toString(), ASTNode.EMPTY_STATEMENT);
 
         listRewrite.insertFirst(fieldNode, null);
         listRewrite.insertLast(methodNode, null);
 
         // computation of the text edits
-        final TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
+        TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
 
         // computation of the new source code
         edits.apply(document);
 
         // format code
-        final String newSource = new CodeFormattingUtil(getJavaProject(), monitor).formatCodeJavaClass(document);
+        String newSource = new CodeFormattingUtil(getJavaProject(), monitor).formatCodeJavaClass(document);
 
         // update of the compilation unit and save it
-        final IBuffer buffer = unit.getBuffer();
+        IBuffer buffer = unit.getBuffer();
         buffer.setContents(newSource);
         buffer.save(monitor, true);
     }
 
-    private void addNameToken(final Map<String, Object> context, final String nameToken, final IProgressMonitor monitor)
+    private void addNameToken(Map<String, Object> context, String nameToken, IProgressMonitor monitor)
             throws JavaModelException, MalformedTreeException, BadLocationException {
         if (nameToken != null && !nameToken.isEmpty()) {
-            final List<ResolvedSourceType> nameTokenFiles = findClassName("NameTokens");
+            List<ResolvedSourceType> nameTokenFiles = findClassName("NameTokens");
             if (!nameTokenFiles.isEmpty()) {
-                final ResolvedSourceType rst = nameTokenFiles.get(0);
+                ResolvedSourceType rst = nameTokenFiles.get(0);
                 addMethodsToNameTokens(rst.getCompilationUnit(), nameToken, monitor);
                 context.put("nametoken", rst.getElementName() + "." + nameToken);
                 context.put("nameTokenImport", "import " + rst.getFullyQualifiedName() + ";");
@@ -246,14 +246,14 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         }
     }
 
-    private Button createButton(final Composite container, final String text, final int type,
+    private Button createButton(Composite container, String text, int type,
             final String booleanValueName) {
         final Button button = createButton(container, text, type);
 
         if (booleanValueName != null) {
             button.addSelectionListener(new SelectionAdapter() {
                 @Override
-                public void widgetSelected(final SelectionEvent e) {
+                public void widgetSelected(SelectionEvent e) {
                     booleanMap.put(booleanValueName, button.getSelection());
                 }
             });
@@ -261,25 +261,25 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         return button;
     }
 
-    private void createExtraOptions(final Composite container) {
-        final Group extraOptionsGroup = createGroup(container, "Extra Options", 8);
+    private void createExtraOptions(Composite container) {
+        Group extraOptionsGroup = createGroup(container, "Extra Options", 8);
 
-        final Group events = createGroup(extraOptionsGroup, "Events", 1);
+        Group events = createGroup(extraOptionsGroup, "Events", 1);
         createButton(events, "Add UiHandlers", SWT.CHECK, "uihandlers");
 
-        final Group popupGroup = createGroup(extraOptionsGroup, "Popup", 1);
+        Group popupGroup = createGroup(extraOptionsGroup, "Popup", 1);
         final Button popupButton = createButton(popupGroup, "Is Popup?", SWT.CHECK, "popup");
         popupButton.addSelectionListener(new SelectionAdapter() {
 
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 revealInGroup.setEnabled(!popupButton.getSelection());
                 revealInGroup.setVisible(!popupButton.getSelection());
                 stringMap.put("revealType", "RevealType.RootPopup");
             }
         });
 
-        final Group presenterLifecycle = createGroup(extraOptionsGroup, "Presenter Lifecycle Methods", 1);
+        Group presenterLifecycle = createGroup(extraOptionsGroup, "Presenter Lifecycle Methods", 1);
         createButton(presenterLifecycle, "Add onBind()", SWT.CHECK, "onbind");
         createButton(presenterLifecycle, "Add onHide()", SWT.CHECK, "onhide");
         createButton(presenterLifecycle, "Add onReveal()", SWT.CHECK, "onreveal");
@@ -287,18 +287,18 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         createButton(presenterLifecycle, "Add onUnbind()", SWT.CHECK, "onunbind");
     }
 
-    private void createMoreNestedOptions(final Composite container) {
-        final Group group = createGroup(container, "More Options", 1);
+    private void createMoreNestedOptions(Composite container) {
+        Group group = createGroup(container, "More Options", 1);
         createButton(group, "Code Split", SWT.CHECK, "codesplit");
         createButton(group, "Use Manual Reveal", SWT.CHECK, "manualreveal");
         createButton(group, "Use Prepare from Request", SWT.CHECK, "preparefromrequest");
     }
 
-    private void createPlaceControl(final Composite container) {
-        final Group group = createGroup(container, "Place", 3);
+    private void createPlaceControl(Composite container) {
+        Group group = createGroup(container, "Place", 3);
         final Button isPlaceButton = createButton(group, "Is a Place", SWT.CHECK, "isplace");
 
-        final Label label = new Label(group, SWT.NONE);
+        Label label = new Label(group, SWT.NONE);
         label.setText("NameToken:");
 
         final Text nameTokenInput = new Text(group, SWT.BORDER);
@@ -307,14 +307,14 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
         isPlaceButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 nameTokenInput.setEnabled(isPlaceButton.getSelection());
             }
         });
 
         nameTokenInput.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(final ModifyEvent e) {
+            public void modifyText(ModifyEvent e) {
                 stringMap.put("nametoken", nameTokenInput.getText());
             }
         });
@@ -323,47 +323,47 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
     /**
      * TODO extract this possibly, but I think I'll wait till I get into slots before I do it see what is common.
      */
-    private void createPresenterGinlink(final ICompilationUnit unit, final String modulePackageName,
-            final String moduleName, final IProgressMonitor monitor) throws JavaModelException, MalformedTreeException,
+    private void createPresenterGinlink(ICompilationUnit unit, String modulePackageName,
+            String moduleName, IProgressMonitor monitor) throws JavaModelException, MalformedTreeException,
             BadLocationException {
         unit.createImport(modulePackageName + "." + moduleName, null, monitor);
-        final Document document = new Document(unit.getSource());
+        Document document = new Document(unit.getSource());
 
-        final CompilationUnit astRoot = initAstRoot(unit, monitor);
+        CompilationUnit astRoot = initAstRoot(unit, monitor);
 
         // creation of ASTRewrite
-        final ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
+        ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
 
         // find the configure method
-        final MethodDeclaration method = findMethod(astRoot, "configure");
+        MethodDeclaration method = findMethod(astRoot, "configure");
         if (method == null) {
             logger.severe("createPresenterGinLink() unit did not have configure implementation.");
             return;
         }
 
         // presenter configure method install(new Module());
-        final String installModuleStatement = "install(new " + moduleName + "());";
+        String installModuleStatement = "install(new " + moduleName + "());";
 
-        final Block block = method.getBody();
-        final ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-        final ASTNode placeHolder = rewrite.createStringPlaceholder(installModuleStatement, ASTNode.EMPTY_STATEMENT);
+        Block block = method.getBody();
+        ListRewrite listRewrite = rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+        ASTNode placeHolder = rewrite.createStringPlaceholder(installModuleStatement, ASTNode.EMPTY_STATEMENT);
         listRewrite.insertFirst(placeHolder, null);
 
         // computation of the text edits
-        final TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
+        TextEdit edits = rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true));
 
         // computation of the new source code
         edits.apply(document);
-        final String newSource = document.get();
+        String newSource = document.get();
 
         // update of the compilation unit and save it
-        final IBuffer buffer = unit.getBuffer();
+        IBuffer buffer = unit.getBuffer();
         buffer.setContents(newSource);
         buffer.save(monitor, true);
     }
 
-    private void createPresenterTabs(final Composite container, final int nColumns) {
-        final Group group = createGroup(container, "Presenter Type", 2);
+    private void createPresenterTabs(Composite container, int nColumns) {
+        Group group = createGroup(container, "Presenter Type", 2);
         final Button nestedRadio = createButton(group, "Nested Presenter", SWT.RADIO);
         nestedRadio.setSelection(true);
         final Button widgetRadio = createButton(group, "Presenter Widget", SWT.RADIO);
@@ -371,17 +371,17 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         final TabFolder tabFolder = new TabFolder(container, SWT.NONE);
         tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, nColumns, 1));
 
-        final Composite nestedTabBody = createTab(tabFolder, "Nested Presenter");
+        Composite nestedTabBody = createTab(tabFolder, "Nested Presenter");
         createRevealInControl(nestedTabBody);
         createPlaceControl(nestedTabBody);
         createMoreNestedOptions(nestedTabBody);
 
-        final Composite widgetTabBody = createTab(tabFolder, "Presenter Widget");
+        Composite widgetTabBody = createTab(tabFolder, "Presenter Widget");
         createPresenterWidgeControl(widgetTabBody);
 
         tabFolder.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 isNested = tabFolder.getSelectionIndex() == 0;
                 nestedRadio.setSelection(isNested);
                 widgetRadio.setSelection(!isNested);
@@ -390,7 +390,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
         nestedRadio.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 tabFolder.setSelection(0);
                 isNested = true;
             }
@@ -398,40 +398,40 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
         widgetRadio.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 tabFolder.setSelection(1);
                 isNested = false;
             }
         });
     }
 
-    private void createPresenterWidgeControl(final Composite parent) {
-        final Composite container = new Composite(parent, SWT.NONE);
+    private void createPresenterWidgeControl(Composite parent) {
+        Composite container = new Composite(parent, SWT.NONE);
 
-        final GridLayout layout = new GridLayout();
+        GridLayout layout = new GridLayout();
         container.setLayout(layout);
 
         createButton(container, "Bind As Singleton", SWT.CHECK, "singleton");
     }
 
-    private void createRevealInControl(final Composite container) {
+    private void createRevealInControl(Composite container) {
         this.revealInGroup = createGroup(container, "Reveal In", 5);
 
-        final Button rootRevealRadio = createButton(revealInGroup, "Root", SWT.RADIO);
+        Button rootRevealRadio = createButton(revealInGroup, "Root", SWT.RADIO);
         rootRevealRadio.setSelection(true);
-        final Button rootLayoutRevealRadio = createButton(revealInGroup, "RootLayout", SWT.RADIO);
+        Button rootLayoutRevealRadio = createButton(revealInGroup, "RootLayout", SWT.RADIO);
         final Button contentSlotRadio = createButton(revealInGroup, "Slot", SWT.RADIO);
 
         rootRevealRadio.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 stringMap.put("revealType", "RevealType.Root");
             }
         });
 
        rootLayoutRevealRadio.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 stringMap.put("revealType", "RevealType.RootLayout");
             }
         });
@@ -442,7 +442,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
         contentSlot.addModifyListener(new ModifyListener() {
             @Override
-            public void modifyText(final ModifyEvent e) {
+            public void modifyText(ModifyEvent e) {
                 stringMap.put("revealType", contentSlot.getText());
             }
         });
@@ -451,7 +451,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         selectContentSlotButton.setEnabled(false);
         contentSlotRadio.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 contentSlot.setEnabled(contentSlotRadio.getSelection());
                 selectContentSlotButton.setEnabled(contentSlotRadio.getSelection());
             }
@@ -460,67 +460,67 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
         selectContentSlotButton.addSelectionListener(new SelectionAdapter() {
             @Override
-            public void widgetSelected(final SelectionEvent e) {
+            public void widgetSelected(SelectionEvent e) {
                 selectContentSlot(contentSlot);
             }
         });
     }
 
-    private Composite createTab(final TabFolder tabFolder, final String name) {
+    private Composite createTab(TabFolder tabFolder, String name) {
         return createTabBody(tabFolder, createTabItem(tabFolder, name));
     }
 
-    private Composite createTabBody(final TabFolder tabFolder, final TabItem tabItem) {
+    private Composite createTabBody(TabFolder tabFolder, TabItem tabItem) {
         tabBody = new Composite(tabFolder, SWT.NONE);
         tabBody.setLayout(getTabBodyLayout());
         tabItem.setControl(tabBody);
         return tabBody;
     }
 
-    private TabItem createTabItem(final TabFolder tabFolder, final String name) {
-        final TabItem tab = new TabItem(tabFolder, SWT.NONE);
+    private TabItem createTabItem(TabFolder tabFolder, String name) {
+        TabItem tab = new TabItem(tabFolder, SWT.NONE);
         tab.setText(name);
         return tab;
     }
 
-    private List<ResolvedSourceType> findClassName(final String name) {
-        final int searchFor = IJavaSearchConstants.CLASS;
-        final int limitTo = IJavaSearchConstants.TYPE;
-        final int matchRule = SearchPattern.R_EXACT_MATCH;
-        final SearchPattern searchPattern = SearchPattern.createPattern(name, searchFor, limitTo, matchRule);
+    private List<ResolvedSourceType> findClassName(String name) {
+        int searchFor = IJavaSearchConstants.CLASS;
+        int limitTo = IJavaSearchConstants.TYPE;
+        int matchRule = SearchPattern.R_EXACT_MATCH;
+        SearchPattern searchPattern = SearchPattern.createPattern(name, searchFor, limitTo, matchRule);
 
-        final IJavaElement[] elements = new IJavaElement[] { getJavaProject() };
-        final IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+        IJavaElement[] elements = new IJavaElement[] { getJavaProject() };
+        IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
         final List<ResolvedSourceType> found = new ArrayList<ResolvedSourceType>();
-        final SearchRequestor requestor = new SearchRequestor() {
+        SearchRequestor requestor = new SearchRequestor() {
             @Override
-            public void acceptSearchMatch(final SearchMatch match) {
+            public void acceptSearchMatch(SearchMatch match) {
                 // TODO
                 System.out.println(match);
-                final Object element = match.getElement();
+                Object element = match.getElement();
                 found.add((ResolvedSourceType) element);
             }
         };
 
-        final SearchEngine searchEngine = new SearchEngine();
-        final SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+        SearchEngine searchEngine = new SearchEngine();
+        SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
         try {
             searchEngine.search(searchPattern, particpant, scope, requestor, new NullProgressMonitor());
-        } catch (final CoreException e) {
+        } catch (CoreException e) {
             // TODO
             e.printStackTrace();
         }
         return found;
     }
 
-    private MethodDeclaration findMethod(final CompilationUnit astRoot, final String methodName) {
-        final MethodDeclaration[] methods = ((TypeDeclaration) astRoot.types().get(0)).getMethods();
+    private MethodDeclaration findMethod(CompilationUnit astRoot, String methodName) {
+        MethodDeclaration[] methods = ((TypeDeclaration) astRoot.types().get(0)).getMethods();
         if (methods == null) {
             return null;
         }
 
-        for (final MethodDeclaration method : methods) {
+        for (MethodDeclaration method : methods) {
             if (method.getName().toString().contains(methodName)) {
                 return method;
             }
@@ -528,17 +528,17 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         return null;
     }
 
-    private ICompilationUnit getGinModule(final IPackageFragment packageFragment, final IProgressMonitor monitor)
+    private ICompilationUnit getGinModule(IPackageFragment packageFragment, IProgressMonitor monitor)
             throws JavaModelException {
         if (packageFragment.getChildren() != null) {
-            for (final IJavaElement element : packageFragment.getChildren()) {
+            for (IJavaElement element : packageFragment.getChildren()) {
                 if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-                    final ICompilationUnit cUnit = (ICompilationUnit) element;
+                    ICompilationUnit cUnit = (ICompilationUnit) element;
                     logger.info("Compilation Unit: " + cUnit.getElementName());
-                    for (final IType type : cUnit.getTypes()) {
-                        final ITypeHierarchy hierarchy = type.newSupertypeHierarchy(monitor);
-                        final IType[] interfaces = hierarchy.getAllInterfaces();
-                        for (final IType checkInterface : interfaces) {
+                    for (IType type : cUnit.getTypes()) {
+                        ITypeHierarchy hierarchy = type.newSupertypeHierarchy(monitor);
+                        IType[] interfaces = hierarchy.getAllInterfaces();
+                        for (IType checkInterface : interfaces) {
                             logger.info(checkInterface.getTypeQualifiedName());
                             if (checkInterface.getTypeQualifiedName().equals("GinModule")) {
                                 return cUnit;
@@ -558,7 +558,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         return null;
     }
 
-    private String getNameTokenMethod(final String nameToken) {
+    private String getNameTokenMethod(String nameToken) {
         if (nameToken.length() == 1) {
             return "get" + nameToken.toUpperCase();
         } else {
@@ -567,7 +567,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
     }
 
     private Layout getTabBodyLayout() {
-        final GridLayout tabBodyLayout = new GridLayout(2, false);
+        GridLayout tabBodyLayout = new GridLayout(2, false);
         tabBodyLayout.marginTop = 10;
         tabBodyLayout.marginBottom = 10;
         tabBodyLayout.verticalSpacing = 20;
@@ -577,52 +577,52 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
     /**
      * Creation of DOM/AST from a ICompilationUnit.
      */
-    private CompilationUnit initAstRoot(final ICompilationUnit unit, final IProgressMonitor monitor) {
-        final ASTParser parser = ASTParser.newParser(AST.JLS8);
+    private CompilationUnit initAstRoot(ICompilationUnit unit, IProgressMonitor monitor) {
+        ASTParser parser = ASTParser.newParser(AST.JLS8);
         parser.setSource(unit);
-        final CompilationUnit astRoot = (CompilationUnit) parser.createAST(monitor);
+        CompilationUnit astRoot = (CompilationUnit) parser.createAST(monitor);
         return astRoot;
     }
 
-    private void selectContentSlot(final Text contentSlot) {
+    private void selectContentSlot(Text contentSlot) {
         final List<ResolvedSourceField> contentSlots = new ArrayList<ResolvedSourceField>();
 
-        final String stringPattern = "ContentSlot";
-        final int searchFor = IJavaSearchConstants.ANNOTATION_TYPE;
-        final int limitTo = IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE;
-        final int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-        final SearchPattern searchPattern = SearchPattern.createPattern(stringPattern, searchFor, limitTo, matchRule);
+        String stringPattern = "ContentSlot";
+        int searchFor = IJavaSearchConstants.ANNOTATION_TYPE;
+        int limitTo = IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE;
+        int matchRule = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
+        SearchPattern searchPattern = SearchPattern.createPattern(stringPattern, searchFor, limitTo, matchRule);
 
-        final IJavaProject project = getJavaProject();
-        final IJavaElement[] elements = new IJavaElement[] { project };
-        final IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
+        IJavaProject project = getJavaProject();
+        IJavaElement[] elements = new IJavaElement[] { project };
+        IJavaSearchScope scope = SearchEngine.createJavaSearchScope(elements);
 
-        final SearchRequestor requestor = new SearchRequestor() {
+        SearchRequestor requestor = new SearchRequestor() {
             @Override
-            public void acceptSearchMatch(final SearchMatch match) {
+            public void acceptSearchMatch(SearchMatch match) {
                 // TODO
                 System.out.println(match);
 
-                final ResolvedSourceField element = (ResolvedSourceField) match.getElement();
+                ResolvedSourceField element = (ResolvedSourceField) match.getElement();
                 contentSlots.add(element);
             }
         };
 
-        final SearchEngine searchEngine = new SearchEngine();
-        final SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+        SearchEngine searchEngine = new SearchEngine();
+        SearchParticipant[] particpant = new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
         try {
             searchEngine.search(searchPattern, particpant, scope, requestor, new NullProgressMonitor());
-        } catch (final CoreException e) {
+        } catch (CoreException e) {
             // TODO
             e.printStackTrace();
         }
 
-        final ResolvedSourceField[] contentListArray = new ResolvedSourceField[contentSlots.size()];
+        ResolvedSourceField[] contentListArray = new ResolvedSourceField[contentSlots.size()];
         contentSlots.toArray(contentListArray);
 
-        final ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), new ILabelProvider() {
+        ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), new ILabelProvider() {
             @Override
-            public void addListener(final ILabelProviderListener listener) {
+            public void addListener(ILabelProviderListener listener) {
             }
 
             @Override
@@ -630,25 +630,25 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
             }
 
             @Override
-            public Image getImage(final Object element) {
+            public Image getImage(Object element) {
                 return null;
             }
 
             @Override
-            public String getText(final Object element) {
-                final ResolvedSourceField rsf = (ResolvedSourceField) element;
-                final String name = rsf.getElementName();
-                final IType type = rsf.getDeclaringType();
+            public String getText(Object element) {
+                ResolvedSourceField rsf = (ResolvedSourceField) element;
+                String name = rsf.getElementName();
+                IType type = rsf.getDeclaringType();
                 return type.getElementName() + "." + name;
             }
 
             @Override
-            public boolean isLabelProperty(final Object element, final String property) {
+            public boolean isLabelProperty(Object element, String property) {
                 return false;
             }
 
             @Override
-            public void removeListener(final ILabelProviderListener listener) {
+            public void removeListener(ILabelProviderListener listener) {
             }
         });
 
@@ -661,11 +661,11 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
             return;
         }
 
-        final Object[] result = dialog.getResult();
+        Object[] result = dialog.getResult();
         if (result == null || result.length < 1) {
             contentSlot.setText("");
         } else {
-            final ResolvedSourceField rsf = (ResolvedSourceField) result[0];
+            ResolvedSourceField rsf = (ResolvedSourceField) result[0];
             contentSlot.setText(rsf.readableName());
             stringMap.put("contentSlotImport", "import " + rsf.getDeclaringType().getFullyQualifiedName() + ";");
         }

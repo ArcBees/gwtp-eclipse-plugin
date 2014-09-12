@@ -55,43 +55,43 @@ public class FeatureConfigPage extends WizardPage {
     }
 
     @Override
-    public void createControl(final Composite parent) {
-        final Composite container = new Composite(parent, SWT.NULL);
+    public void createControl(Composite parent) {
+        Composite container = new Composite(parent, SWT.NULL);
         setControl(container);
         container.setLayout(new GridLayout(1, false));
 
         createFeatureConfigWidgets(container, Feature.getFeatures().getChildren());
     }
 
-    public void fillContext(final Map<String, Object> context) {
-        for (final FeatureConfigOption option : configOptions) {
+    public void fillContext(Map<String, Object> context) {
+        for (FeatureConfigOption option : configOptions) {
             context.put(option.getName(), option.getValue());
         }
     }
 
-    void setFeatureEnabled(final Feature feature, final boolean enabled) {
+    void setFeatureEnabled(Feature feature, boolean enabled) {
         enabledFeatures.put(feature, enabled);
         if (featureGroups.containsKey(feature)) {
             featureGroups.get(feature).setVisible(enabled);
         }
     }
 
-    private void createFeatureConfigWidgets(final Composite container, final List<Node<Feature>> children) {
-        for (final Node<Feature> node : children) {
+    private void createFeatureConfigWidgets(Composite container, List<Node<Feature>> children) {
+        for (Node<Feature> node : children) {
             createGroup(container, node.getData());
             createFeatureConfigWidgets(container, node.getChildren());
         }
     }
 
-    private void createGroup(final Composite container, final Feature feature) {
+    private void createGroup(Composite container, Feature feature) {
         if (feature.hasConfigOptions()) {
-            final Group group = new Group(container, SWT.NONE);
+            Group group = new Group(container, SWT.NONE);
             group.setLayout(new GridLayout(2, false));
             group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true, 1, 1));
             group.setText(feature.getTitle());
             featureGroups.put(feature, group);
 
-            for (final FeatureConfigOption option : feature.getConfigOptions()) {
+            for (FeatureConfigOption option : feature.getConfigOptions()) {
                 createTextInput(group, option);
             }
 
@@ -101,8 +101,8 @@ public class FeatureConfigPage extends WizardPage {
         }
     }
 
-    private void createTextInput(final Composite composite, final FeatureConfigOption option) {
-        final Label label = new Label(composite, SWT.NONE);
+    private void createTextInput(Composite composite, final FeatureConfigOption option) {
+        Label label = new Label(composite, SWT.NONE);
         label.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
         label.setText(option.getName() + ":");
 
@@ -113,7 +113,7 @@ public class FeatureConfigPage extends WizardPage {
         input.addModifyListener(new ModifyListener() {
 
             @Override
-            public void modifyText(final ModifyEvent e) {
+            public void modifyText(ModifyEvent e) {
                 option.setValue(input.getText());
             }
         });

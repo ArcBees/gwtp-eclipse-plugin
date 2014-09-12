@@ -32,20 +32,20 @@ public enum Feature {
     private final String title;
     private final List<FeatureConfigOption> configOptions = new ArrayList<>();
 
-    Feature(final String title, final String url, final boolean recommended,
-            final FeatureConfigOption... configOptions) {
+    Feature(String title, String url, boolean recommended,
+            FeatureConfigOption... configOptions) {
         this.title = title;
         this.url = url;
         this.recommended = recommended;
 
-        for (final FeatureConfigOption option : configOptions) {
+        for (FeatureConfigOption option : configOptions) {
             this.configOptions.add(option);
         }
     }
 
     public static Node<Feature> getFeatures() {
-        final Node<Feature> root = new Node<>(null);
-        final Node<Feature> appengineNode = root.addChild(APP_ENGINE);
+        Node<Feature> root = new Node<>(null);
+        Node<Feature> appengineNode = root.addChild(APP_ENGINE);
         appengineNode.addChild(OBJECTIFY);
         root.addChild(UNIVERSAL_ANALYTICS);
         root.addChild(GWT_PUSH_STATE);

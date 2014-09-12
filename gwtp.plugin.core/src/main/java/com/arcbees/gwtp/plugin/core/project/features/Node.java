@@ -21,21 +21,21 @@ import java.util.List;
 
 public class Node<T> {
 
-    private final T data;
+    private T data;
     private final Node<T> parent;
     private List<Node<T>> children = new ArrayList<>();
 
-    private Node(final Node<T> parent, final T data) {
+    private Node(Node<T> parent, T data) {
         this.parent = parent;
         this.data = data;
     }
 
-    public Node(final T data) {
+    public Node(T data) {
         this(null, data);
     }
 
-    public Node<T> addChild(final T data) {
-        final Node<T> child = new Node<>(this, data);
+    public Node<T> addChild(T data) {
+        Node<T> child = new Node<>(this, data);
         children.add(child);
         return child;
     }
