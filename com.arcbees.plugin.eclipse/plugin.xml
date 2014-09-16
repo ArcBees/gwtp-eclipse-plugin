@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            name="Create Project"
+            id="com.arcbees.plugin.eclipse.commands.createProject">
+      </command>
+      <command
+            defaultHandler="com.arcbees.plugin.eclipse.handlers.CreateProjectHandler"
+            id="referenceToMenuId"
+            name="referenceToMenuId">
+      </command>
+      <command
+            id="com.arcbees.plugin.eclipse.commands.createPresenter"
+            name="Create Presenter">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.arcbees.plugin.eclipse.commands.createProject"
+            class="com.arcbees.plugin.eclipse.handlers.CreateProjectHandler">
+      </handler>
+      <handler
+            class="com.arcbees.plugin.eclipse.handlers.CreatePresenterHandler"
+            commandId="com.arcbees.plugin.eclipse.commands.createPresenter">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="com.arcbees.plugin.eclipse.toolbars.gwtp">
+            <command
+                  commandId="referenceToMenuId"
+                  icon="icons/addgwtp.png"
+                  style="pulldown"
+                  tooltip="Create GWTP Project">
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:referenceToMenuId">
+         <command
+               commandId="com.arcbees.plugin.eclipse.commands.createProject"
+               label="Create GWTP Project"
+               style="push">
+         </command>
+         <command
+               commandId="com.arcbees.plugin.eclipse.commands.createPresenter"
+               label="Create Presenter"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+
+</plugin>
