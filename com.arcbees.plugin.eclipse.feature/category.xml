@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="com.arcbees.plugin.eclipse" version="1.0.3.alpha">
+      <category name="gwtp-tools"/>
+   </bundle>
+   <category-def name="gwtp-tools" label="GWT-Platform Tools"/>
+</site>

@@ -1,8 +1,0 @@
-#if ($uihandlers)
-package ${package};
-
-import com.gwtplatform.mvp.client.UiHandlers;
-
-interface ${name}UiHandlers extends UiHandlers {
-}
-#end
