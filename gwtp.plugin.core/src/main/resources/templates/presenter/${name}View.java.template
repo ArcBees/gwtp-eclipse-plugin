@@ -1,0 +1,49 @@
+package ${package};
+
+import javax.inject.Inject;
+
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
+#if ( $popup )
+import com.google.web.bindery.event.shared.EventBus;
+#end
+#if( $uihandlers )
+#set( $extends = "${viewInterface}WithUiHandlers<${name}UiHandlers>" )
+import com.gwtplatform.mvp.client.${viewInterface}WithUiHandlers;
+#else
+import com.gwtplatform.mvp.client.${viewInterface}Impl;
+#set( $extends = "${viewInterface}Impl" )
+#end
+
+class ${name}View extends ${extends} implements ${name}Presenter.MyView {
+    interface Binder extends UiBinder<Widget, ${name}View> {
+    }
+
+    @UiField
+    SimplePanel main;
+
+    @Inject
+    #if ( $popup )
+    ${name}View(EventBus eventBus, Binder uiBinder) {
+        super(eventBus);
+    
+    #else
+    ${name}View(Binder uiBinder) {
+    #end
+        initWidget(uiBinder.createAndBindUi(this));
+    }
+    
+    #if ( $nested )
+    @Override
+    public void setInSlot(Object slot, IsWidget content) {
+        if (slot == ${name}Presenter.SLOT_${name}) {
+            main.setWidget(content);
+        } else {
+            super.setInSlot(slot, content);
+        }
+    }
+    #end
+}

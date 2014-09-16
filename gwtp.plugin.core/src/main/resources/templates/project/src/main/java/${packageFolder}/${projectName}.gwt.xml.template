@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.6.1//EN"
+        "https://raw.githubusercontent.com/gwtproject/gwt/2.6.1/distro-source/core/src/gwt-module.dtd">
+<module rename-to="${projectName}">
+    <!-- Inherit the core Web Toolkit stuff. -->
+    <inherits name='com.google.gwt.user.User' />
+    <inherits name='com.google.gwt.inject.Inject' />
+
+    <!-- Default css -->
+    <inherits name='com.google.gwt.user.theme.standard.Standard' />
+    <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+    <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
+
+    <!-- Other module inherits -->
+    <inherits name='com.gwtplatform.dispatch.Dispatch' />
+    <inherits name='com.gwtplatform.mvp.MvpWithEntryPoint' />
+    #if ($UNIVERSAL_ANALYTICS)
+    <inherits name="com.arcbees.analytics.Analytics"/>
+    #end
+    #if ($GWT_PUSH_STATE)
+    <inherits name="de.barop.gwt.PushState" />
+    #end
+
+    <source path='client' />
+    <source path='shared' />
+
+    <set-configuration-property name="gin.ginjector.modules" 
+                                value="${packageName}.client.gin.ClientModule"/>
+</module>
