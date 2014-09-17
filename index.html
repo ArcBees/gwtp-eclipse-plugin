@@ -1,60 +1,39 @@
 <html>
 <head>
-<title>com.arcbees.plugin.eclipse.update-site</title>
+<title>GWTP Plugin For Eclipse</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<style>@import url("web/site.css");</style>
-<script type="text/javascript">
-	var returnval = 0;
-	var stylesheet, xmlFile, cache, doc;
-	function init(){
-		// NSCP 7.1+ / Mozilla 1.4.1+ / Safari
-		// Use the standard DOM Level 2 technique, if it is supported
-		if (document.implementation && document.implementation.createDocument) {
-			xmlFile = document.implementation.createDocument("", "", null);
-			stylesheet = document.implementation.createDocument("", "", null);
-			if (xmlFile.load){
-				xmlFile.load("site.xml");
-				stylesheet.load("web/site.xsl");
-			} else {
-				alert("Document could not be loaded by browser.");
-			}
-			xmlFile.addEventListener("load", transform, false);
-			stylesheet.addEventListener("load", transform, false);
-		}
-		//IE 6.0+ solution
-		else if (window.ActiveXObject) {
-			xmlFile = new ActiveXObject("msxml2.DOMDocument.3.0");
-			xmlFile.async = false;
-			xmlFile.load("site.xml");
-			stylesheet = new ActiveXObject("msxml2.FreeThreadedDOMDocument.3.0");
-			stylesheet.async = false;
-			stylesheet.load("web/site.xsl");
-			cache = new ActiveXObject("msxml2.XSLTemplate.3.0");
-			cache.stylesheet = stylesheet;
-			transformData();
-		}
-	}
-	// separate transformation function for IE 6.0+
-	function transformData(){
-		var processor = cache.createProcessor();
-		processor.input = xmlFile;
-		processor.transform();
-		data.innerHTML = processor.output;
-	}
-	// separate transformation function for NSCP 7.1+ and Mozilla 1.4.1+ 
-	function transform(){
-		returnval+=1;
-		if (returnval==2){
-			var processor = new XSLTProcessor();
-			processor.importStylesheet(stylesheet); 
-			doc = processor.transformToDocument(xmlFile);
-			document.getElementById("data").innerHTML = doc.documentElement.innerHTML;
-		}
-	}
-</script>
+<style></style>
 </head>
-<body onload="init();">
-Eclipse GWTP-Platform Tools Plugin Update Site
-<div id="data"><!-- this is where the transformed data goes --></div>
+<body>
+
+<h1>GWTP Plugin For Eclipse</h1>
+<h2>Eclipse 4.3 (Kepler) and below:</h2>
+<p>GWTP Plugin for Eclipse requires Eclipse 4.4 (Luna) or later.</p>
+<p>If you have an older version of eclipse you can use the old plugin at https://github.com/ArcBees/gwtp-eclipse-plugin/tree/1.0.0</p>
+
+<h2>Setup</h2>
+<h3>Prerequisites</h3>
+<ol>
+    <li><a href="http://eclipse.org/home/index.php">Eclipse Version 4.4 or later</a></li>
+    <li><a href="https://developers.google.com/eclipse/">Google Plugin for Eclipse</a></li>
+</ol>
+<h3>Install</h3>
+<ol>
+    <li>In Eclipse select Help -> Install New Software</li>
+    <li>In the dialog that appears enter the following update site:
+    <table>
+        <tr>
+        <td>Update site:</td><td><a href="http://arcbees.github.io/gwtp-eclipse-plugin/4.4">http://arcbees.github.io/gwtp-eclipse-plugin/4.4</a></td>
+        </tr>
+    </table>
+    </li>
+    <li>You may need to reset your perspective to have the GWTP wizards appear in the new shortcut menu.</li>
+</ol>
+<h3>Creating a Project</h3>
+<ol>
+    <li>Right Click the Package Explorer and Select New -> New GWTP Project</li>
+    <li>Select the options that you want</li>
+    <li>Click Finish</li>
+</ol>
 </body>
 </html>
