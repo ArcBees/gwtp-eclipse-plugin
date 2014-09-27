@@ -207,7 +207,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         ASTNode rootNode = (ASTNode) types.get(0);
         ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 
-        ASTNode fieldNode = rewrite.createStringPlaceholder("public statuc String " + nameToken + " = \""
+        ASTNode fieldNode = rewrite.createStringPlaceholder("public static String " + nameToken + " = \""
                 + nameToken + "\";", ASTNode.EMPTY_STATEMENT);
 
         StringBuilder nameTokenMethod = new StringBuilder();
