@@ -1,6 +1,6 @@
 # GWTP Plugin For Eclipse
 
-We're currently updating our documentation: You can find instalation instructions at: http://arcbees.github.io/gwtp-eclipse-plugin/
+We're currently updating our documentation: You can find installation instructions at: http://arcbees.github.io/gwtp-eclipse-plugin/
 
 Ask a question at the GWTP google group if you need help.
 
