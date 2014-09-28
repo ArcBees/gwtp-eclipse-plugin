@@ -1,4 +1,10 @@
-https://bugs.eclipse.org/bugs/show_bug.cgi?id=396554
+# GWTP Plugin For Eclipse
+
+We're currently updating our documentation: You can find instalation instructions at: http://arcbees.github.io/gwtp-eclipse-plugin/
+
+Ask a question at the GWTP google group if you need help.
+
+## Basic Info for Contributors
 
 Eclipse SDK
 http://wiki.eclipse.org/M2E_extension_development_environment
