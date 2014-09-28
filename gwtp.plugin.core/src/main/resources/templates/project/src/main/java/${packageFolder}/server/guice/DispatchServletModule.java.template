@@ -5,6 +5,7 @@ import com.gwtplatform.dispatch.rpc.server.guice.DispatchServiceImpl;
 import com.gwtplatform.dispatch.rpc.shared.ActionImpl;
 #if ($OBJECTIFY)   
 import com.googlecode.objectify.ObjectifyFilter;
+import javax.inject.Singleton;
 #end
 
 public class DispatchServletModule extends ServletModule {
