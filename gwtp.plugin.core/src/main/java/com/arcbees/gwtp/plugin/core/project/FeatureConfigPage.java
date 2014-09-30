@@ -67,7 +67,6 @@ public class FeatureConfigPage extends WizardPage {
         for (Entry<Feature, Group> entry: featureGroups.entrySet()) {
             entry.getValue().setVisible(entry.getKey().isSelected());
         }
-        
     }
 
     public void fillContext(Map<String, Object> context) {
@@ -75,8 +74,6 @@ public class FeatureConfigPage extends WizardPage {
             context.put(option.getName(), option.getValue());
         }
     }
-
-    
 
     private void createFeatureConfigWidgets(Composite container, List<Node<Feature>> children) {
         for (Node<Feature> node : children) {

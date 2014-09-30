@@ -73,7 +73,6 @@ public class AddFeaturesPage extends WizardPage {
         });
     }
 
-
     static AddFeaturesPage get() {
         return INSTANCE;
     }
@@ -92,5 +91,4 @@ public class AddFeaturesPage extends WizardPage {
     public void fillContext(Map<String, Object> context) {
         fillContext(Feature.getFeatures().getChildren(), context);
     }
-
 }
