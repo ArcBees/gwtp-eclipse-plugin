@@ -22,7 +22,7 @@ public class FeatureCheckStateProvider implements ICheckStateProvider {
 
     @Override
     public boolean isChecked(Object element) {
-        return ((Node<Feature>) element).getData().isRecommended();
+        return ((Node<Feature>) element).getData().isSelected();
     }
 
     @Override

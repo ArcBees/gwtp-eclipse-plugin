@@ -37,9 +37,7 @@ import com.arcbees.gwtp.plugin.core.project.features.FeatureLabelProvider;
 import com.arcbees.gwtp.plugin.core.project.features.Node;
 
 public class AddFeaturesPage extends WizardPage {
-    private static final AddFeaturesPage INSTANCE = new AddFeaturesPage();;
-
-    private final Map<Feature, Boolean> featureSelectionMap = new HashMap<>();
+    private static final AddFeaturesPage INSTANCE = new AddFeaturesPage();
 
     private AddFeaturesPage() {
         super("Add Features To Your Project", "Add Features To Your Project", null);
@@ -69,15 +67,12 @@ public class AddFeaturesPage extends WizardPage {
                 if (!event.getChecked()) {
                     checkboxTreeViewer.setSubtreeChecked(event.getElement(), false);
                 }
-                setFeatureSelected(((Node<Feature>) event.getElement()).getData(), event.getChecked());
+                ((Node<Feature>) event.getElement()).getData().setSelected(event.getChecked());
+                FeatureConfigPage.get().showSelectedFeatures();
             }
         });
     }
 
-    private void setFeatureSelected(Feature feature, boolean selected) {
-        featureSelectionMap.put(feature, selected);
-        FeatureConfigPage.get().setFeatureEnabled(feature, selected);
-    }
 
     static AddFeaturesPage get() {
         return INSTANCE;
@@ -85,8 +80,10 @@ public class AddFeaturesPage extends WizardPage {
 
     private void fillContext(List<Node<Feature>> children, Map<String, Object> context) {
         for (Node<Feature> node: children) {
-            if (isFeatureSelected(node.getData())) {
+            if (node.getData().isSelected()) {
                 context.put(node.getData().name(), true);
+            } else {
+                context.remove(node.getData().name());
             }
             fillContext(node.getChildren(), context);
         }
@@ -96,7 +93,4 @@ public class AddFeaturesPage extends WizardPage {
         fillContext(Feature.getFeatures().getChildren(), context);
     }
 
-    private boolean isFeatureSelected(Feature feature) {
-        return featureSelectionMap.containsKey(feature) ? featureSelectionMap.get(feature) : feature.isRecommended();
-    }
 }
