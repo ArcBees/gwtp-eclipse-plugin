@@ -31,7 +31,7 @@ public enum Feature {
     private final String url;
     private final String title;
     private final List<FeatureConfigOption> configOptions = new ArrayList<>();
-   
+
     Feature(String title, String url, boolean recommended,
             FeatureConfigOption... configOptions) {
         this.title = title;
