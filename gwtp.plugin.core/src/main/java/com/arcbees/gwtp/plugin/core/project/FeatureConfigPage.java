@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jface.wizard.WizardPage;
@@ -42,8 +43,6 @@ public class FeatureConfigPage extends WizardPage {
 
     private final Map<Feature, Group> featureGroups = new HashMap<>();
 
-    private final Map<Feature, Boolean> enabledFeatures = new HashMap<>();
-
     private final Set<FeatureConfigOption> configOptions = new HashSet<>();
 
     private FeatureConfigPage() {
@@ -61,18 +60,18 @@ public class FeatureConfigPage extends WizardPage {
         container.setLayout(new GridLayout(1, false));
 
         createFeatureConfigWidgets(container, Feature.getFeatures().getChildren());
+        showSelectedFeatures();
+    }
+
+    void showSelectedFeatures() {
+        for (Entry<Feature, Group> entry: featureGroups.entrySet()) {
+            entry.getValue().setVisible(entry.getKey().isSelected());
+        }
     }
 
     public void fillContext(Map<String, Object> context) {
         for (FeatureConfigOption option : configOptions) {
             context.put(option.getName(), option.getValue());
-        }
-    }
-
-    void setFeatureEnabled(Feature feature, boolean enabled) {
-        enabledFeatures.put(feature, enabled);
-        if (featureGroups.containsKey(feature)) {
-            featureGroups.get(feature).setVisible(enabled);
         }
     }
 
@@ -95,9 +94,6 @@ public class FeatureConfigPage extends WizardPage {
                 createTextInput(group, option);
             }
 
-            if (enabledFeatures.containsKey(feature)) {
-                group.setVisible(enabledFeatures.get(feature));
-            }
         }
     }
 

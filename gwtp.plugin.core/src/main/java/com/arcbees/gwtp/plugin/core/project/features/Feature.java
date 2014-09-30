@@ -27,7 +27,7 @@ public enum Feature {
                     new FeatureConfigOption("Web Property ID", "UX-XXXX-Y", null)),
     GWT_PUSH_STATE("HTML5 Push State", "https://github.com/jbarop/gwt-pushstate", true);
 
-    private final boolean recommended;
+    private boolean selected;
     private final String url;
     private final String title;
     private final List<FeatureConfigOption> configOptions = new ArrayList<>();
@@ -36,7 +36,7 @@ public enum Feature {
             FeatureConfigOption... configOptions) {
         this.title = title;
         this.url = url;
-        this.recommended = recommended;
+        this.selected = recommended;
 
         for (FeatureConfigOption option : configOptions) {
             this.configOptions.add(option);
@@ -68,7 +68,11 @@ public enum Feature {
         return !configOptions.isEmpty();
     }
 
-    public boolean isRecommended() {
-        return recommended;
+    public boolean isSelected() {
+        return selected;
+    }
+    
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }
