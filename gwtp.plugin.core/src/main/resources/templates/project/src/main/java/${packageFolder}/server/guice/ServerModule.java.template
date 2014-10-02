@@ -1,9 +1,11 @@
 package ${packageName}.server.guice;
 
+import ${packageName}.server.message.MessageHandlerModule;
 import com.gwtplatform.dispatch.rpc.server.guice.HandlerModule;
 
 public class ServerModule extends HandlerModule {
     @Override
     protected void configureHandlers() {
+        install(new MessageHandlerModule());
     }
 }

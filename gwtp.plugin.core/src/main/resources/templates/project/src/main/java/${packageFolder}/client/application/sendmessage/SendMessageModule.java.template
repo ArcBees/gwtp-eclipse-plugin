@@ -1,0 +1,13 @@
+package ${packageName}.client.application.sendmessage;
+
+import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
+import ${packageName}.client.application.sendmessage.messageresult.MessageResultModule;
+
+public class SendMessageModule extends AbstractPresenterModule {
+    @Override
+    protected void configure() {
+        install(new MessageResultModule());
+        bindPresenter(SendMessagePresenter.class, SendMessagePresenter.MyView.class, SendMessageView.class,
+                SendMessagePresenter.MyProxy.class);
+    }
+}

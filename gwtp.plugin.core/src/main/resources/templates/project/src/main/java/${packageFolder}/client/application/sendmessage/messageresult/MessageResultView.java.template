@@ -1,0 +1,27 @@
+package ${packageName}.client.application.sendmessage.messageresult;
+
+import javax.inject.Inject;
+
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.Widget;
+import com.gwtplatform.mvp.client.ViewImpl;
+
+class MessageResultView extends ViewImpl implements MessageResultPresenter.MyView {
+    interface Binder extends UiBinder<Widget, MessageResultView> {
+    }
+
+    @UiField
+    HasText message;
+
+    @Inject
+    MessageResultView(Binder uiBinder) {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    @Override
+    public void setMessage(String message) {
+        this.message.setText(message);
+    }
+}

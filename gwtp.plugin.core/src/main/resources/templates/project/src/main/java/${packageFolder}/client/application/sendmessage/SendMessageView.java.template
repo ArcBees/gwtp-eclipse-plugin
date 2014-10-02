@@ -1,0 +1,40 @@
+package ${packageName}.client.application.sendmessage;
+
+import javax.inject.Inject;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+
+class SendMessageView extends ViewWithUiHandlers<SendMessageUiHandlers> implements SendMessagePresenter.MyView {
+    interface Binder extends UiBinder<Widget, SendMessageView> {
+    }
+
+    @UiField HasText message;    
+    @UiField HasWidgets messageResultPanel;
+
+    @Inject
+    SendMessageView(Binder uiBinder) {
+        initWidget(uiBinder.createAndBindUi(this));
+    }
+
+    @UiHandler("sendButton")
+    void onSendButtonClick(ClickEvent event) {
+        getUiHandlers().sendMessage(message.getText());
+    }
+
+    @Override
+    public void addToSlot(Object slot, IsWidget content) {
+        if (slot == SendMessagePresenter.MESSAGE_RESULT_SLOT) {
+            messageResultPanel.add(content.asWidget());
+        } else {
+            super.addToSlot(slot, content);
+        }
+    }
+}

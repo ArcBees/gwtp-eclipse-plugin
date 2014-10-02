@@ -1,0 +1,27 @@
+package ${packageName}.server.message;
+
+import ${packageName}.shared.message.MessageResult;
+import ${packageName}.shared.message.SendMessageAction;
+import com.gwtplatform.dispatch.rpc.server.ExecutionContext;
+import com.gwtplatform.dispatch.rpc.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
+
+public class SendMessageHandler extends AbstractActionHandler<SendMessageAction, MessageResult> {
+
+    SendMessageHandler() {
+        super(SendMessageAction.class);
+    }
+
+    @Override
+    public MessageResult execute(SendMessageAction action, ExecutionContext context) throws ActionException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Thanks for the message!\n\n");
+        sb.append("The server received: ").append(action.getMessage());
+        return new MessageResult(sb.toString());
+    }
+
+    @Override
+    public void undo(SendMessageAction action, MessageResult result, ExecutionContext context) throws ActionException {
+        // TODO Auto-generated method stub
+    }
+}

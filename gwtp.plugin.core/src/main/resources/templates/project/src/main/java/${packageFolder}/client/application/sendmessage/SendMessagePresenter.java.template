@@ -1,0 +1,65 @@
+package ${packageName}.client.application.sendmessage;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import ${packageName}.client.application.ApplicationPresenter;
+import ${packageName}.client.application.sendmessage.messageresult.MessageResultPresenter;
+import ${packageName}.client.place.NameTokens;
+import ${packageName}.shared.message.MessageResult;
+import ${packageName}.shared.message.SendMessageAction;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.dispatch.rpc.shared.DispatchAsync;
+import com.gwtplatform.mvp.client.HasUiHandlers;
+import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.View;
+import com.gwtplatform.mvp.client.annotations.NameToken;
+import com.gwtplatform.mvp.client.annotations.ProxyStandard;
+import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+
+public class SendMessagePresenter extends Presenter<SendMessagePresenter.MyView, SendMessagePresenter.MyProxy> implements SendMessageUiHandlers{
+    interface MyView extends View, HasUiHandlers<SendMessageUiHandlers> {
+    }
+
+    @ProxyStandard
+    @NameToken(NameTokens.home)
+    interface MyProxy extends ProxyPlace<SendMessagePresenter> {
+    }
+    
+    private final DispatchAsync dispatch;
+
+    private final Provider<MessageResultPresenter> messageResultProvider;
+    
+    static final Object MESSAGE_RESULT_SLOT = new Object();
+
+    @Inject
+    SendMessagePresenter(EventBus eventBus,
+                      MyView view,
+                      MyProxy proxy,
+                      DispatchAsync dispatch, 
+                      Provider<MessageResultPresenter> messageResultProvider) {
+        super(eventBus, view, proxy, ApplicationPresenter.SLOT_SetMainContent);
+        
+        getView().setUiHandlers(this);
+        this.dispatch = dispatch;
+        this.messageResultProvider = messageResultProvider;
+    }
+
+    @Override
+    public void sendMessage(String message) {
+        dispatch.execute(new SendMessageAction(message), new AsyncCallback<MessageResult>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Woops something went wrong on the server: " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(MessageResult result) {
+                addToSlot(MESSAGE_RESULT_SLOT, messageResultProvider.get().setMessage(result.getMessage()));
+            }
+        });
+    }
+}

@@ -1,0 +1,12 @@
+package com.example.myproject.server.message;
+
+import com.example.myproject.shared.message.SendMessageAction;
+import com.gwtplatform.dispatch.rpc.server.guice.HandlerModule;
+
+public class MessageHandlerModule extends HandlerModule {
+
+    @Override
+    protected void configureHandlers() {
+        bindHandler(SendMessageAction.class, SendMessageHandler.class);
+    }
+}
