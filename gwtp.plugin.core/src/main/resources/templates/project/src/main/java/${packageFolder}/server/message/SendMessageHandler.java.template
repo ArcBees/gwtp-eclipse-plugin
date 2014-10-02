@@ -23,7 +23,5 @@ public class SendMessageHandler extends AbstractActionHandler<SendMessageAction,
     @Override
     public void undo(SendMessageAction action, MessageResult result, ExecutionContext context) throws ActionException {
         // TODO Auto-generated method stub
-        
     }
-
 }
