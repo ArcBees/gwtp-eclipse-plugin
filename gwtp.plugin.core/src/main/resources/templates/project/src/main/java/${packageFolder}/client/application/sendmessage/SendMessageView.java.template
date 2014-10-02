@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-
 class SendMessageView extends ViewWithUiHandlers<SendMessageUiHandlers> implements SendMessagePresenter.MyView {
     interface Binder extends UiBinder<Widget, SendMessageView> {
     }
