@@ -1,0 +1,9 @@
+package ${packageName}.client.application.sendmessage;
+
+import com.gwtplatform.mvp.client.UiHandlers;
+
+public interface SendMessageUiHandlers extends UiHandlers{
+
+    void sendMessage(String message);
+
+}

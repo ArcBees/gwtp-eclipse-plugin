@@ -1,0 +1,32 @@
+package ${packageName}.shared.message;
+
+import ${packageName}.shared.DefaultActionImpl;
+
+public class SendMessageAction extends DefaultActionImpl<MessageResult>{
+    
+    private String message;
+
+    // gwt requires a default constructor for serialization.
+    @SuppressWarnings("unused")
+    private SendMessageAction() {
+        
+    }
+    
+    public SendMessageAction(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public boolean isSecured() {
+        return false;
+    }
+
+    @Override
+    public Class<MessageResult> getResultClass() {
+        return MessageResult.class;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}

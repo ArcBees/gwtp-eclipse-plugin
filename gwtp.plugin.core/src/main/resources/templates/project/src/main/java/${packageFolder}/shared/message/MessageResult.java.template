@@ -1,0 +1,22 @@
+package ${packageName}.shared.message;
+
+import com.gwtplatform.dispatch.rpc.shared.Result;
+
+public class MessageResult implements Result{
+    private static final long serialVersionUID = 1L;
+    private String message;
+    
+    // GWT serialization requires a default constructor
+    @SuppressWarnings("unused")
+    private MessageResult() {
+        
+    }
+    
+    public MessageResult(String message) {
+        this.message = message;
+    }
+    
+    public String getMessage() {
+        return this.message;
+    }
+}

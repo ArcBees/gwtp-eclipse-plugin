@@ -1,0 +1,27 @@
+package ${packageName}.client.application.sendmessage.messageresult;
+
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+import com.gwtplatform.mvp.client.PresenterWidget;
+import com.gwtplatform.mvp.client.View;
+
+public class MessageResultPresenter extends PresenterWidget<MessageResultPresenter.MyView>  {
+    interface MyView extends View  {
+        void setMessage(String message);
+    }
+
+    @Inject
+    MessageResultPresenter(
+            EventBus eventBus,
+            MyView view) {
+        super(eventBus, view);
+        
+    }
+
+    public PresenterWidget<?> setMessage(String message) {
+        getView().setMessage(message);
+        return this;
+    }
+    
+    
+}
