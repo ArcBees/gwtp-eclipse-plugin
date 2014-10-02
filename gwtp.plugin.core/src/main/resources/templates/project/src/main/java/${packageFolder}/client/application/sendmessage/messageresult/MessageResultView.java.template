@@ -23,7 +23,5 @@ class MessageResultView extends ViewImpl implements MessageResultPresenter.MyVie
     @Override
     public void setMessage(String message) {
         this.message.setText(message);
-        
     }
-    
 }

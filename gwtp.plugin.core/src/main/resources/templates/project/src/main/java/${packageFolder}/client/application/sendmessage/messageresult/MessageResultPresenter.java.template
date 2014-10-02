@@ -22,6 +22,4 @@ public class MessageResultPresenter extends PresenterWidget<MessageResultPresent
         getView().setMessage(message);
         return this;
     }
-    
-    
 }
