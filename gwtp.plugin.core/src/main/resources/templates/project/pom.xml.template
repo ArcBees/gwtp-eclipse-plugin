@@ -14,7 +14,7 @@
         <gwtp.version>1.3.1</gwtp.version>
         <gin.version>2.1.2</gin.version>
         #if ($UNIVERSAL_ANALYTICS)
-        <universal-analytics.version>2.0</universal-analytics.version>
+        <universal-analytics.version>2.0.1</universal-analytics.version>
         #end
         #if ($GWT_PUSH_STATE)
         <gwt-pushstate.version>1.1.4</gwt-pushstate.version>
@@ -22,13 +22,13 @@
         <!-- server -->
         <guice.version>3.0</guice.version>
         #if ($APP_ENGINE)
-        <gae.version>1.9.12</gae.version>
+        <gae.version>1.9.13</gae.version>
         <gae-runtime.version>1.8.8</gae-runtime.version>
         <maven-gae-plugin.version>0.9.6</maven-gae-plugin.version>
         <gae.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
         #end
         #if ($OBJECTIFY)    
-        <objectify.version>5.0.4</objectify.version>
+        <objectify.version>5.1.1</objectify.version>
         #end
         
         <!-- testing -->
@@ -38,7 +38,7 @@
         <!-- maven -->
         <gwt-maven-plugin.version>2.6.1</gwt-maven-plugin.version>
         <maven-surefire-plugin.version>2.17</maven-surefire-plugin.version>
-        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
         <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
         <maven-processor-plugin.version>2.0.5</maven-processor-plugin.version>
         <maven-build-helper-plugin.version>1.7</maven-build-helper-plugin.version>
