@@ -3,7 +3,6 @@ www-test
 target
 .project
 *.iml
-.settings
 .idea
 .classpath
 .gwt
@@ -21,7 +20,11 @@ tmp/
 *.swp
 *~.nib
 local.properties
-.settings/
+gwtp.plugin.core/.settings/
+gwtp.plugin.feature/.settings/
+gwtp.plugin.site/.settings/
+gwtp.plugin.test/.settings/
+
 .loadpath
 
 # External tool builders
