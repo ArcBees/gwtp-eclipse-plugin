@@ -16,7 +16,6 @@
 
 package com.arcbees.gwtp.plugin.core.project;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,13 +63,23 @@ public class AddFeaturesPage extends WizardPage {
             @SuppressWarnings("unchecked")
             @Override
             public void checkStateChanged(CheckStateChangedEvent event) {
+                Node<Feature> featureNode = ((Node<Feature>) event.getElement());
                 if (!event.getChecked()) {
                     checkboxTreeViewer.setSubtreeChecked(event.getElement(), false);
+                    deselectFeatureNode(featureNode);
+                } else {
+                    featureNode.getData().setSelected(true);
                 }
-                ((Node<Feature>) event.getElement()).getData().setSelected(event.getChecked());
                 FeatureConfigPage.get().showSelectedFeatures();
             }
         });
+    }
+
+    private void deselectFeatureNode(Node<Feature> featureNode) {
+        featureNode.getData().setSelected(false);
+        for (Node<Feature> child: featureNode.getChildren()) {
+            deselectFeatureNode(child);
+        }
     }
 
     static AddFeaturesPage get() {
