@@ -18,6 +18,8 @@
         <tycho.extras.version>0.20.0</tycho.extras.version>
         <tycho.test.jvmArgs>-Xmx512m -XX:MaxPermSize=256m</tycho.test.jvmArgs>
 
+        <github.version>0.10</github.version>
+        <eclipse.version>4.4</eclipse.version>
     </properties>
 
     <repositories>
@@ -35,6 +37,11 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <scm>
+        <connection>scm:git:git@github.com:ArcBees/gwtp-eclipse-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:ArcBees/gwtp-eclipse-plugin.git</developerConnection>
+        <url>https://github.com/ArcBees/gwtp-eclipse-plugin</url>
+    </scm>
 
     <build>
         <plugins>
