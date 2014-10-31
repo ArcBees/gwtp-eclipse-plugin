@@ -9,4 +9,37 @@
     <artifactId>gwtp.plugin.site</artifactId>
     <packaging>eclipse-repository</packaging>
     <name>gwtp.plugin :: update site</name>
+
+    <build>
+        <plugins>
+            <!--
+            run 'mvn com.github.github:site-maven-plugin:0.10site -N' to upload
+            -->
+            <plugin>
+                <groupId>com.github.github</groupId>
+                <artifactId>site-maven-plugin</artifactId>
+                <version>${github.version}</version>
+                <inherited>false</inherited>
+
+                <configuration>
+                    <message>Creating site for ${project.version}</message>
+                    <force>true</force>
+                    <merge>true</merge>
+                    <outputDirectory>${project.build.directory}/repository</outputDirectory>
+
+                    <!-- github > sets the ~/.m2/setting.xml server id profile -->
+                    <server>github</server>
+
+                    <path>${eclipse.version}</path>
+
+                    <excludes>
+                        <exclude>*.DS_Store</exclude>
+                        <exclude>*.sh</exclude>
+                        <exclude>options</exclude>
+                        <exclude>packages</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
