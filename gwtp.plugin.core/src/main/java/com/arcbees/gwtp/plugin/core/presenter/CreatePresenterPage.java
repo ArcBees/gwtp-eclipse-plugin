@@ -190,7 +190,8 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
 
     private void addMethodsToNameTokens(ICompilationUnit unit, String nameToken,
             IProgressMonitor monitor) throws JavaModelException, MalformedTreeException, BadLocationException {
-        String varName = nameToken.startsWith("/") ? nameToken.substring(1): nameToken;
+       
+        String fieldName = getFieldNameFromNameToken(nameToken);
         Document document = new Document(unit.getSource());
         CompilationUnit astRoot = initAstRoot(unit, monitor);
 
@@ -198,7 +199,7 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
 
         // find existing method
-        MethodDeclaration method = findMethod(astRoot, getNameTokenMethod(varName));
+        MethodDeclaration method = findMethod(astRoot, getNameTokenMethod(fieldName));
         if (method != null) {
             logger.severe("FYI: the method in nameTokens already exists." + method.toString());
             return;
@@ -208,12 +209,12 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         ASTNode rootNode = (ASTNode) types.get(0);
         ListRewrite listRewrite = rewrite.getListRewrite(rootNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 
-        ASTNode fieldNode = rewrite.createStringPlaceholder("public static final String " + varName + " = \""
+        ASTNode fieldNode = rewrite.createStringPlaceholder("public static final String " + fieldName + " = \""
                 + nameToken + "\";", ASTNode.EMPTY_STATEMENT);
 
         StringBuilder nameTokenMethod = new StringBuilder();
-        nameTokenMethod.append("public static String ").append(getNameTokenMethod(varName)).append("() {\n")
-        .append("return " + varName + ";\n").append("}\n");
+        nameTokenMethod.append("public static String ").append(getNameTokenMethod(fieldName)).append("() {\n")
+        .append("return " + fieldName + ";\n").append("}\n");
         ASTNode methodNode = rewrite.createStringPlaceholder(nameTokenMethod.toString(), ASTNode.EMPTY_STATEMENT);
 
         listRewrite.insertFirst(fieldNode, null);
@@ -233,6 +234,17 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
         buffer.setContents(newSource);
         buffer.save(monitor, true);
     }
+    
+    private String getFieldNameFromNameToken(String nameToken) {
+        String fieldName = nameToken;
+        while (fieldName.matches("[^a-zA-Z\\$_]+.*")) {
+            fieldName = fieldName.substring(1);
+        }
+        if (fieldName.contains("/")) {
+            fieldName = fieldName.substring(0, fieldName.indexOf("/"));
+        }
+        return fieldName;
+    }
 
     private void addNameToken(Map<String, Object> context, String nameToken, IProgressMonitor monitor)
             throws JavaModelException, MalformedTreeException, BadLocationException {
@@ -241,12 +253,12 @@ public class CreatePresenterPage extends GWTPNewTypeWizardPage {
             if (!nameTokenFiles.isEmpty()) {
                 ResolvedSourceType rst = nameTokenFiles.get(0);
                 addMethodsToNameTokens(rst.getCompilationUnit(), nameToken, monitor);
-                context.put("nametoken", rst.getElementName() + "." + (nameToken.startsWith("/") ? nameToken.substring(1) : nameToken));
+                context.put("nametoken", rst.getElementName() + "." + getFieldNameFromNameToken(nameToken));
                 context.put("nameTokenImport", "import " + rst.getFullyQualifiedName() + ";");
             }
         }
     }
-
+    
     private Button createButton(Composite container, String text, int type,
             final String booleanValueName) {
         final Button button = createButton(container, text, type);
