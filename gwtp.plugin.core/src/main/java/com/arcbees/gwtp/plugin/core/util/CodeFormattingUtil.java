@@ -112,9 +112,6 @@ public class CodeFormattingUtil {
         }
 
         OrganizeImportsAction organizeImportsAction = new OrganizeImportsAction(workBenchSite);
-        if (organizeImportsAction == null) {
-            return;
-        }
 
         organizeImportsAction.run(unit);
     }
