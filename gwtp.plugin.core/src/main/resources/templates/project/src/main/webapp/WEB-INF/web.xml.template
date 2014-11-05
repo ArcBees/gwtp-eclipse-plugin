@@ -6,7 +6,7 @@
     <display-name>${projectName}</display-name>
 
     <welcome-file-list>
-        <welcome-file>${projectName}.html</welcome-file>
+        <welcome-file>${projectName}.jsp</welcome-file>
     </welcome-file-list>
 
     <listener>
