@@ -33,7 +33,9 @@ import com.google.web.bindery.event.shared.EventBus;
     import com.gwtplatform.mvp.client.PresenterWidget;
 #end
 import com.gwtplatform.mvp.client.${viewInterface};
+#if ( $nested )
 import com.gwtplatform.mvp.client.annotations.ContentSlot;
+#end
 #if ( $codesplit )
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 #else
@@ -45,7 +47,9 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 #else
 import com.gwtplatform.mvp.client.proxy.Proxy;
 #end
+#if ( $nested )
 import com.gwtplatform.mvp.client.proxy.RevealContentHandler;
+#end
 #if ( $uihandlers )
 import com.gwtplatform.mvp.client.HasUiHandlers;
 #end

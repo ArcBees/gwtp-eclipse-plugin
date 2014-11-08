@@ -24,6 +24,7 @@ gwtp.plugin.core/.settings/
 gwtp.plugin.feature/.settings/
 gwtp.plugin.site/.settings/
 gwtp.plugin.test/.settings/
+/.settings/
 
 .loadpath
 
