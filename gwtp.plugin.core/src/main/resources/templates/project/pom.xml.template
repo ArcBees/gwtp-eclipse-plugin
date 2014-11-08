@@ -22,7 +22,7 @@
         <!-- server -->
         <guice.version>3.0</guice.version>
         #if ($APP_ENGINE)
-        <gae.version>1.9.14</gae.version>
+        <gae.version>1.9.15</gae.version>
         <gae-runtime.version>1.8.8</gae-runtime.version>
         <maven-gae-plugin.version>0.9.6</maven-gae-plugin.version>
         <gae.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
