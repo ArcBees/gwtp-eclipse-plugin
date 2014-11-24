@@ -46,6 +46,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+        #if ($APP_ENGINE)
+        <appengine.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk/appengine-java-sdk-${gae.version}</appengine.home>
+        #end
     </properties>
 
     <build>
@@ -110,12 +113,18 @@
                 <configuration>
                     <!-- With multiple tests use GwtTestSuite.java for speed -->
                     <includes>**/*GwtTest.java</includes>
+                    #if ($APP_ENGINE)
+                    <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
+                    <appEngineVersion>${appengine.version}</appEngineVersion>
+                    <appEngineHome>${appengine.home}</appEngineHome>
+                    <extraJvmArgs>-Dappengine.sdk.root=${appengine.home}
+                        -Xss1024K -Xmx1024M -XX:MaxPermSize=256M</extraJvmArgs>
+                    #else
                     <extraJvmArgs>-Xss1024K -Xmx1024M -XX:MaxPermSize=256M</extraJvmArgs>
-
+                    #end
                     <copyWebapp>true</copyWebapp>
                     <hostedWebapp>${webappDirectory}</hostedWebapp>
-
-                    <runTarget>Project.html</runTarget>
+                    <runTarget>${projectName}.jsp</runTarget>
                     <modules>
                         <module>${packageName}.${projectName}</module>
                     </modules>
