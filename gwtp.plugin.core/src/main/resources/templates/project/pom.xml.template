@@ -47,7 +47,7 @@
 
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
         #if ($APP_ENGINE)
-        <appengine.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk/appengine-java-sdk-${gae.version}</appengine.home>
+        <appengine.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${appengine.version}/appengine-java-sdk/appengine-java-sdk-${appengine.version}</appengine.home>
         #end
     </properties>
 
@@ -117,7 +117,7 @@
                     <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
                     <appEngineVersion>${appengine.version}</appEngineVersion>
                     <appEngineHome>${appengine.home}</appEngineHome>
-                    <extraJvmArgs>-Dappengine.sdk.root=${appengine.home}
+                    <extraJvmArgs>-Dappengine.sdk.root=${appengine.home} 
                         -Xss1024K -Xmx1024M -XX:MaxPermSize=256M</extraJvmArgs>
                     #else
                     <extraJvmArgs>-Xss1024K -Xmx1024M -XX:MaxPermSize=256M</extraJvmArgs>
