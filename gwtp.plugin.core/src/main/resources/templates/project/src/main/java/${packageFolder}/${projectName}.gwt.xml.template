@@ -18,7 +18,7 @@
     <inherits name="com.arcbees.analytics.Analytics"/>
     #end
     #if ($GWT_PUSH_STATE)
-    <inherits name="de.barop.gwt.PushState" />
+    <inherits name="com.wallissoftware.pushstate.PushState" />
     #end
 
     <source path='client' />
