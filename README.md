@@ -23,3 +23,9 @@ and the m2eclipse-tycho plugin (https://github.com/tesla/m2eclipse-tycho/). Upda
 * m2e stable update site : http://download.eclipse.org/technology/m2e/releases/
 * m2eclipse-tycho dev update site : http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.7.0/N/0.7.0.201309291400/
 
+##Thanks to
+[![Arcbees.com](http://i.imgur.com/HDf1qfq.png)](http://arcbees.com)
+
+[![Atlassian](http://i.imgur.com/BKkj8Rg.png)](https://www.atlassian.com/)
+
+[![IntelliJ](https://lh6.googleusercontent.com/--QIIJfKrjSk/UJJ6X-UohII/AAAAAAAAAVM/cOW7EjnH778/s800/banner_IDEA.png)](http://www.jetbrains.com/idea/index.html)
